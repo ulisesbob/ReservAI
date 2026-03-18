@@ -14,6 +14,28 @@ export async function POST(request: Request) {
       )
     }
 
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "La contraseña debe tener al menos 8 caracteres" },
+        { status: 400 }
+      )
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Email inválido" },
+        { status: 400 }
+      )
+    }
+
+    if (restaurantName.length > 100 || name.length > 100 || email.length > 255) {
+      return NextResponse.json(
+        { error: "Datos demasiado largos" },
+        { status: 400 }
+      )
+    }
+
     const existingUser = await prisma.user.findUnique({
       where: { email },
     })
@@ -37,8 +59,9 @@ export async function POST(request: Request) {
       where: { slug },
     })
 
+    const suffix = `-${Date.now().toString(36)}`
     const finalSlug = existingSlug
-      ? `${slug}-${Date.now().toString(36)}`
+      ? `${slug.slice(0, 50 - suffix.length)}${suffix}`
       : slug
 
     const hashedPassword = await bcrypt.hash(password, 12)
