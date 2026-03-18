@@ -18,9 +18,11 @@ interface WhatsAppFormProps {
     whatsappPhoneId: string
     whatsappToken: string
   }
+  maskedToken?: string
+  hasExistingToken?: boolean
 }
 
-export function WhatsAppForm({ initialData }: WhatsAppFormProps) {
+export function WhatsAppForm({ initialData, maskedToken, hasExistingToken }: WhatsAppFormProps) {
   const [whatsappPhoneId, setWhatsappPhoneId] = useState(
     initialData.whatsappPhoneId
   )
@@ -95,7 +97,7 @@ export function WhatsAppForm({ initialData }: WhatsAppFormProps) {
                 type={showToken ? "text" : "password"}
                 value={whatsappToken}
                 onChange={(e) => setWhatsappToken(e.target.value)}
-                placeholder="EAAxxxxxxx..."
+                placeholder={hasExistingToken ? maskedToken || "Token guardado" : "EAAxxxxxxx..."}
                 className="pr-10"
               />
               <Button

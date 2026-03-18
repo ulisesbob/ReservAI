@@ -4,6 +4,7 @@ import { processMessage } from "@/lib/ai-agent"
 import type { RestaurantConfig, AgentMessage } from "@/lib/ai-agent"
 import { checkAvailability } from "@/lib/availability"
 import { sendWhatsAppMessage } from "@/lib/whatsapp"
+import { safeDecrypt, verifyWebhookSignature } from "@/lib/encryption"
 
 // ---------------------------------------------------------------------------
 // Rate limiting — in-memory, per-phone, max 10 messages/minute
@@ -47,10 +48,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   // Always return 200 to Meta quickly — errors are logged, not surfaced
   try {
-    const body = await request.json()
-    // Fire-and-forget: process asynchronously but don't await
-    // However in Next.js edge/serverless we can't truly fire-and-forget,
-    // so we process inline but always return 200 at the end.
+    const rawBody = await request.text()
+
+    // Verify webhook signature (HMAC-SHA256) if WHATSAPP_APP_SECRET is set
+    const signature = request.headers.get("x-hub-signature-256") || ""
+    if (!verifyWebhookSignature(rawBody, signature)) {
+      console.error("Webhook signature verification failed")
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+    }
+
+    const body: WhatsAppWebhookBody = JSON.parse(rawBody)
     await handleWebhook(body)
   } catch (error) {
     console.error("Webhook processing error:", error)
@@ -197,6 +204,11 @@ async function processIncomingMessage(
   }))
 
   // 6. Build restaurant config for AI agent
+  // Decrypt sensitive fields before use
+  const decryptedOpenaiKey = restaurant.openaiApiKey
+    ? safeDecrypt(restaurant.openaiApiKey)
+    : null
+
   const restaurantConfig: RestaurantConfig = {
     name: restaurant.name,
     timezone: restaurant.timezone,
@@ -207,7 +219,7 @@ async function processIncomingMessage(
     > | null,
     maxPartySize: restaurant.maxPartySize,
     maxCapacity: restaurant.maxCapacity,
-    openaiApiKey: restaurant.openaiApiKey,
+    openaiApiKey: decryptedOpenaiKey,
   }
 
   // 7. Call AI agent
@@ -285,11 +297,12 @@ async function processIncomingMessage(
     },
   })
 
-  // 10. Send reply via WhatsApp
+  // 10. Send reply via WhatsApp — decrypt token before use
   if (restaurant.whatsappToken) {
+    const decryptedToken = safeDecrypt(restaurant.whatsappToken)
     await sendWhatsAppMessage(
       phoneNumberId,
-      restaurant.whatsappToken,
+      decryptedToken,
       customerPhone,
       responseText
     )

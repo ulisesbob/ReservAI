@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { encrypt } from "@/lib/encryption"
 
 export async function PATCH(request: Request) {
   try {
@@ -16,13 +17,19 @@ export async function PATCH(request: Request) {
       )
     }
 
-    // Store as plain text for now — encryption comes in step 9
+    // Build update data — only update token if a new value was provided
+    const updateData: { whatsappPhoneId: string | null; whatsappToken?: string | null } = {
+      whatsappPhoneId: whatsappPhoneId || null,
+    }
+
+    if (whatsappToken) {
+      // Encrypt whatsappToken before saving to DB
+      updateData.whatsappToken = encrypt(whatsappToken)
+    }
+
     await prisma.restaurant.update({
       where: { id: session.restaurantId },
-      data: {
-        whatsappPhoneId: whatsappPhoneId || null,
-        whatsappToken: whatsappToken || null,
-      },
+      data: updateData,
     })
 
     return NextResponse.json({ success: true })

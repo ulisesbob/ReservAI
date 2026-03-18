@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
 import { processMessage } from "@/lib/ai-agent"
 import { checkAvailability } from "@/lib/availability"
+import { safeDecrypt } from "@/lib/encryption"
 import type { AgentMessage, RestaurantConfig } from "@/lib/ai-agent"
 
 export async function POST(request: Request) {
@@ -74,6 +75,11 @@ export async function POST(request: Request) {
     }))
 
     // Call AI agent
+    // Decrypt openaiApiKey if present
+    const decryptedOpenaiKey = restaurant.openaiApiKey
+      ? safeDecrypt(restaurant.openaiApiKey)
+      : null
+
     const restaurantConfig: RestaurantConfig = {
       name: restaurant.name,
       timezone: restaurant.timezone,
@@ -81,7 +87,7 @@ export async function POST(request: Request) {
       operatingHours: restaurant.operatingHours as Record<string, unknown> | null,
       maxPartySize: restaurant.maxPartySize,
       maxCapacity: restaurant.maxCapacity,
-      openaiApiKey: restaurant.openaiApiKey,
+      openaiApiKey: decryptedOpenaiKey,
     }
 
     const agentResponse = await processMessage(
