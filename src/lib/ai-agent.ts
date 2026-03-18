@@ -117,7 +117,7 @@ Validaciones:
 function extractReservation(text: string): ReservationData | null {
   // Look for JSON pattern in the response — handle whitespace and newlines
   const jsonMatch = text.match(
-    /\{\s*"reserva"\s*:\s*\{[^}]*\}\s*\}/s
+    /\{\s*"reserva"\s*:\s*\{[^}]*\}\s*\}/
   )
   if (!jsonMatch) return null
 
