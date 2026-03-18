@@ -56,14 +56,27 @@ export async function POST(request: Request) {
       )
     }
 
+    const parsedDate = new Date(dateTime)
+    if (isNaN(parsedDate.getTime())) {
+      return NextResponse.json({ error: "Fecha/hora inválida" }, { status: 400 })
+    }
+    if (parsedDate < new Date()) {
+      return NextResponse.json({ error: "No se pueden crear reservas en el pasado" }, { status: 400 })
+    }
+
+    const size = Number(partySize)
+    if (!Number.isInteger(size) || size < 1) {
+      return NextResponse.json({ error: "Cantidad de personas debe ser un entero positivo" }, { status: 400 })
+    }
+
     const reservation = await prisma.reservation.create({
       data: {
         restaurantId: session.restaurantId,
         customerName,
         customerPhone,
         customerEmail: customerEmail || null,
-        dateTime: new Date(dateTime),
-        partySize: Number(partySize),
+        dateTime: parsedDate,
+        partySize: size,
         source: "MANUAL",
         status: "CONFIRMED",
       },

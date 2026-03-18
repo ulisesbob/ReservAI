@@ -31,11 +31,23 @@ export async function PATCH(
     if (customerPhone !== undefined) data.customerPhone = customerPhone
     if (customerEmail !== undefined) data.customerEmail = customerEmail
     if (dateTime !== undefined) data.dateTime = new Date(dateTime)
-    if (partySize !== undefined) data.partySize = Number(partySize)
-    if (status !== undefined) data.status = status
+    if (partySize !== undefined) {
+      const size = Number(partySize)
+      if (!Number.isInteger(size) || size < 1) {
+        return NextResponse.json({ error: "partySize debe ser un entero positivo" }, { status: 400 })
+      }
+      data.partySize = size
+    }
+    if (status !== undefined) {
+      const VALID_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]
+      if (!VALID_STATUSES.includes(status)) {
+        return NextResponse.json({ error: "Status inválido" }, { status: 400 })
+      }
+      data.status = status
+    }
 
     const reservation = await prisma.reservation.update({
-      where: { id },
+      where: { id, restaurantId: session.restaurantId },
       data,
     })
 
@@ -70,7 +82,7 @@ export async function DELETE(
       )
     }
 
-    await prisma.reservation.delete({ where: { id } })
+    await prisma.reservation.delete({ where: { id, restaurantId: session.restaurantId } })
 
     return NextResponse.json({ success: true })
   } catch (error) {
