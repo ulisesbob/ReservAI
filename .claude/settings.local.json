@@ -27,7 +27,12 @@
       "Bash(node -e \"const p = require\\(''./package.json''\\); console.log\\(''next:'', p.dependencies.next\\); console.log\\(''prisma:'', p.dependencies.prisma || p.devDependencies.prisma\\); console.log\\(''typescript:'', p.devDependencies.typescript\\); console.log\\(''next-auth:'', p.dependencies[''next-auth'']\\); console.log\\(''bcryptjs:'', p.dependencies[''bcryptjs'']\\);\")",
       "Bash(echo \"TSC=$?\")",
       "Bash(echo \"BUILD=$?\")",
-      "Bash(npx shadcn@latest init -d --yes)"
+      "Bash(npx shadcn@latest init -d --yes)",
+      "Bash(npx shadcn@latest add card input label select badge dialog table dropdown-menu separator avatar --yes)",
+      "Bash(rm -rf src/components/ui src/lib/utils.ts components.json)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx shadcn@2.3.0 init -d --yes)",
+      "Bash(npx shadcn@2.3.0 add button card input label select badge dialog table dropdown-menu separator avatar --yes)"
     ]
   }
 }
