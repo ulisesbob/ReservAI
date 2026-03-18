@@ -1,6 +1,7 @@
 import { requireSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { ReservationList } from "./reservation-list"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function DashboardPage() {
   const session = await requireSession()
@@ -38,26 +39,43 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      {/* Date header */}
-      <h1 className="text-2xl font-bold text-gray-900 capitalize">{dateLabel}</h1>
+      <h1 className="text-2xl font-bold tracking-tight capitalize">{dateLabel}</h1>
 
-      {/* Stats */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg bg-white p-5 shadow-sm border border-gray-200">
-          <p className="text-sm font-medium text-gray-500">Total reservas</p>
-          <p className="mt-1 text-3xl font-bold text-gray-900">{totalReservations}</p>
-        </div>
-        <div className="rounded-lg bg-white p-5 shadow-sm border border-gray-200">
-          <p className="text-sm font-medium text-gray-500">Confirmadas</p>
-          <p className="mt-1 text-3xl font-bold text-green-600">{confirmedCount}</p>
-        </div>
-        <div className="rounded-lg bg-white p-5 shadow-sm border border-gray-200">
-          <p className="text-sm font-medium text-gray-500">Comensales</p>
-          <p className="mt-1 text-3xl font-bold text-indigo-600">{totalGuests}</p>
-        </div>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total reservas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{totalReservations}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Confirmadas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-green-600">{confirmedCount}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Comensales
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-primary">{totalGuests}</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Reservation list (client component) */}
       <div className="mt-8">
         <ReservationList reservations={serialized} />
       </div>

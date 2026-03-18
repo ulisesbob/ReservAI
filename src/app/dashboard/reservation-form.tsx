@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 
 export function ReservationForm({ onSuccess }: { onSuccess: () => void }) {
   const [error, setError] = useState("")
@@ -48,93 +51,73 @@ export function ReservationForm({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-    >
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Nueva Reserva</h3>
-
+    <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-1">
-            Nombre *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="customerName">Nombre *</Label>
+          <Input
             id="customerName"
             name="customerName"
             type="text"
+            placeholder="Nombre del cliente"
             required
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
 
-        <div>
-          <label htmlFor="customerPhone" className="block text-sm font-medium text-gray-700 mb-1">
-            Telefono *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="customerPhone">Telefono *</Label>
+          <Input
             id="customerPhone"
             name="customerPhone"
             type="tel"
+            placeholder="+54 11 1234-5678"
             required
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
 
-        <div>
-          <label htmlFor="customerEmail" className="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="customerEmail">Email</Label>
+          <Input
             id="customerEmail"
             name="customerEmail"
             type="email"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            placeholder="email@ejemplo.com"
           />
         </div>
 
-        <div>
-          <label htmlFor="dateTime" className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha y hora *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="dateTime">Fecha y hora *</Label>
+          <Input
             id="dateTime"
             name="dateTime"
             type="datetime-local"
             required
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
 
-        <div>
-          <label htmlFor="partySize" className="block text-sm font-medium text-gray-700 mb-1">
-            Personas *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="partySize">Personas *</Label>
+          <Input
             id="partySize"
             name="partySize"
             type="number"
             min="1"
+            placeholder="2"
             required
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end">
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-        >
+      <div className="flex justify-end pt-2">
+        <Button type="submit" disabled={loading}>
           {loading ? "Creando..." : "Crear Reserva"}
-        </button>
+        </Button>
       </div>
     </form>
   )

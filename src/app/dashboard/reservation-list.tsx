@@ -3,6 +3,30 @@
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { ReservationForm } from "./reservation-form"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 type SerializedReservation = {
   id: string
@@ -18,11 +42,11 @@ type SerializedReservation = {
   updatedAt: string
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800",
-  CONFIRMED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800",
-  COMPLETED: "bg-blue-100 text-blue-800",
+const STATUS_CLASSES: Record<string, string> = {
+  PENDING: "border-yellow-500 text-yellow-700 bg-yellow-50",
+  CONFIRMED: "border-transparent bg-green-100 text-green-800",
+  CANCELLED: "border-transparent bg-red-100 text-red-800",
+  COMPLETED: "border-transparent bg-gray-100 text-gray-700",
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -37,6 +61,11 @@ const SOURCE_LABELS: Record<string, string> = {
   MANUAL: "Manual",
 }
 
+const SOURCE_CLASSES: Record<string, string> = {
+  WHATSAPP: "border-transparent bg-blue-100 text-blue-800",
+  MANUAL: "border-transparent bg-gray-100 text-gray-700",
+}
+
 export function ReservationList({
   reservations,
 }: {
@@ -44,7 +73,7 @@ export function ReservationList({
 }) {
   const router = useRouter()
   const [statusFilter, setStatusFilter] = useState("ALL")
-  const [showForm, setShowForm] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [loadingId, setLoadingId] = useState<string | null>(null)
 
   const filtered =
@@ -82,133 +111,120 @@ export function ReservationList({
 
   return (
     <div>
-      {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
-            Filtrar:
-          </label>
-          <select
-            id="status-filter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          >
-            <option value="ALL">Todas</option>
-            <option value="PENDING">Pendientes</option>
-            <option value="CONFIRMED">Confirmadas</option>
-            <option value="CANCELLED">Canceladas</option>
-            <option value="COMPLETED">Completadas</option>
-          </select>
+          <span className="text-sm font-medium text-muted-foreground">Filtrar:</span>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todas</SelectItem>
+              <SelectItem value="PENDING">Pendientes</SelectItem>
+              <SelectItem value="CONFIRMED">Confirmadas</SelectItem>
+              <SelectItem value="CANCELLED">Canceladas</SelectItem>
+              <SelectItem value="COMPLETED">Completadas</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors"
-        >
-          {showForm ? "Cancelar" : "Nueva Reserva"}
-        </button>
+
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>Nueva Reserva</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Nueva Reserva</DialogTitle>
+            </DialogHeader>
+            <ReservationForm
+              onSuccess={() => {
+                setDialogOpen(false)
+                router.refresh()
+              }}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* New reservation form */}
-      {showForm && (
-        <div className="mb-6">
-          <ReservationForm
-            onSuccess={() => {
-              setShowForm(false)
-              router.refresh()
-            }}
-          />
-        </div>
-      )}
-
-      {/* Reservation table */}
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-          <p className="text-gray-500">No hay reservas para mostrar.</p>
+        <div className="rounded-lg border bg-card p-8 text-center">
+          <p className="text-muted-foreground">No hay reservas para mostrar.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Hora
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Cliente
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Personas
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Estado
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Origen
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
+        <div className="rounded-lg border bg-card shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Hora</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Personas</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Origen</TableHead>
+                <TableHead>Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filtered.map((r) => (
-                <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                <TableRow key={r.id}>
+                  <TableCell className="font-medium">
                     {formatTime(r.dateTime)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    <div>{r.customerName}</div>
-                    <div className="text-xs text-gray-400">{r.customerPhone}</div>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700">
-                    {r.partySize}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[r.status] || "bg-gray-100 text-gray-800"}`}
-                    >
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium">{r.customerName}</div>
+                    <div className="text-xs text-muted-foreground">{r.customerPhone}</div>
+                  </TableCell>
+                  <TableCell>{r.partySize}</TableCell>
+                  <TableCell>
+                    <Badge className={STATUS_CLASSES[r.status] || ""}>
                       {STATUS_LABELS[r.status] || r.status}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-xs text-gray-500">
-                    {SOURCE_LABELS[r.source] || r.source}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      {r.status !== "CONFIRMED" && (
-                        <button
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={SOURCE_CLASSES[r.source] || ""}>
+                      {SOURCE_LABELS[r.source] || r.source}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      {r.status !== "CONFIRMED" && r.status !== "CANCELLED" && r.status !== "COMPLETED" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
                           disabled={loadingId === r.id}
                           onClick={() => updateStatus(r.id, "CONFIRMED")}
-                          className="rounded px-2 py-1 text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 disabled:opacity-50 transition-colors"
+                          className="text-green-700 border-green-200 hover:bg-green-50"
                         >
                           Confirmar
-                        </button>
+                        </Button>
                       )}
-                      {r.status !== "CANCELLED" && (
-                        <button
+                      {r.status !== "CANCELLED" && r.status !== "COMPLETED" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
                           disabled={loadingId === r.id}
                           onClick={() => updateStatus(r.id, "CANCELLED")}
-                          className="rounded px-2 py-1 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50 transition-colors"
+                          className="text-red-700 border-red-200 hover:bg-red-50"
                         >
                           Cancelar
-                        </button>
+                        </Button>
                       )}
-                      {r.status !== "COMPLETED" && (
-                        <button
+                      {r.status !== "COMPLETED" && r.status !== "CANCELLED" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
                           disabled={loadingId === r.id}
                           onClick={() => updateStatus(r.id, "COMPLETED")}
-                          className="rounded px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 disabled:opacity-50 transition-colors"
+                          className="text-blue-700 border-blue-200 hover:bg-blue-50"
                         >
                           Completar
-                        </button>
+                        </Button>
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

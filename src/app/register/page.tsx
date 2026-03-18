@@ -4,6 +4,10 @@ import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -46,7 +50,7 @@ export default function RegisterPage() {
       })
 
       if (result?.error) {
-        setError("Registro exitoso pero error al iniciar sesión. Intentá ingresar manualmente.")
+        setError("Registro exitoso pero error al iniciar sesion. Intenta ingresar manualmente.")
         setLoading(false)
         return
       }
@@ -54,92 +58,90 @@ export default function RegisterPage() {
       router.push("/dashboard")
       router.refresh()
     } catch {
-      setError("Error de conexión")
+      setError("Error de conexion")
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Registrar Restaurante</h1>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
-            {error}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mb-2">
+            <span className="text-2xl font-bold tracking-tight">
+              Reserva<span className="text-primary">Ya</span>
+            </span>
           </div>
-        )}
+          <CardTitle className="text-xl">Registrar Restaurante</CardTitle>
+        </CardHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre del Restaurante
-            </label>
-            <input
-              id="restaurantName"
-              name="restaurantName"
-              type="text"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <CardContent>
+          {error && (
+            <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
 
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Tu Nombre
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="restaurantName">Nombre del Restaurante</Label>
+              <Input
+                id="restaurantName"
+                name="restaurantName"
+                type="text"
+                placeholder="Mi Restaurante"
+                required
+              />
+            </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Tu Nombre</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Juan Perez"
+                required
+              />
+            </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="tu@email.com"
+                required
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Registrando..." : "Registrar"}
-          </button>
-        </form>
+            <div className="space-y-2">
+              <Label htmlFor="password">Contrasena</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minLength={8}
+              />
+            </div>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          ¿Ya tenés cuenta?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline">
-            Iniciá sesión
-          </Link>
-        </p>
-      </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Registrando..." : "Registrar"}
+            </Button>
+          </form>
+        </CardContent>
+
+        <CardFooter className="justify-center">
+          <p className="text-sm text-muted-foreground">
+            Ya tenes cuenta?{" "}
+            <Link href="/login" className="text-primary hover:underline font-medium">
+              Inicia sesion
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
