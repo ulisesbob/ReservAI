@@ -11,3 +11,118 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// === ENUMS ===
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum ReservationSource {
+  WHATSAPP
+  MANUAL
+}
+
+enum ConversationStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+// === MODELS ===
+
+model Restaurant {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  timezone       String   @default("America/Argentina/Buenos_Aires")
+  maxCapacity    Int
+  maxPartySize   Int      @default(20)
+  operatingHours Json?
+  whatsappPhoneId String?
+  whatsappToken  String?
+  openaiApiKey   String?
+  knowledgeBase  String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  users          User[]
+  reservations   Reservation[]
+  conversations  Conversation[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  restaurantId String
+  name         String
+  email        String   @unique
+  password     String
+  role         Role     @default(EMPLOYEE)
+  createdAt    DateTime @default(now())
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+}
+
+model Reservation {
+  id            String            @id @default(cuid())
+  restaurantId  String
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  dateTime      DateTime
+  partySize     Int
+  status        ReservationStatus @default(PENDING)
+  source        ReservationSource @default(MANUAL)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+
+  @@index([restaurantId])
+  @@index([restaurantId, dateTime])
+  @@index([restaurantId, status])
+}
+
+model Conversation {
+  id            String             @id @default(cuid())
+  restaurantId  String
+  customerPhone String
+  status        ConversationStatus @default(ACTIVE)
+  reservationId String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  messages      Message[]
+
+  @@index([restaurantId])
+  @@index([restaurantId, customerPhone, status])
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  role           MessageRole
+  content        String      @db.Text
+  createdAt      DateTime    @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
