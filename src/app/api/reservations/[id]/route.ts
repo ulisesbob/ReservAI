@@ -46,8 +46,9 @@ export async function PATCH(
       data.status = status
     }
 
+    // findFirst above already verified tenant ownership
     const reservation = await prisma.reservation.update({
-      where: { id, restaurantId: session.restaurantId },
+      where: { id },
       data,
     })
 
@@ -82,7 +83,8 @@ export async function DELETE(
       )
     }
 
-    await prisma.reservation.delete({ where: { id, restaurantId: session.restaurantId } })
+    // findFirst above already verified tenant ownership
+    await prisma.reservation.delete({ where: { id } })
 
     return NextResponse.json({ success: true })
   } catch (error) {
