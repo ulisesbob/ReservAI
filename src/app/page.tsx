@@ -1,7 +1,15 @@
+import { redirect } from "next/navigation"
 import Link from "next/link"
+import { auth } from "@/auth"
 import { Button } from "@/components/ui/button"
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth()
+
+  if (session?.user) {
+    redirect("/dashboard")
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-muted px-4">
       <div className="max-w-2xl text-center space-y-8">
