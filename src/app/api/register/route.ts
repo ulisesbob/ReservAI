@@ -81,6 +81,12 @@ export async function POST(request: Request) {
             role: "ADMIN",
           },
         },
+        subscription: {
+          create: {
+            status: "TRIALING",
+            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          },
+        },
       },
       include: {
         users: {
