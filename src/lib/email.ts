@@ -26,7 +26,7 @@ export async function sendEmail({
 }) {
   try {
     const { data, error } = await getResend().emails.send({
-      from: `ReservaYa <${FROM_EMAIL}>`,
+      from: `ReservasAI <${FROM_EMAIL}>`,
       to,
       subject,
       react,

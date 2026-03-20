@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ReservaYa",
+  title: "ReservasAI",
   description: "Sistema de reservas para restaurantes",
 };
 

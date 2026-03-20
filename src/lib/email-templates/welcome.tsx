@@ -17,11 +17,11 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Bienvenido a ReservaYa</Preview>
+      <Preview>Bienvenido a ReservasAI</Preview>
       <Body style={{ fontFamily: "sans-serif", background: "#f4f4f5" }}>
         <Container style={{ background: "#ffffff", padding: "40px", borderRadius: "8px", margin: "40px auto", maxWidth: "480px" }}>
           <Heading style={{ fontSize: "24px", marginBottom: "16px" }}>
-            Bienvenido a ReservaYa
+            Bienvenido a ReservasAI
           </Heading>
           <Text>Hola {name},</Text>
           <Text>
@@ -35,7 +35,7 @@ export function WelcomeEmail({ name }: WelcomeEmailProps) {
             <Text>3. Conecta tu WhatsApp Business</Text>
           </Section>
           <Text style={{ marginTop: "24px", color: "#71717a", fontSize: "14px" }}>
-            — El equipo de ReservaYa
+            — El equipo de ReservasAI
           </Text>
         </Container>
       </Body>

@@ -67,12 +67,15 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left branding panel - hidden on mobile */}
-      <div className="hidden lg:flex lg:w-1/2 bg-foreground text-background relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground to-primary/20" />
+      <div className="hidden lg:flex lg:w-1/2 gradient-dark text-white relative overflow-hidden">
+        {/* Decorative gradient orbs */}
+        <div className="absolute top-20 right-10 w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-10 w-[250px] h-[250px] bg-indigo-500/10 rounded-full blur-3xl" />
+
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <div>
             <span className="text-3xl font-bold tracking-tight">
-              Reserva<span className="text-primary">Ya</span>
+              Reservas<span className="text-emerald-400">AI</span>
             </span>
           </div>
 
@@ -84,37 +87,37 @@ export default function RegisterPage() {
             </h2>
             <div className="space-y-5">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-primary" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="font-medium">Reservas por WhatsApp</p>
-                  <p className="text-sm text-background/60">Un agente de IA atiende a tus clientes 24/7.</p>
+                  <p className="text-sm text-white/60">Un agente de IA atiende a tus clientes 24/7.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CalendarDays className="w-5 h-5 text-primary" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                  <CalendarDays className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="font-medium">Cero overbooking</p>
-                  <p className="text-sm text-background/60">Validacion automatica de disponibilidad y capacidad.</p>
+                  <p className="text-sm text-white/60">Validacion automatica de disponibilidad y capacidad.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="font-medium">Listo en 5 minutos</p>
-                  <p className="text-sm text-background/60">Registrate, configura horarios, y empeza a recibir reservas.</p>
+                  <p className="text-sm text-white/60">Registrate, configura horarios, y empeza a recibir reservas.</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <p className="text-sm text-background/40">
-            ReservaYa &mdash; La forma inteligente de recibir reservas.
+          <p className="text-sm text-white/40">
+            ReservasAI &mdash; La forma inteligente de recibir reservas.
           </p>
         </div>
       </div>
@@ -125,7 +128,7 @@ export default function RegisterPage() {
           {/* Mobile logo */}
           <div className="mb-8 lg:hidden text-center">
             <span className="text-2xl font-bold tracking-tight">
-              Reserva<span className="text-primary">Ya</span>
+              Reservas<span className="text-emerald-500">AI</span>
             </span>
           </div>
 
@@ -202,7 +205,7 @@ export default function RegisterPage() {
             <CardFooter className="justify-center px-8 pb-8">
               <p className="text-sm text-muted-foreground">
                 Ya tenes cuenta?{" "}
-                <Link href="/login" className="text-primary hover:underline font-medium">
+                <Link href="/login" className="text-emerald-600 hover:underline font-medium">
                   Inicia sesion
                 </Link>
               </p>

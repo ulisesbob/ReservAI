@@ -42,12 +42,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left branding panel - hidden on mobile */}
-      <div className="hidden lg:flex lg:w-1/2 bg-foreground text-background relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground to-primary/20" />
+      <div className="hidden lg:flex lg:w-1/2 gradient-dark text-white relative overflow-hidden">
+        {/* Decorative gradient orbs */}
+        <div className="absolute top-20 right-10 w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-10 w-[250px] h-[250px] bg-indigo-500/10 rounded-full blur-3xl" />
+
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <div>
             <span className="text-3xl font-bold tracking-tight">
-              Reserva<span className="text-primary">Ya</span>
+              Reservas<span className="text-emerald-400">AI</span>
             </span>
           </div>
 
@@ -59,37 +62,37 @@ export default function LoginPage() {
             </h2>
             <div className="space-y-5">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-primary" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="font-medium">Reservas por WhatsApp</p>
-                  <p className="text-sm text-background/60">Tus clientes reservan desde su app favorita con IA.</p>
+                  <p className="text-sm text-white/60">Tus clientes reservan desde su app favorita con IA.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CalendarDays className="w-5 h-5 text-primary" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                  <CalendarDays className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="font-medium">Panel en tiempo real</p>
-                  <p className="text-sm text-background/60">Ve y gestiona todas tus reservas en un solo lugar.</p>
+                  <p className="text-sm text-white/60">Ve y gestiona todas tus reservas en un solo lugar.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
                   <p className="font-medium">Equipo conectado</p>
-                  <p className="text-sm text-background/60">Invita a tu equipo y gestionen juntos.</p>
+                  <p className="text-sm text-white/60">Invita a tu equipo y gestionen juntos.</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <p className="text-sm text-background/40">
-            ReservaYa &mdash; La forma inteligente de recibir reservas.
+          <p className="text-sm text-white/40">
+            ReservasAI &mdash; La forma inteligente de recibir reservas.
           </p>
         </div>
       </div>
@@ -100,7 +103,7 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="mb-8 lg:hidden text-center">
             <span className="text-2xl font-bold tracking-tight">
-              Reserva<span className="text-primary">Ya</span>
+              Reservas<span className="text-emerald-500">AI</span>
             </span>
           </div>
 
@@ -153,7 +156,7 @@ export default function LoginPage() {
             <CardFooter className="justify-center px-8 pb-8">
               <p className="text-sm text-muted-foreground">
                 No tenes cuenta?{" "}
-                <Link href="/register" className="text-primary hover:underline font-medium">
+                <Link href="/register" className="text-emerald-600 hover:underline font-medium">
                   Registrate
                 </Link>
               </p>

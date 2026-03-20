@@ -20,7 +20,7 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
         <div className="flex h-14 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="text-xl font-bold tracking-tight">
-              Reserva<span className="text-primary">Ya</span>
+              Reservas<span className="text-primary">AI</span>
             </Link>
             <Separator orientation="vertical" className="h-6" />
             <div className="flex items-center gap-1">

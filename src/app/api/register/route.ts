@@ -100,7 +100,7 @@ export async function POST(request: Request) {
     // Send welcome email (non-blocking)
     sendEmail({
       to: email,
-      subject: "Bienvenido a ReservaYa",
+      subject: "Bienvenido a ReservasAI",
       react: WelcomeEmail({ name }),
     }).catch((err) => console.error("Welcome email failed:", err))
 

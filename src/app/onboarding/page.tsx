@@ -132,7 +132,7 @@ export default function OnboardingPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <span className="text-2xl font-bold tracking-tight">
-            Reserva<span className="text-primary">Ya</span>
+            Reservas<span className="text-primary">AI</span>
           </span>
         </div>
 

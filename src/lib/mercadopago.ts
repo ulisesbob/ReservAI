@@ -16,13 +16,13 @@ function getClient() {
 
 const PLANS = {
   MONTHLY: {
-    reason: "ReservaYa - Plan Mensual",
+    reason: "ReservasAI - Plan Mensual",
     amount: 25000,
     frequency: 1,
     frequencyType: "months" as const,
   },
   YEARLY: {
-    reason: "ReservaYa - Plan Anual",
+    reason: "ReservasAI - Plan Anual",
     amount: 240000,
     frequency: 12,
     frequencyType: "months" as const,
