@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import { prisma } from "@/lib/prisma"
 import { DashboardNav } from "./dashboard-nav"
 
 export default async function DashboardLayout({
@@ -9,6 +10,13 @@ export default async function DashboardLayout({
 }) {
   const session = await auth()
   if (!session?.user) redirect("/login")
+
+  // Onboarding gate: check DB directly (not stale JWT)
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { id: session.user.restaurantId },
+    select: { operatingHours: true },
+  })
+  if (!restaurant?.operatingHours) redirect("/onboarding")
 
   const { name, role } = session.user
 

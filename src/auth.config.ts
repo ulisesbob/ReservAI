@@ -47,11 +47,7 @@ export const authConfig = {
             return Response.redirect(new URL("/settings/billing", nextUrl))
           }
 
-          // Onboarding gate: redirect to onboarding if not completed
-          const onboardingCompleted = auth?.user?.onboardingCompleted
-          if (!onboardingCompleted && !pathname.startsWith("/onboarding")) {
-            return Response.redirect(new URL("/onboarding", nextUrl))
-          }
+          // Onboarding gate moved to dashboard layout (needs real-time DB check, not stale JWT)
         }
       }
 
