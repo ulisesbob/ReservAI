@@ -40,7 +40,7 @@ export const authConfig = {
           const status = auth?.user?.subscriptionStatus
           const trialEndsAt = auth?.user?.trialEndsAt
 
-          const isTrialExpired = status === "TRIALING" && trialEndsAt && new Date(trialEndsAt) < new Date()
+          const isTrialExpired = status === "TRIALING" && (!trialEndsAt || new Date(trialEndsAt) < new Date())
           const isInactive = status === "PAST_DUE" || status === "CANCELLED"
 
           if (isTrialExpired || isInactive) {

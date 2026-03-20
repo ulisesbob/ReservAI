@@ -136,6 +136,14 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div className="space-y-4">
               <div className="space-y-2">
+                <Label>Nombre del restaurante</Label>
+                <Input
+                  value={restaurantName}
+                  onChange={(e) => setRestaurantName(e.target.value)}
+                  placeholder="Ej: La Trattoria"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label>Zona horaria</Label>
                 <Select value={timezone} onValueChange={setTimezone}>
                   <SelectTrigger><SelectValue /></SelectTrigger>

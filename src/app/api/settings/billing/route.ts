@@ -46,17 +46,28 @@ export async function POST(request: Request) {
 
     const mpSubscription = await createSubscription(plan, session.email, backUrl)
 
-    await prisma.subscription.update({
+    const initPoint = mpSubscription.init_point
+    if (!initPoint) {
+      console.error("MercadoPago did not return init_point:", mpSubscription)
+      return NextResponse.json({ error: "Error al crear suscripcion en MercadoPago" }, { status: 502 })
+    }
+
+    await prisma.subscription.upsert({
       where: { restaurantId: session.restaurantId },
-      data: {
+      create: {
+        restaurantId: session.restaurantId,
+        plan,
+        status: "TRIALING",
+        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        mercadoPagoSubscriptionId: mpSubscription.id ? String(mpSubscription.id) : null,
+      },
+      update: {
         plan,
         mercadoPagoSubscriptionId: mpSubscription.id ? String(mpSubscription.id) : null,
       },
     })
 
-    return NextResponse.json({
-      initPoint: mpSubscription.init_point,
-    })
+    return NextResponse.json({ initPoint })
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {

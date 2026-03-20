@@ -28,9 +28,11 @@ const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secon
 
 export function BillingForm({ subscription }: { subscription: Subscription | null }) {
   const [loading, setLoading] = useState<"MONTHLY" | "YEARLY" | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubscribe(plan: "MONTHLY" | "YEARLY") {
     setLoading(plan)
+    setError(null)
     try {
       const res = await fetch("/api/settings/billing", {
         method: "POST",
@@ -38,11 +40,17 @@ export function BillingForm({ subscription }: { subscription: Subscription | nul
         body: JSON.stringify({ plan }),
       })
       const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Error al procesar el pago")
+        return
+      }
       if (data.initPoint) {
         window.location.href = data.initPoint
+      } else {
+        setError("No se recibio el enlace de pago. Intenta de nuevo.")
       }
-    } catch (error) {
-      console.error("Error:", error)
+    } catch {
+      setError("Error de conexion. Verifica tu internet.")
     } finally {
       setLoading(null)
     }
@@ -73,6 +81,12 @@ export function BillingForm({ subscription }: { subscription: Subscription | nul
           </CardDescription>
         </CardHeader>
       </Card>
+
+      {error && (
+        <p className="text-sm text-destructive rounded-md border border-destructive/20 bg-destructive/10 px-4 py-2">
+          {error}
+        </p>
+      )}
 
       {/* Plan Selection */}
       {!isActive && (

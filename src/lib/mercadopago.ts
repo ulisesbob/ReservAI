@@ -1,9 +1,18 @@
 import crypto from "crypto"
 import { MercadoPagoConfig, PreApproval } from "mercadopago"
 
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
-})
+let _client: MercadoPagoConfig
+
+function getClient() {
+  if (!_client) {
+    const token = process.env.MERCADOPAGO_ACCESS_TOKEN
+    if (!token) {
+      throw new Error("MERCADOPAGO_ACCESS_TOKEN is not configured")
+    }
+    _client = new MercadoPagoConfig({ accessToken: token })
+  }
+  return _client
+}
 
 const PLANS = {
   MONTHLY: {
@@ -26,7 +35,7 @@ export async function createSubscription(
   backUrl: string,
 ) {
   const planConfig = PLANS[plan]
-  const preapproval = new PreApproval(client)
+  const preapproval = new PreApproval(getClient())
 
   const result = await preapproval.create({
     body: {
@@ -68,7 +77,15 @@ export function verifyWebhookSignature(
   const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`
   const expected = crypto.createHmac("sha256", secret).update(manifest).digest("hex")
 
-  return hash === expected
+  try {
+    return crypto.timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(expected, "hex"))
+  } catch {
+    return false
+  }
 }
 
-export { client as mercadoPagoClient, PLANS }
+export function getMercadoPagoClient() {
+  return getClient()
+}
+
+export { PLANS }

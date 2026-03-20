@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { verifyWebhookSignature, mercadoPagoClient } from "@/lib/mercadopago"
+import { verifyWebhookSignature, getMercadoPagoClient } from "@/lib/mercadopago"
 import { PreApproval, Payment as MPPayment } from "mercadopago"
 
 export async function POST(request: Request) {
@@ -8,15 +8,21 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { type, data } = body
 
+    if (!data?.id) {
+      return NextResponse.json({ error: "Missing data.id" }, { status: 400 })
+    }
+
     const xSignature = request.headers.get("x-signature")
     const xRequestId = request.headers.get("x-request-id")
 
-    if (!verifyWebhookSignature(xSignature, xRequestId, data?.id)) {
+    if (!verifyWebhookSignature(xSignature, xRequestId, String(data.id))) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
     }
 
+    const client = getMercadoPagoClient()
+
     if (type === "payment") {
-      const mpPayment = new MPPayment(mercadoPagoClient)
+      const mpPayment = new MPPayment(client)
       const paymentInfo = await mpPayment.get({ id: data.id })
 
       if (!paymentInfo) {
@@ -67,7 +73,7 @@ export async function POST(request: Request) {
     }
 
     if (type === "subscription_preapproval") {
-      const preapproval = new PreApproval(mercadoPagoClient)
+      const preapproval = new PreApproval(client)
       const subInfo = await preapproval.get({ id: data.id })
 
       if (subInfo) {
