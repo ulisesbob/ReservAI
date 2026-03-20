@@ -13,6 +13,9 @@ export async function getSession() {
     role: session.user.role as "ADMIN" | "EMPLOYEE",
     name: session.user.name ?? "",
     email: session.user.email ?? "",
+    subscriptionStatus: session.user.subscriptionStatus as string,
+    trialEndsAt: session.user.trialEndsAt as string | null,
+    onboardingCompleted: session.user.onboardingCompleted as boolean,
   }
 }
 

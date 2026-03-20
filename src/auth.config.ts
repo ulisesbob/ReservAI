@@ -1,4 +1,4 @@
-import type { NextAuthConfig, User } from "next-auth"
+import type { NextAuthConfig } from "next-auth"
 
 export const authConfig = {
   session: { strategy: "jwt" },
@@ -6,25 +6,20 @@ export const authConfig = {
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-        token.role = (user as User & { role?: string }).role
-        token.restaurantId = (user as User & { restaurantId?: string }).restaurantId
-      }
-      return token
-    },
     async session({ session, token }) {
       session.user.id = token.id as string
       session.user.role = token.role as string
       session.user.restaurantId = token.restaurantId as string
+      session.user.subscriptionStatus = token.subscriptionStatus as string
+      session.user.trialEndsAt = token.trialEndsAt as string | null
+      session.user.onboardingCompleted = token.onboardingCompleted as boolean
       return session
     },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
       const { pathname } = nextUrl
 
-      const protectedPaths = ["/dashboard", "/settings"]
+      const protectedPaths = ["/dashboard", "/settings", "/onboarding"]
       const isProtected = protectedPaths.some((path) => pathname.startsWith(path))
 
       if (isProtected && !isLoggedIn) return false
@@ -36,8 +31,32 @@ export const authConfig = {
         return Response.redirect(new URL("/dashboard", nextUrl))
       }
 
+      // Billing gate: if logged in and accessing protected routes (except billing & onboarding)
+      if (isLoggedIn && isProtected) {
+        const billingExempt = ["/settings/billing", "/onboarding"]
+        const isBillingExempt = billingExempt.some((path) => pathname.startsWith(path))
+
+        if (!isBillingExempt) {
+          const status = auth?.user?.subscriptionStatus
+          const trialEndsAt = auth?.user?.trialEndsAt
+
+          const isTrialExpired = status === "TRIALING" && trialEndsAt && new Date(trialEndsAt) < new Date()
+          const isInactive = status === "PAST_DUE" || status === "CANCELLED"
+
+          if (isTrialExpired || isInactive) {
+            return Response.redirect(new URL("/settings/billing", nextUrl))
+          }
+
+          // Onboarding gate: redirect to onboarding if not completed
+          const onboardingCompleted = auth?.user?.onboardingCompleted
+          if (!onboardingCompleted && !pathname.startsWith("/onboarding")) {
+            return Response.redirect(new URL("/onboarding", nextUrl))
+          }
+        }
+      }
+
       return true
     },
   },
-  providers: [], // Providers are added in auth.ts (requires Node.js runtime for bcrypt/prisma)
+  providers: [],
 } satisfies NextAuthConfig
