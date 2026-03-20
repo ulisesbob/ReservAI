@@ -29,45 +29,62 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Payment not found" }, { status: 404 })
       }
 
-      const preapprovalId = paymentInfo.metadata?.preapproval_id as string | undefined
+      // MercadoPago includes preapproval_id at top level for subscription payments,
+      // or in metadata. Try both, plus point_of_interaction for additional lookup.
+      const preapprovalId =
+        (paymentInfo as unknown as Record<string, unknown>).preapproval_id as string | undefined
+        ?? paymentInfo.metadata?.preapproval_id as string | undefined
 
-      if (preapprovalId) {
-        const subscription = await prisma.subscription.findUnique({
-          where: { mercadoPagoSubscriptionId: preapprovalId },
+      let subscription = preapprovalId
+        ? await prisma.subscription.findUnique({
+            where: { mercadoPagoSubscriptionId: preapprovalId },
+          })
+        : null
+
+      // Fallback: look up by payer email if preapprovalId not found
+      if (!subscription && paymentInfo.payer?.email) {
+        const user = await prisma.user.findUnique({
+          where: { email: paymentInfo.payer.email },
+          select: { restaurantId: true },
+        })
+        if (user) {
+          subscription = await prisma.subscription.findUnique({
+            where: { restaurantId: user.restaurantId },
+          })
+        }
+      }
+
+      if (subscription) {
+        const paymentStatus = paymentInfo.status === "approved" ? "APPROVED"
+          : paymentInfo.status === "rejected" ? "REJECTED"
+          : "PENDING"
+
+        await prisma.payment.upsert({
+          where: { mercadoPagoPaymentId: String(data.id) },
+          create: {
+            subscriptionId: subscription.id,
+            amount: paymentInfo.transaction_amount ?? 0,
+            currency: "ARS",
+            status: paymentStatus,
+            mercadoPagoPaymentId: String(data.id),
+            paidAt: paymentStatus === "APPROVED" ? new Date() : null,
+          },
+          update: {
+            status: paymentStatus,
+            paidAt: paymentStatus === "APPROVED" ? new Date() : null,
+          },
         })
 
-        if (subscription) {
-          const paymentStatus = paymentInfo.status === "approved" ? "APPROVED"
-            : paymentInfo.status === "rejected" ? "REJECTED"
-            : "PENDING"
-
-          await prisma.payment.upsert({
-            where: { mercadoPagoPaymentId: String(data.id) },
-            create: {
-              subscriptionId: subscription.id,
-              amount: paymentInfo.transaction_amount ?? 0,
-              currency: "ARS",
-              status: paymentStatus,
-              mercadoPagoPaymentId: String(data.id),
-              paidAt: paymentStatus === "APPROVED" ? new Date() : null,
-            },
-            update: {
-              status: paymentStatus,
-              paidAt: paymentStatus === "APPROVED" ? new Date() : null,
-            },
+        if (paymentStatus === "APPROVED") {
+          await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: { status: "ACTIVE" },
           })
-
-          if (paymentStatus === "APPROVED") {
-            await prisma.subscription.update({
-              where: { id: subscription.id },
-              data: { status: "ACTIVE" },
-            })
-          } else if (paymentStatus === "REJECTED") {
-            await prisma.subscription.update({
-              where: { id: subscription.id },
-              data: { status: "PAST_DUE" },
-            })
-          }
+        } else if (paymentStatus === "REJECTED") {
+          await prisma.subscription.update({
+            where: { id: subscription.id },
+            data: { status: "PAST_DUE" },
+          })
         }
       }
     }
@@ -100,6 +117,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error("MercadoPago webhook error:", error)
-    return NextResponse.json({ error: "Internal error" }, { status: 500 })
+    // Return 200 to prevent MercadoPago from retrying on unrecoverable errors
+    return NextResponse.json({ error: "Processed with error" }, { status: 200 })
   }
 }

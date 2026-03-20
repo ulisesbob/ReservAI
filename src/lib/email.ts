@@ -4,7 +4,11 @@ let resend: Resend
 
 function getResend() {
   if (!resend) {
-    resend = new Resend(process.env.RESEND_API_KEY)
+    const key = process.env.RESEND_API_KEY
+    if (!key) {
+      throw new Error("RESEND_API_KEY is not configured")
+    }
+    resend = new Resend(key)
   }
   return resend
 }

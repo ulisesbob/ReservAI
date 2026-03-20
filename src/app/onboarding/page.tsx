@@ -172,7 +172,11 @@ export default function OnboardingPage() {
                   onChange={(e) => setMaxPartySize(e.target.value)}
                 />
               </div>
-              <Button className="w-full" onClick={() => setStep(2)} disabled={!ready}>
+              <Button
+                className="w-full"
+                onClick={() => setStep(2)}
+                disabled={!ready || !restaurantName.trim() || Number(maxCapacity) < 1 || Number(maxPartySize) < 1}
+              >
                 {ready ? "Siguiente" : "Cargando..."}
               </Button>
             </div>
@@ -226,6 +230,7 @@ export default function OnboardingPage() {
           {step === 3 && (
             <div className="space-y-4">
               <div className="rounded-lg bg-muted p-4 space-y-2 text-sm">
+                <p><strong>Restaurante:</strong> {restaurantName}</p>
                 <p><strong>Zona horaria:</strong> {timezone}</p>
                 <p><strong>Capacidad:</strong> {maxCapacity} personas</p>
                 <p><strong>Max por reserva:</strong> {maxPartySize} personas</p>

@@ -41,6 +41,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Plan invalido" }, { status: 400 })
     }
 
+    // Prevent duplicate subscriptions: if already has a pending MP subscription, reject
+    const existing = await prisma.subscription.findUnique({
+      where: { restaurantId: session.restaurantId },
+      select: { mercadoPagoSubscriptionId: true, status: true },
+    })
+    if (existing?.mercadoPagoSubscriptionId && existing.status === "ACTIVE") {
+      return NextResponse.json({ error: "Ya tenes una suscripcion activa" }, { status: 409 })
+    }
+
     const origin = request.headers.get("origin") || process.env.NEXTAUTH_URL || ""
     const backUrl = `${origin}/settings/billing`
 
