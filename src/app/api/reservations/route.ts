@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
+import { sendEmail } from "@/lib/email"
+import { ReservationConfirmationEmail } from "@/lib/email-templates/reservation-confirmation"
 
 export async function GET(request: Request) {
   try {
@@ -81,6 +83,27 @@ export async function POST(request: Request) {
         status: "CONFIRMED",
       },
     })
+
+    // Send confirmation email if customer has email
+    if (reservation.customerEmail) {
+      const restaurant = await prisma.restaurant.findUnique({
+        where: { id: session.restaurantId },
+        select: { name: true },
+      })
+
+      const dateObj = new Date(reservation.dateTime)
+      sendEmail({
+        to: reservation.customerEmail,
+        subject: `Tu reserva en ${restaurant?.name ?? "el restaurante"}`,
+        react: ReservationConfirmationEmail({
+          customerName: reservation.customerName,
+          restaurantName: restaurant?.name ?? "el restaurante",
+          date: dateObj.toLocaleDateString("es-AR"),
+          time: dateObj.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
+          partySize: reservation.partySize,
+        }),
+      }).catch((err) => console.error("Confirmation email failed:", err))
+    }
 
     return NextResponse.json(reservation, { status: 201 })
   } catch (error) {

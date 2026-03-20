@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
+import { sendEmail } from "@/lib/email"
+import { WelcomeEmail } from "@/lib/email-templates/welcome"
 
 export async function POST(request: Request) {
   try {
@@ -94,6 +96,13 @@ export async function POST(request: Request) {
         },
       },
     })
+
+    // Send welcome email (non-blocking)
+    sendEmail({
+      to: email,
+      subject: "Bienvenido a ReservaYa",
+      react: WelcomeEmail({ name }),
+    }).catch((err) => console.error("Welcome email failed:", err))
 
     return NextResponse.json(
       { restaurant: { id: restaurant.id, name: restaurant.name, slug: restaurant.slug } },
