@@ -51,6 +51,83 @@ SaaS multi-tenant para restaurantes. Los clientes reservan por WhatsApp a traves
 7. **TEST E2E EN PRODUCCION** — Verificar estado post-cambio contra el entorno real (/diagnostics, curl a API, probar todos los canales afectados).
 8. **SCAN PROACTIVO + COMMIT + VERIFY-DEPLOY** — Grep el mismo patron de bug en todo el codebase. Otros archivos tienen el mismo problema? → arreglar. Codigo muerto? → eliminar. Tests cubren el caso? Si no → agregar. Commit + push + verify-deploy.
 
+## Estado del Proyecto (2026-03-18)
+
+**Todos los 10 pasos de implementacion completados.** Proyecto funcional y listo para deploy.
+
+### Pasos Completados
+1. ✅ Setup proyecto (Next.js 14 + Prisma 7.5 + Neon PostgreSQL)
+2. ✅ Autenticacion (NextAuth v5 + Credentials + JWT + bcrypt)
+3. ✅ CRUD reservas + dashboard
+4. ✅ UI del panel con shadcn/ui
+5. ✅ Integracion OpenAI (agente IA gpt-4o-mini + validacion disponibilidad)
+6. ✅ Integracion WhatsApp Business API (webhook + rate limiting)
+7. ✅ Knowledge Base + config restaurante (horarios, capacidad)
+8. ✅ Gestion de equipo (invitar/eliminar empleados)
+9. ✅ Encriptacion AES-256-GCM + seguridad (HMAC webhook, security headers)
+10. ✅ Preparacion deploy (Vercel)
+
+### Estructura de Archivos Clave
+```
+src/
+├── auth.ts, auth.config.ts          # NextAuth v5 config (split para edge)
+├── middleware.ts                     # Proteccion de rutas
+├── lib/
+│   ├── prisma.ts                    # Singleton PrismaClient con PrismaPg adapter
+│   ├── auth.ts                      # getSession, requireSession, requireAdmin
+│   ├── ai-agent.ts                  # Servicio agente OpenAI
+│   ├── availability.ts              # Validacion disponibilidad
+│   ├── whatsapp.ts                  # Envio mensajes WhatsApp
+│   └── encryption.ts                # AES-256-GCM encrypt/decrypt
+├── app/
+│   ├── api/
+│   │   ├── auth/[...nextauth]/      # NextAuth handler
+│   │   ├── register/                # POST registro restaurante+admin
+│   │   ├── reservations/            # GET/POST + [id] PATCH/DELETE
+│   │   ├── agent/test/              # Test endpoint agente IA
+│   │   ├── settings/                # restaurant, knowledge-base, whatsapp, team
+│   │   └── whatsapp/webhook/        # GET verificacion + POST mensajes
+│   ├── dashboard/                   # Lista reservas, form, acciones
+│   ├── settings/                    # Config restaurante, KB, WhatsApp, equipo
+│   ├── login/, register/            # Auth pages
+│   └── page.tsx                     # Landing page
+└── components/ui/                   # shadcn/ui components
+```
+
+### Notas Tecnicas
+- **Prisma 7.5**: usa `prisma.config.ts` para datasource (no en schema.prisma), requiere PrismaPg adapter
+- **NextAuth v5**: config split en auth.config.ts (edge-safe) + auth.ts (Node runtime con Prisma/bcrypt)
+- **Prisma Client**: generado en `src/generated/prisma/`, importar de `@/generated/prisma/client`
+- **Multi-tenancy**: findFirst con restaurantId para ownership checks, luego update/delete con solo { id }
+- **Encriptacion**: formato `iv:authTag:ciphertext` (hex), safeDecrypt() para datos legacy
+
+### Variables de Entorno Requeridas
+- DATABASE_URL, ENCRYPTION_KEY, NEXTAUTH_SECRET, NEXTAUTH_URL
+- OPENAI_API_KEY, WHATSAPP_VERIFY_TOKEN, WHATSAPP_APP_SECRET
+
+## Roadmap Post-MVP
+
+### Fase 1 (Critico — monetizacion)
+1. Planes de pago + billing (Stripe/MercadoPago)
+2. Landing page publica con pricing
+3. Onboarding wizard post-registro
+4. Email transaccional (Resend/SendGrid)
+5. Deploy a Vercel + dominio
+
+### Fase 2 (Retencion)
+6. Reportes/analytics
+7. Notificaciones recordatorio 24h
+8. Calendario visual
+9. Historial de clientes
+10. Export CSV/PDF
+
+### Fase 3 (Diferenciadores)
+11. Widget embebible
+12. Multi-idioma (i18n)
+13. Waitlist
+14. Reviews/feedback post-visita
+15. API publica
+
 ## Spec Completa
 
 Ver `docs/superpowers/specs/2026-03-18-reserva-saas-design.md`
