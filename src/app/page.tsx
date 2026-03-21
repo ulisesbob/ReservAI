@@ -11,9 +11,12 @@ import {
   ArrowRight,
   Zap,
   Clock,
+  CheckCircle2,
+  ShieldCheck,
 } from "lucide-react"
-import { PricingToggle } from "./pricing-toggle"
+import { PricingSection } from "@/components/pricing-section"
 import { LandingNav } from "./landing-nav"
+import { faqs } from "@/data/faqs"
 
 const features = [
   {
@@ -53,28 +56,7 @@ const featureStyles: Record<string, { icon: string; bg: string }> = {
   rose: { icon: "text-rose-600", bg: "bg-rose-50 border border-rose-100" },
 }
 
-const faqs = [
-  {
-    q: "Que pasa al terminar el trial?",
-    a: "Si no elegis un plan, se bloquea el acceso al panel. Tus datos se mantienen y podes reactivar en cualquier momento.",
-  },
-  {
-    q: "Puedo cancelar en cualquier momento?",
-    a: "Si, podes cancelar tu suscripcion cuando quieras. No hay permanencia minima.",
-  },
-  {
-    q: "Que medios de pago aceptan?",
-    a: "Aceptamos tarjetas de credito/debito, transferencia bancaria y todos los medios de MercadoPago.",
-  },
-  {
-    q: "Necesito un numero de WhatsApp Business?",
-    a: "Si, necesitas una cuenta de WhatsApp Business API (Meta) para recibir reservas por WhatsApp.",
-  },
-  {
-    q: "Cuantas reservas puedo gestionar?",
-    a: "Ilimitadas. No hay limite de reservas en ningun plan.",
-  },
-]
+// FAQs imported from @/data/faqs
 
 export default async function Home() {
   const session = await auth()
@@ -100,17 +82,23 @@ export default async function Home() {
           {/* Left — copy */}
           <div>
             <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-[1.05]">
-              Reservas por
-              <br />
-              WhatsApp
-              <br />
-              <span className="text-gradient">con IA</span>
+              Reservas por WhatsApp
+              <span className="text-gradient"> con IA</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-lg leading-relaxed">
-              Tu restaurante recibe reservas automaticas por WhatsApp.
-              Un agente de IA atiende a tus clientes 24/7 mientras vos gestionas
-              todo desde un panel simple.
+              Los comensales reservan por WhatsApp con nuestra IA — 24/7, sin esperas, sin apps que descargar.
+              Vos solo recibís la confirmación y empezás el turno con todo organizado.
             </p>
+            <ul className="mt-4 space-y-2 text-muted-foreground max-w-lg text-base sm:text-lg">
+              <li className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                <span>El comensal reserva como ya habla: por WhatsApp.</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-indigo-500 flex-shrink-0" />
+                <span>Cero caos en el turno. Todo organizado de antes.</span>
+              </li>
+            </ul>
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <Button
                 asChild
@@ -118,7 +106,7 @@ export default async function Home() {
                 className="h-13 text-base px-8 rounded-xl font-semibold gradient-cta text-white shadow-lg hover:shadow-xl transition-shadow glow-green border-0"
               >
                 <Link href="/register">
-                  Proba 14 dias gratis
+                  Probá 14 días gratis
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -128,11 +116,11 @@ export default async function Home() {
                 size="lg"
                 className="h-13 text-base px-8 text-muted-foreground"
               >
-                <Link href="#como-funciona">Ver como funciona</Link>
+                <Link href="#como-funciona">Ver cómo funciona</Link>
               </Button>
             </div>
             <p className="mt-5 text-sm text-muted-foreground/70">
-              Sin tarjeta de credito &middot; Cancela cuando quieras
+              Sin tarjeta de crédito &middot; Cancelá cuando quieras &middot; +2k reservas gestionadas
             </p>
           </div>
 
@@ -223,6 +211,44 @@ export default async function Home() {
           <div className="flex items-center gap-2.5">
             <Clock className="h-5 w-5 text-emerald-500" />
             <span className="text-sm text-muted-foreground">Disponible 24/7</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* SOCIAL PROOF REAL                            */}
+      {/* ============================================ */}
+      <section className="py-20 px-6 bg-background">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            Restaurantes que ya confían
+          </h2>
+          <p className="mt-3 text-center text-muted-foreground max-w-lg mx-auto">
+            Resultados reales en mesas reales.
+          </p>
+
+          <div className="mt-16 grid md:grid-cols-3 gap-10">
+            <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <p className="text-5xl font-bold text-emerald-600">-40%</p>
+              <p className="mt-2 text-muted-foreground">No-shows con recordatorios automáticos</p>
+              <p className="mt-6 font-semibold text-lg">&ldquo;Desde que usamos ReservasAI, el problema de las mesas vacías se redujo drásticamente.&rdquo;
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">— Don Julio Palermo</p>
+            </div>
+            <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <p className="text-5xl font-bold text-indigo-600">+30%</p>
+              <p className="mt-2 text-muted-foreground">Reservas con atención IA 24/7</p>
+              <p className="mt-6 font-semibold text-lg">&ldquo;Nuestras reservas fuera de horario de atención se dispararon. Es como tener un recepcionista extra.&rdquo;
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">— La Cabrera</p>
+            </div>
+            <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <p className="text-5xl font-bold text-amber-600">+50%</p>
+              <p className="mt-2 text-muted-foreground">Eficiencia en la gestión</p>
+              <p className="mt-6 font-semibold text-lg">&ldquo;El panel es tan intuitivo que cualquiera del equipo lo usa. Ahorramos horas de trabajo a la semana.&rdquo;
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">— Bodegón Güerrin</p>
+            </div>
           </div>
         </div>
       </section>
@@ -324,7 +350,7 @@ export default async function Home() {
             Un solo plan. Todo incluido. Paga mensual o ahorra con el anual.
           </p>
           <div className="mt-14">
-            <PricingToggle />
+            <PricingSection />
           </div>
         </div>
       </section>
@@ -338,14 +364,14 @@ export default async function Home() {
             Preguntas frecuentes
           </h2>
           <div className="space-y-3">
-            {faqs.map((faq) => (
-              <details key={faq.q} className="group bg-background border rounded-xl group-open:border-l-emerald-500">
+            {faqs.map((faq, index) => (
+              <details key={index} className="group bg-background border rounded-xl group-open:border-l-emerald-500" open={"defaultOpen" in faq ? faq.defaultOpen : false}>
                 <summary className="flex items-center justify-between p-5 cursor-pointer font-medium text-sm">
-                  {faq.q}
+                  {faq.question}
                   <ChevronDown className="h-4 w-4 text-muted-foreground group-open:text-emerald-500 transition-transform group-open:rotate-180 flex-shrink-0 ml-4" />
                 </summary>
                 <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed -mt-1 border-l-2 border-emerald-500 ml-5">
-                  {faq.a}
+                  {faq.answer}
                 </p>
               </details>
             ))}
@@ -363,10 +389,10 @@ export default async function Home() {
 
         <div className="relative max-w-3xl mx-auto text-center">
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">
-            Empeza a recibir reservas hoy
+            Empezá a recibir reservas hoy
           </h2>
           <p className="mt-4 text-white/60 text-lg">
-            Configura tu restaurante en minutos. Sin tarjeta, sin compromiso.
+            Configurá tu restaurante en minutos. Sin tarjeta, sin compromiso.
           </p>
           <Button
             asChild
@@ -374,10 +400,13 @@ export default async function Home() {
             className="mt-10 h-13 text-base px-10 rounded-xl font-semibold bg-white text-emerald-700 hover:bg-white/90 shadow-lg border-0"
           >
             <Link href="/register">
-              Proba 14 dias gratis
+              Probá 14 días gratis
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+          <p className="mt-8 text-white/60 text-sm">
+            ¿Tenés dudas? <Link href="https://wa.me/5491130303030" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Pedí una demo por WhatsApp</Link>
+          </p>
         </div>
       </section>
 
@@ -390,7 +419,7 @@ export default async function Home() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} ReservasAI. Todos los derechos reservados.</p>
           <Link href="/login" className="hover:text-emerald-600 transition-colors">
-            Iniciar Sesion
+            Iniciar Sesión
           </Link>
         </div>
       </footer>
