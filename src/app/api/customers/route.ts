@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { requireSession } from "@/lib/auth"
+import { requireAdmin } from "@/lib/auth"
 
 
 export async function GET(request: Request) {
   try {
-    const session = await requireSession()
+    const session = await requireAdmin()
     const { searchParams } = new URL(request.url)
     const search = searchParams.get("search")
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10))
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    console.error("Customers error:", error)
+    console.error("Customers error:", error instanceof Error ? error.message : "Unknown error")
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

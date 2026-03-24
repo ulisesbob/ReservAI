@@ -33,7 +33,11 @@ export async function GET(request: Request) {
       where.dateTime = { gte: dayStart, lte: dayEnd }
     }
 
+    const validStatuses = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]
     if (status && status !== "ALL") {
+      if (!validStatuses.includes(status)) {
+        return NextResponse.json({ error: "Estado inválido" }, { status: 400 })
+      }
       where.status = status
     }
 
@@ -59,7 +63,8 @@ export async function GET(request: Request) {
     })
 
     const csv = "\uFEFF" + [header, ...rows].join("\n")
-    const filename = `reservas-${date || "todas"}.csv`
+    const safeDateStr = (date || "todas").replace(/[^a-zA-Z0-9-]/g, "")
+    const filename = `reservas-${safeDateStr}.csv`
 
     return new NextResponse(csv, {
       headers: {

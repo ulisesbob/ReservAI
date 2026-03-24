@@ -9,10 +9,10 @@ import { ReservationReminderEmail } from "@/lib/email-templates/reservation-remi
  * Protected by CRON_SECRET header.
  */
 export async function GET(request: Request) {
-  // Verify cron secret
+  // Verify cron secret — fail closed if not configured
   const cronSecret = process.env.CRON_SECRET
   const authHeader = request.headers.get("authorization")
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const tomorrowStart = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 0, 0, 0)
     const tomorrowEnd = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 23, 59, 59, 999)
 
-    // Find all confirmed reservations for tomorrow that have an email
+    // Find confirmed reservations for tomorrow that have an email (batch limit)
     const reservations = await prisma.reservation.findMany({
       where: {
         dateTime: { gte: tomorrowStart, lte: tomorrowEnd },
@@ -34,9 +34,9 @@ export async function GET(request: Request) {
       include: {
         restaurant: { select: { name: true, timezone: true } },
       },
+      take: 500,
     })
 
-    let sent = 0
     for (const r of reservations) {
       if (!r.customerEmail) continue
 
@@ -53,18 +53,14 @@ export async function GET(request: Request) {
             partySize: r.partySize,
           }),
         })
-        sent++
       } catch (err) {
-        console.error(`Reminder email failed for reservation ${r.id}:`, err)
+        console.error(`Reminder failed for ${r.id}:`, err instanceof Error ? err.message : "Unknown")
       }
     }
 
-    return NextResponse.json({
-      message: `Sent ${sent} reminder emails for ${reservations.length} reservations`,
-      date: tomorrowStart.toISOString().split("T")[0],
-    })
+    return NextResponse.json({ status: "ok" })
   } catch (error) {
-    console.error("Cron reminders error:", error)
+    console.error("Cron reminders error:", error instanceof Error ? error.message : "Unknown error")
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
