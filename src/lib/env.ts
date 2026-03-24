@@ -1,0 +1,36 @@
+/**
+ * Validates that all critical environment variables are set.
+ * Call this in instrumentation.ts or at app startup.
+ */
+export function validateEnv() {
+  const required = [
+    "DATABASE_URL",
+    "NEXTAUTH_SECRET",
+    "ENCRYPTION_KEY",
+  ]
+
+  const optional = [
+    "OPENAI_API_KEY",
+    "WHATSAPP_VERIFY_TOKEN",
+    "WHATSAPP_APP_SECRET",
+    "RESEND_API_KEY",
+    "MERCADOPAGO_ACCESS_TOKEN",
+    "MERCADOPAGO_WEBHOOK_SECRET",
+    "CRON_SECRET",
+  ]
+
+  const missing = required.filter((key) => !process.env[key])
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missing.join(", ")}`
+    )
+  }
+
+  const missingOptional = optional.filter((key) => !process.env[key])
+  if (missingOptional.length > 0) {
+    console.warn(
+      `[env] Optional variables not set (some features disabled): ${missingOptional.join(", ")}`
+    )
+  }
+}

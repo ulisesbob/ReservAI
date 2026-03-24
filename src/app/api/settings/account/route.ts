@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
+import { validatePassword } from "@/lib/validation"
 
 export async function GET() {
   try {
@@ -54,11 +55,9 @@ export async function PATCH(request: Request) {
           { status: 400 }
         )
       }
-      if (typeof newPassword !== "string" || newPassword.length < 8) {
-        return NextResponse.json(
-          { error: "La nueva contraseña debe tener al menos 8 caracteres" },
-          { status: 400 }
-        )
+      const passwordError = validatePassword(newPassword)
+      if (passwordError) {
+        return NextResponse.json({ error: passwordError }, { status: 400 })
       }
 
       const isValid = await bcrypt.compare(currentPassword, user.password)

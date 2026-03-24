@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { verifyResetToken } from "@/lib/reset-token"
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit"
+import { validatePassword } from "@/lib/validation"
 
 const rateLimiter = { name: "reset-password", maxRequests: 5, windowMs: 15 * 60 * 1000 }
 
@@ -25,11 +26,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Token y contraseña requeridos" }, { status: 400 })
     }
 
-    if (typeof password !== "string" || password.length < 8) {
-      return NextResponse.json(
-        { error: "La contraseña debe tener al menos 8 caracteres" },
-        { status: 400 }
-      )
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      return NextResponse.json({ error: passwordError }, { status: 400 })
     }
 
     const payload = verifyResetToken(token)

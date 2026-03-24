@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { sendEmail } from "@/lib/email"
 import { WelcomeEmail } from "@/lib/email-templates/welcome"
 import { checkRateLimit, rateLimiters, getClientIp } from "@/lib/rate-limit"
+import { validatePassword } from "@/lib/validation"
 
 export async function POST(request: Request) {
   try {
@@ -27,11 +28,9 @@ export async function POST(request: Request) {
       )
     }
 
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: "La contraseña debe tener al menos 8 caracteres" },
-        { status: 400 }
-      )
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      return NextResponse.json({ error: passwordError }, { status: 400 })
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

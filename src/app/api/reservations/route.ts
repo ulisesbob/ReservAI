@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
 import { sendEmail } from "@/lib/email"
 import { ReservationConfirmationEmail } from "@/lib/email-templates/reservation-confirmation"
+import { VALID_STATUSES } from "@/lib/validation"
 
 export async function GET(request: Request) {
   try {
@@ -22,6 +23,9 @@ export async function GET(request: Request) {
     }
 
     if (status && status !== "ALL") {
+      if (!VALID_STATUSES.includes(status as typeof VALID_STATUSES[number])) {
+        return NextResponse.json({ error: "Estado inválido" }, { status: 400 })
+      }
       where.status = status
     }
 

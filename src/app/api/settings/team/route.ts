@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { sendEmail } from "@/lib/email"
+import { validatePassword } from "@/lib/validation"
 import { TeamInviteEmail } from "@/lib/email-templates/team-invite"
 
 export async function GET() {
@@ -66,11 +67,9 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!password || typeof password !== "string" || password.length < 8) {
-      return NextResponse.json(
-        { error: "La contrasena debe tener al menos 8 caracteres" },
-        { status: 400 }
-      )
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      return NextResponse.json({ error: passwordError }, { status: 400 })
     }
 
     // Check email uniqueness
