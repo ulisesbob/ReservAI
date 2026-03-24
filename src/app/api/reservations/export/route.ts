@@ -1,0 +1,76 @@
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { requireSession } from "@/lib/auth"
+
+/** Escape CSV value to prevent formula injection (CWE-1236) */
+function escapeCsv(value: string): string {
+  // Always wrap in double quotes for safety, escape internal quotes
+  const escaped = value.replace(/"/g, '""')
+  // Prefix formula-triggering characters with tab inside quotes
+  if (/^[=+\-@\t\r]/.test(escaped)) {
+    return `"\t${escaped}"`
+  }
+  return `"${escaped}"`
+}
+
+export async function GET(request: Request) {
+  try {
+    const session = await requireSession()
+    const { searchParams } = new URL(request.url)
+    const date = searchParams.get("date")
+    const status = searchParams.get("status")
+
+    const where: Record<string, unknown> = {
+      restaurantId: session.restaurantId,
+    }
+
+    if (date) {
+      const dayStart = new Date(`${date}T00:00:00.000Z`)
+      if (isNaN(dayStart.getTime())) {
+        return NextResponse.json({ error: "Fecha inválida" }, { status: 400 })
+      }
+      const dayEnd = new Date(`${date}T23:59:59.999Z`)
+      where.dateTime = { gte: dayStart, lte: dayEnd }
+    }
+
+    if (status && status !== "ALL") {
+      where.status = status
+    }
+
+    const reservations = await prisma.reservation.findMany({
+      where,
+      orderBy: { dateTime: "asc" },
+      take: 5000, // Safety limit
+    })
+
+    const header = "Fecha,Hora,Nombre,Telefono,Email,Personas,Estado,Origen"
+    const rows = reservations.map((r) => {
+      const dt = new Date(r.dateTime)
+      return [
+        dt.toLocaleDateString("es-AR"),
+        dt.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
+        escapeCsv(r.customerName),
+        escapeCsv(r.customerPhone),
+        escapeCsv(r.customerEmail || ""),
+        String(r.partySize),
+        r.status,
+        r.source,
+      ].join(",")
+    })
+
+    const csv = "\uFEFF" + [header, ...rows].join("\n")
+    const filename = `reservas-${date || "todas"}.csv`
+
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+      },
+    })
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}

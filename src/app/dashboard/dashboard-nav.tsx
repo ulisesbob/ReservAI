@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator"
 
 export function DashboardNav({ name, role }: { name: string; role: string }) {
   return (
-    <nav className="border-b bg-background">
+    <nav className="border-b bg-background" aria-label="Navegación principal">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           <div className="flex items-center gap-6">
@@ -26,6 +26,12 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/dashboard">Reservas</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard/analytics">Analytics</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard/customers">Clientes</Link>
               </Button>
               {role === "ADMIN" && (
                 <Button variant="ghost" size="sm" asChild>

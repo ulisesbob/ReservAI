@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { ReservationForm } from "./reservation-form"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog"
-import { ChevronLeft, ChevronRight, Search, Loader2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Search, Loader2, Download } from "lucide-react"
 
 type Reservation = {
   id: string
@@ -66,9 +66,18 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState("ALL")
   const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [date, setDate] = useState(defaultDate)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [loadingId, setLoadingId] = useState<string | null>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Debounce search input (400ms)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => setDebouncedSearch(search), 400)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [search])
 
   const fetchReservations = useCallback(async (page = 1) => {
     setLoading(true)
@@ -77,10 +86,11 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
     params.set("limit", "20")
     if (date) params.set("date", date)
     if (statusFilter !== "ALL") params.set("status", statusFilter)
-    if (search.trim()) params.set("search", search.trim())
+    if (debouncedSearch.trim()) params.set("search", debouncedSearch.trim())
 
     try {
       const res = await fetch(`/api/reservations?${params}`)
+      if (!res.ok) throw new Error("fetch failed")
       const json = await res.json()
       setReservations(json.data || [])
       setPagination(json.pagination || { page: 1, limit: 20, total: 0, totalPages: 0 })
@@ -89,7 +99,7 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
     } finally {
       setLoading(false)
     }
-  }, [date, statusFilter, search])
+  }, [date, statusFilter, debouncedSearch])
 
   useEffect(() => {
     fetchReservations(1)
@@ -136,6 +146,7 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 h-9"
+            aria-label="Buscar reservas"
           />
         </div>
 
@@ -159,7 +170,19 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
           </SelectContent>
         </Select>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline" size="sm"
+            onClick={() => {
+              const params = new URLSearchParams()
+              if (date) params.set("date", date)
+              if (statusFilter !== "ALL") params.set("status", statusFilter)
+              window.open(`/api/reservations/export?${params}`, "_blank")
+            }}
+            aria-label="Exportar reservas a CSV"
+          >
+            <Download className="h-4 w-4 mr-1" /> CSV
+          </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">Nueva Reserva</Button>
