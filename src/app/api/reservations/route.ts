@@ -11,12 +11,17 @@ export async function GET(request: Request) {
 
     const status = searchParams.get("status")
     const date = searchParams.get("date")
+    const search = searchParams.get("search")
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10))
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)))
+    const sortBy = searchParams.get("sortBy") || "dateTime"
+    const sortOrder = searchParams.get("sortOrder") === "desc" ? "desc" : "asc"
 
     const where: Record<string, unknown> = {
       restaurantId: session.restaurantId,
     }
 
-    if (status) {
+    if (status && status !== "ALL") {
       where.status = status
     }
 
@@ -26,12 +31,35 @@ export async function GET(request: Request) {
       where.dateTime = { gte: dayStart, lte: dayEnd }
     }
 
-    const reservations = await prisma.reservation.findMany({
-      where,
-      orderBy: { dateTime: "asc" },
-    })
+    if (search && search.trim()) {
+      where.OR = [
+        { customerName: { contains: search.trim(), mode: "insensitive" } },
+        { customerPhone: { contains: search.trim() } },
+      ]
+    }
 
-    return NextResponse.json(reservations)
+    const allowedSorts = ["dateTime", "customerName", "partySize", "status", "createdAt"]
+    const orderField = allowedSorts.includes(sortBy) ? sortBy : "dateTime"
+
+    const [reservations, total] = await Promise.all([
+      prisma.reservation.findMany({
+        where,
+        orderBy: { [orderField]: sortOrder },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.reservation.count({ where }),
+    ])
+
+    return NextResponse.json({
+      data: reservations,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    })
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

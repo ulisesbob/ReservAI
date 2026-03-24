@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { sendEmail } from "@/lib/email"
+import { TeamInviteEmail } from "@/lib/email-templates/team-invite"
 
 export async function GET() {
   try {
@@ -103,6 +105,22 @@ export async function POST(request: Request) {
         createdAt: true,
       },
     })
+
+    // Send team invite email (non-blocking)
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { id: session.restaurantId },
+      select: { name: true },
+    })
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+    sendEmail({
+      to: user.email,
+      subject: `Te invitaron al equipo de ${restaurant?.name ?? "un restaurante"} — ReservasAI`,
+      react: TeamInviteEmail({
+        employeeName: user.name,
+        restaurantName: restaurant?.name ?? "un restaurante",
+        loginUrl: `${baseUrl}/login`,
+      }),
+    }).catch((err) => console.error("Team invite email failed:", err))
 
     return NextResponse.json(user, { status: 201 })
   } catch (error) {

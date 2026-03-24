@@ -10,25 +10,18 @@ export default async function DashboardPage() {
   const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0)
   const dayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
 
-  const reservations = await prisma.reservation.findMany({
-    where: {
-      restaurantId: session.restaurantId,
-      dateTime: { gte: dayStart, lte: dayEnd },
-    },
-    orderBy: { dateTime: "asc" },
-  })
-
-  // Serialize dates to ISO strings for client component
-  const serialized = reservations.map((r) => ({
-    ...r,
-    dateTime: r.dateTime.toISOString(),
-    createdAt: r.createdAt.toISOString(),
-    updatedAt: r.updatedAt.toISOString(),
-  }))
-
-  const totalReservations = reservations.length
-  const confirmedCount = reservations.filter((r) => r.status === "CONFIRMED").length
-  const totalGuests = reservations.reduce((sum, r) => sum + r.partySize, 0)
+  const [totalReservations, confirmedCount, totalGuests] = await Promise.all([
+    prisma.reservation.count({
+      where: { restaurantId: session.restaurantId, dateTime: { gte: dayStart, lte: dayEnd } },
+    }),
+    prisma.reservation.count({
+      where: { restaurantId: session.restaurantId, dateTime: { gte: dayStart, lte: dayEnd }, status: "CONFIRMED" },
+    }),
+    prisma.reservation.aggregate({
+      where: { restaurantId: session.restaurantId, dateTime: { gte: dayStart, lte: dayEnd } },
+      _sum: { partySize: true },
+    }),
+  ])
 
   const dateLabel = today.toLocaleDateString("es-AR", {
     weekday: "long",
@@ -36,6 +29,8 @@ export default async function DashboardPage() {
     month: "long",
     day: "numeric",
   })
+
+  const todayStr = today.toISOString().split("T")[0]
 
   return (
     <div>
@@ -71,13 +66,13 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-primary">{totalGuests}</p>
+            <p className="text-3xl font-bold text-primary">{totalGuests._sum.partySize ?? 0}</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="mt-8">
-        <ReservationList reservations={serialized} />
+        <ReservationList defaultDate={todayStr} />
       </div>
     </div>
   )
