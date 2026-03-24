@@ -418,9 +418,17 @@ export default async function Home() {
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-indigo-500 to-amber-500" />
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} ReservasAI. Todos los derechos reservados.</p>
-          <Link href="/login" className="hover:text-emerald-600 transition-colors">
-            Iniciar Sesión
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/terms" className="hover:text-emerald-600 transition-colors">
+              Términos
+            </Link>
+            <Link href="/privacy" className="hover:text-emerald-600 transition-colors">
+              Privacidad
+            </Link>
+            <Link href="/login" className="hover:text-emerald-600 transition-colors">
+              Iniciar Sesión
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

@@ -3,9 +3,20 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { sendEmail } from "@/lib/email"
 import { WelcomeEmail } from "@/lib/email-templates/welcome"
+import { checkRateLimit, rateLimiters, getClientIp } from "@/lib/rate-limit"
 
 export async function POST(request: Request) {
   try {
+    // Rate limit: 3 registrations per IP per hour
+    const ip = getClientIp(request)
+    const rl = checkRateLimit(rateLimiters.register, ip)
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Demasiados intentos. Intenta de nuevo más tarde." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      )
+    }
+
     const body = await request.json()
     const { restaurantName, name, email, password, timezone } = body
 

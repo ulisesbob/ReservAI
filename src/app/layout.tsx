@@ -33,21 +33,12 @@ export const metadata: Metadata = {
     description,
     url: siteUrl,
     siteName: "ReservasAI",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: title,
-      },
-    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: ["/og-image.png"],
   },
 };
 

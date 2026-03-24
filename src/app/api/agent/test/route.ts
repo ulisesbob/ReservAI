@@ -4,10 +4,21 @@ import { requireSession } from "@/lib/auth"
 import { processMessage } from "@/lib/ai-agent"
 import { checkAvailability } from "@/lib/availability"
 import { safeDecrypt } from "@/lib/encryption"
+import { checkRateLimit, rateLimiters, getClientIp } from "@/lib/rate-limit"
 import type { AgentMessage, RestaurantConfig } from "@/lib/ai-agent"
 
 export async function POST(request: Request) {
   try {
+    // Rate limit: 10 requests per IP per minute
+    const ip = getClientIp(request)
+    const rl = checkRateLimit(rateLimiters.agentTest, ip)
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Demasiados intentos. Intenta de nuevo más tarde." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      )
+    }
+
     const session = await requireSession()
     const body = await request.json()
 

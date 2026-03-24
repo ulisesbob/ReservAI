@@ -50,6 +50,10 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
                   {role === "ADMIN" ? "Administrador" : "Empleado"}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/dashboard/account">Mi cuenta</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive cursor-pointer"
                   onClick={() => signOut({ callbackUrl: "/login" })}

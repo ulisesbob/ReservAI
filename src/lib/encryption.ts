@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes, createHmac } from "crypto"
+import { createCipheriv, createDecipheriv, randomBytes, createHmac, timingSafeEqual } from "crypto"
 
 const ALGORITHM = "aes-256-gcm"
 
@@ -74,7 +74,13 @@ export function maskSecret(value: string): string {
  */
 export function verifyWebhookSignature(body: string, signature: string): boolean {
   const appSecret = process.env.WHATSAPP_APP_SECRET
-  if (!appSecret) return true // Skip validation if not configured
+  if (!appSecret) {
+    console.error("CRITICAL: WHATSAPP_APP_SECRET not configured — rejecting webhook")
+    return false
+  }
   const expected = "sha256=" + createHmac("sha256", appSecret).update(body).digest("hex")
-  return signature === expected
+  const expectedBuf = Buffer.from(expected)
+  const signatureBuf = Buffer.from(signature)
+  if (expectedBuf.length !== signatureBuf.length) return false
+  return timingSafeEqual(expectedBuf, signatureBuf)
 }
