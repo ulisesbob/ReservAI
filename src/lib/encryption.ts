@@ -50,13 +50,13 @@ export function safeDecrypt(value: string): string {
   // If it doesn't contain exactly 2 colons, it's likely unencrypted
   const parts = value.split(":")
   if (parts.length !== 3) {
-    console.warn("Value does not appear to be encrypted — using raw value")
+    console.error("SECURITY: Value stored without encryption — migrate to encrypted format. Masked value: " + maskSecret(value))
     return value
   }
   try {
     return decrypt(value)
   } catch {
-    console.warn("Failed to decrypt value — using raw value (possibly unencrypted legacy data)")
+    console.error("SECURITY: Failed to decrypt value — possibly unencrypted legacy data. Masked value: " + maskSecret(value))
     return value
   }
 }

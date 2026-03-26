@@ -30,13 +30,63 @@ export async function PATCH(
     if (customerName !== undefined) data.customerName = customerName
     if (customerPhone !== undefined) data.customerPhone = customerPhone
     if (customerEmail !== undefined) data.customerEmail = customerEmail
-    if (dateTime !== undefined) data.dateTime = new Date(dateTime)
+    if (dateTime !== undefined) {
+      const parsedDate = new Date(dateTime)
+      if (isNaN(parsedDate.getTime())) {
+        return NextResponse.json({ error: "Fecha/hora inválida" }, { status: 400 })
+      }
+      if (parsedDate < new Date()) {
+        return NextResponse.json({ error: "No se pueden mover reservas al pasado" }, { status: 400 })
+      }
+      data.dateTime = parsedDate
+    }
+
+    // Fetch restaurant limits for validation
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { id: session.restaurantId },
+      select: { maxPartySize: true, maxCapacity: true },
+    })
+
     if (partySize !== undefined) {
       const size = Number(partySize)
       if (!Number.isInteger(size) || size < 1) {
         return NextResponse.json({ error: "partySize debe ser un entero positivo" }, { status: 400 })
       }
+      if (restaurant && size > restaurant.maxPartySize) {
+        return NextResponse.json(
+          { error: `El máximo de personas por reserva es ${restaurant.maxPartySize}` },
+          { status: 400 }
+        )
+      }
       data.partySize = size
+    }
+
+    // Validate capacity if partySize or dateTime changed
+    if (restaurant && (partySize !== undefined || dateTime !== undefined)) {
+      const targetDate = (data.dateTime as Date) ?? existing.dateTime
+      const targetSize = (data.partySize as number) ?? existing.partySize
+      const dayStart = new Date(targetDate)
+      dayStart.setUTCHours(0, 0, 0, 0)
+      const dayEnd = new Date(targetDate)
+      dayEnd.setUTCHours(23, 59, 59, 999)
+
+      const dayReservations = await prisma.reservation.aggregate({
+        where: {
+          restaurantId: session.restaurantId,
+          dateTime: { gte: dayStart, lte: dayEnd },
+          status: { in: ["PENDING", "CONFIRMED"] },
+          id: { not: id },
+        },
+        _sum: { partySize: true },
+      })
+
+      const otherOccupancy = dayReservations._sum.partySize ?? 0
+      if (otherOccupancy + targetSize > restaurant.maxCapacity) {
+        return NextResponse.json(
+          { error: `Capacidad máxima del día alcanzada (${restaurant.maxCapacity} personas)` },
+          { status: 400 }
+        )
+      }
     }
     if (status !== undefined) {
       const VALID_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]
@@ -54,8 +104,13 @@ export async function PATCH(
 
     return NextResponse.json(reservation)
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      if (error.message === "Forbidden") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      }
     }
     return NextResponse.json(
       { error: "Internal server error" },
@@ -88,8 +143,13 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      if (error.message === "Forbidden") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      }
     }
     return NextResponse.json(
       { error: "Internal server error" },

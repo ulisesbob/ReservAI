@@ -171,8 +171,13 @@ export async function POST(request: Request) {
       reservation: createdReservation,
     })
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      if (error.message === "Forbidden") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      }
     }
     console.error("Agent test error:", error)
     return NextResponse.json(

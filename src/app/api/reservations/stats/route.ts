@@ -77,8 +77,13 @@ export async function GET(request: Request) {
       dailyCounts: dailyCounts.map((d) => ({ day: String(d.day).split("T")[0], count: Number(d.count) })),
     })
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      if (error.message === "Forbidden") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      }
     }
     console.error("Stats error:", error instanceof Error ? error.message : "Unknown error")
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

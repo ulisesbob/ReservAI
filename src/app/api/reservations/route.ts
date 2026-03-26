@@ -65,8 +65,13 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      if (error.message === "Forbidden") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      }
     }
     return NextResponse.json(
       { error: "Internal server error" },
@@ -101,6 +106,44 @@ export async function POST(request: Request) {
     const size = Number(partySize)
     if (!Number.isInteger(size) || size < 1) {
       return NextResponse.json({ error: "Cantidad de personas debe ser un entero positivo" }, { status: 400 })
+    }
+
+    // Validate against restaurant maxPartySize and maxCapacity
+    const restaurant = await prisma.restaurant.findUnique({
+      where: { id: session.restaurantId },
+      select: { maxPartySize: true, maxCapacity: true, name: true },
+    })
+
+    if (restaurant) {
+      if (size > restaurant.maxPartySize) {
+        return NextResponse.json(
+          { error: `El máximo de personas por reserva es ${restaurant.maxPartySize}` },
+          { status: 400 }
+        )
+      }
+
+      // Check total capacity for that day
+      const dayStart = new Date(parsedDate)
+      dayStart.setUTCHours(0, 0, 0, 0)
+      const dayEnd = new Date(parsedDate)
+      dayEnd.setUTCHours(23, 59, 59, 999)
+
+      const dayReservations = await prisma.reservation.aggregate({
+        where: {
+          restaurantId: session.restaurantId,
+          dateTime: { gte: dayStart, lte: dayEnd },
+          status: { in: ["PENDING", "CONFIRMED"] },
+        },
+        _sum: { partySize: true },
+      })
+
+      const currentOccupancy = dayReservations._sum.partySize ?? 0
+      if (currentOccupancy + size > restaurant.maxCapacity) {
+        return NextResponse.json(
+          { error: `Capacidad máxima del día alcanzada (${restaurant.maxCapacity} personas)` },
+          { status: 400 }
+        )
+      }
     }
 
     const reservation = await prisma.reservation.create({
@@ -139,8 +182,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json(reservation, { status: 201 })
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      }
+      if (error.message === "Forbidden") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+      }
     }
     return NextResponse.json(
       { error: "Internal server error" },

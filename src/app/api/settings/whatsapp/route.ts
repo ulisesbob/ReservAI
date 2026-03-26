@@ -8,7 +8,7 @@ export async function PATCH(request: Request) {
     const session = await requireAdmin()
 
     const body = await request.json()
-    const { whatsappPhoneId, whatsappToken } = body
+    const { whatsappPhoneId, whatsappToken, openaiApiKey } = body
 
     if (typeof whatsappPhoneId !== "string" || typeof whatsappToken !== "string") {
       return NextResponse.json(
@@ -17,14 +17,17 @@ export async function PATCH(request: Request) {
       )
     }
 
-    // Build update data — only update token if a new value was provided
-    const updateData: { whatsappPhoneId: string | null; whatsappToken?: string | null } = {
+    // Build update data — only update tokens if new values were provided
+    const updateData: { whatsappPhoneId: string | null; whatsappToken?: string | null; openaiApiKey?: string | null } = {
       whatsappPhoneId: whatsappPhoneId || null,
     }
 
     if (whatsappToken) {
-      // Encrypt whatsappToken before saving to DB
       updateData.whatsappToken = encrypt(whatsappToken)
+    }
+
+    if (typeof openaiApiKey === "string") {
+      updateData.openaiApiKey = openaiApiKey ? encrypt(openaiApiKey) : null
     }
 
     await prisma.restaurant.update({

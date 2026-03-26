@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { timingSafeEqual } from "crypto"
 import { prisma } from "@/lib/prisma"
 import { processMessage } from "@/lib/ai-agent"
 import type { RestaurantConfig, AgentMessage } from "@/lib/ai-agent"
@@ -32,9 +33,13 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get("hub.verify_token")
   const challenge = searchParams.get("hub.challenge")
 
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN
   if (
     mode === "subscribe" &&
-    token === process.env.WHATSAPP_VERIFY_TOKEN
+    token &&
+    verifyToken &&
+    token.length === verifyToken.length &&
+    timingSafeEqual(Buffer.from(token), Buffer.from(verifyToken))
   ) {
     return new NextResponse(challenge, { status: 200 })
   }

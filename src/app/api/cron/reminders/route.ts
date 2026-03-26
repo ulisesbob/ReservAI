@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
+import { timingSafeEqual } from "crypto"
 import { prisma } from "@/lib/prisma"
-import { sendEmail } from "@/lib/email"
+import { sendEmail, isEmailConfigured } from "@/lib/email"
 import { ReservationReminderEmail } from "@/lib/email-templates/reservation-reminder"
 
 /**
@@ -12,8 +13,22 @@ export async function GET(request: Request) {
   // Verify cron secret — fail closed if not configured
   const cronSecret = process.env.CRON_SECRET
   const authHeader = request.headers.get("authorization")
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || !authHeader) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  const expected = `Bearer ${cronSecret}`
+  if (
+    authHeader.length !== expected.length ||
+    !timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected))
+  ) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  // Bail out early with a clear warning when email is not configured.
+  // This avoids flooding logs with one error per reservation.
+  if (!isEmailConfigured()) {
+    console.warn("[cron/reminders] Skipping — RESEND_API_KEY is not configured.")
+    return NextResponse.json({ status: "skipped", reason: "email_not_configured" })
   }
 
   try {
@@ -37,28 +52,35 @@ export async function GET(request: Request) {
       take: 500,
     })
 
+    let sent = 0
+    let failed = 0
+
     for (const r of reservations) {
       if (!r.customerEmail) continue
 
       const dateObj = new Date(r.dateTime)
-      try {
-        await sendEmail({
-          to: r.customerEmail,
-          subject: `Recordatorio: tu reserva en ${r.restaurant.name} es mañana`,
-          react: ReservationReminderEmail({
-            customerName: r.customerName,
-            restaurantName: r.restaurant.name,
-            date: dateObj.toLocaleDateString("es-AR"),
-            time: dateObj.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
-            partySize: r.partySize,
-          }),
-        })
-      } catch (err) {
-        console.error(`Reminder failed for ${r.id}:`, err instanceof Error ? err.message : "Unknown")
+      const result = await sendEmail({
+        to: r.customerEmail,
+        subject: `Recordatorio: tu reserva en ${r.restaurant.name} es mañana`,
+        react: ReservationReminderEmail({
+          customerName: r.customerName,
+          restaurantName: r.restaurant.name,
+          date: dateObj.toLocaleDateString("es-AR"),
+          time: dateObj.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
+          partySize: r.partySize,
+        }),
+      })
+
+      if (result.success) {
+        sent++
+      } else {
+        failed++
+        console.error(`[cron/reminders] Failed for reservation ${r.id} (${r.customerEmail}):`, result.error)
       }
     }
 
-    return NextResponse.json({ status: "ok" })
+    console.info(`[cron/reminders] Done — sent: ${sent}, failed: ${failed}, total: ${reservations.length}`)
+    return NextResponse.json({ status: "ok", sent, failed, total: reservations.length })
   } catch (error) {
     console.error("Cron reminders error:", error instanceof Error ? error.message : "Unknown error")
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
