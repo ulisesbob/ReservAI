@@ -4,11 +4,11 @@ import { requireSession } from "@/lib/auth"
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await requireSession()
-    const { id } = params
+    const { id } = await params
 
     const existing = await prisma.reservation.findFirst({
       where: { id, restaurantId: session.restaurantId },
@@ -121,11 +121,11 @@ export async function PATCH(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await requireSession()
-    const { id } = params
+    const { id } = await params
 
     const existing = await prisma.reservation.findFirst({
       where: { id, restaurantId: session.restaurantId },
