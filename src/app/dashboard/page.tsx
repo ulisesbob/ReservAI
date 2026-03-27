@@ -1,6 +1,6 @@
 import { requireSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { ReservationList } from "./reservation-list"
+import { DashboardViewToggle } from "./dashboard-view-toggle"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function DashboardPage() {
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-8">
-        <ReservationList defaultDate={todayStr} />
+        <DashboardViewToggle defaultDate={todayStr} />
       </div>
     </div>
   )

@@ -36,7 +36,7 @@ export const restaurantSettingsSchema = z.object({
   timezone: z.string().optional(),
   maxCapacity: z.number().int().min(1, "Capacidad debe ser mayor a 0"),
   maxPartySize: z.number().int().min(1, "Máximo por reserva debe ser mayor a 0"),
-  operatingHours: z.record(z.unknown()).nullish(),
+  operatingHours: z.record(z.string(), z.unknown()).nullish(),
 })
 
 export const knowledgeBaseSchema = z.object({
@@ -67,8 +67,9 @@ export function parseBody<T>(schema: z.ZodSchema<T>, data: unknown):
   | { success: false; error: string } {
   const result = schema.safeParse(data)
   if (!result.success) {
-    const firstError = result.error.errors[0]
-    return { success: false, error: firstError?.message || "Datos inválidos" }
+    const issues = result.error.issues
+    const firstIssue = issues[0]
+    return { success: false, error: firstIssue?.message || "Datos inválidos" }
   }
   return { success: true, data: result.data }
 }

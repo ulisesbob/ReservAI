@@ -18,9 +18,9 @@ function checkRateLimit(phone: string): boolean {
 
   // Cleanup expired entries every 5 minutes to prevent memory leak
   if (now - lastCleanup > 5 * 60 * 1000) {
-    for (const [key, val] of rateLimitMap) {
+    rateLimitMap.forEach((val, key) => {
       if (now > val.resetAt) rateLimitMap.delete(key)
-    }
+    })
     lastCleanup = now
   }
 
