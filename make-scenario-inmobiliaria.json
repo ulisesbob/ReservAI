@@ -1,0 +1,90 @@
+{
+  "name": "WhatsApp Bot Inmobiliario - Leads",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 1,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {
+          "parameters": {
+            "hook": { "label": "WhatsApp Bot Inmobiliario" }
+          }
+        },
+        "parameters": [
+          { "name": "hook", "type": "hook:gateway-webhook", "label": "Webhook", "required": true },
+          { "name": "maxResults", "type": "number", "label": "Maximum number of results" }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "google-sheets:addRow",
+      "version": 2,
+      "parameters": {
+        "includeHeaders": 1
+      },
+      "mapper": {
+        "spreadsheetId": "TU_SPREADSHEET_ID",
+        "sheetId": "Leads",
+        "values": {
+          "Nombre": "{{1.nombre}}",
+          "Teléfono": "{{1.telefono}}",
+          "Tipo de propiedad": "{{1.tipo_propiedad}}",
+          "Zona": "{{1.zona}}",
+          "Presupuesto": "{{1.presupuesto}}",
+          "Crédito hipotecario": "{{1.credito_hipotecario}}",
+          "Quiere agendar llamada": "{{1.quiere_llamada}}",
+          "Fecha y hora": "{{now}}"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "restore": {
+          "parameters": {
+            "includeHeaders": { "label": "Yes" }
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "gmail:sendEmail",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "to": "hernan@amigoiapp.com",
+        "subject": "🏠 Nuevo lead inmobiliario: {{1.nombre}}",
+        "html": true,
+        "content": "<h2>Nuevo lead recibido</h2><table style='border-collapse:collapse;width:100%'><tr style='background:#f5f5f5'><td style='padding:8px;border:1px solid #ddd'><strong>Nombre</strong></td><td style='padding:8px;border:1px solid #ddd'>{{1.nombre}}</td></tr><tr><td style='padding:8px;border:1px solid #ddd'><strong>Teléfono</strong></td><td style='padding:8px;border:1px solid #ddd'>{{1.telefono}}</td></tr><tr style='background:#f5f5f5'><td style='padding:8px;border:1px solid #ddd'><strong>Tipo de propiedad</strong></td><td style='padding:8px;border:1px solid #ddd'>{{1.tipo_propiedad}}</td></tr><tr><td style='padding:8px;border:1px solid #ddd'><strong>Zona</strong></td><td style='padding:8px;border:1px solid #ddd'>{{1.zona}}</td></tr><tr style='background:#f5f5f5'><td style='padding:8px;border:1px solid #ddd'><strong>Presupuesto</strong></td><td style='padding:8px;border:1px solid #ddd'>{{1.presupuesto}}</td></tr><tr><td style='padding:8px;border:1px solid #ddd'><strong>Crédito hipotecario</strong></td><td style='padding:8px;border:1px solid #ddd'>{{1.credito_hipotecario}}</td></tr><tr style='background:#f5f5f5'><td style='padding:8px;border:1px solid #ddd'><strong>Quiere agendar llamada</strong></td><td style='padding:8px;border:1px solid #ddd'>{{1.quiere_llamada}}</td></tr><tr><td style='padding:8px;border:1px solid #ddd'><strong>Fecha y hora</strong></td><td style='padding:8px;border:1px solid #ddd'>{{now}}</td></tr></table>"
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  }
+}

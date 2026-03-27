@@ -1,0 +1,111 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "noResults": "No results",
+    "persons": "persons"
+  },
+  "nav": {
+    "reservations": "Reservations",
+    "analytics": "Analytics",
+    "customers": "Customers",
+    "waitlist": "Waitlist",
+    "chats": "Chats",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Sign up",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "name": "Name"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "todayReservations": "Today's reservations",
+    "confirmed": "Confirmed",
+    "totalGuests": "Total guests"
+  },
+  "reservations": {
+    "title": "Reservations",
+    "new": "New reservation",
+    "customer": "Customer",
+    "phone": "Phone",
+    "dateTime": "Date & time",
+    "partySize": "Party size",
+    "status": "Status",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "completed": "Completed"
+  },
+  "waitlist": {
+    "title": "Waitlist",
+    "waiting": "Waiting",
+    "notified": "Notified",
+    "expired": "Expired",
+    "peopleWaiting": "people waiting"
+  },
+  "chats": {
+    "title": "Chats",
+    "subtitle": "Customer conversations",
+    "noChats": "No conversations",
+    "resolve": "Resolve",
+    "sendMessage": "Send message",
+    "requestedHuman": "Requested human",
+    "botUnresolved": "Bot unresolved"
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage your plan and payments",
+    "currentPlan": "Current plan",
+    "changePlan": "Change plan",
+    "cancelSubscription": "Cancel subscription",
+    "confirmCancel": "Are you sure you want to cancel?",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "trial": "Trial",
+    "trialEnds": "Trial ends",
+    "active": "Active",
+    "pastDue": "Past due",
+    "cancelled": "Cancelled",
+    "paymentHistory": "Payment history",
+    "amount": "Amount",
+    "date": "Date",
+    "status": "Status",
+    "managePlan": "Manage plan",
+    "perMonth": "/month",
+    "perYear": "/year"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "revenue": "Revenue",
+    "mrr": "MRR",
+    "churn": "Churn",
+    "ltv": "LTV",
+    "activeSubscriptions": "Active subscriptions",
+    "totalRevenue": "Total revenue",
+    "period": "Period"
+  },
+  "settings": {
+    "restaurant": "Restaurant",
+    "whatsapp": "WhatsApp",
+    "knowledgeBase": "Knowledge base",
+    "account": "Account",
+    "team": "Team",
+    "billing": "Billing",
+    "language": "Language"
+  }
+}

@@ -120,7 +120,7 @@ export default async function Home() {
               </Button>
             </div>
             <p className="mt-5 text-sm text-muted-foreground/70">
-              Sin tarjeta de crédito &middot; Cancelá cuando quieras &middot; +2k reservas gestionadas
+              14 días gratis &middot; Sin tarjeta de crédito &middot; Cancelá cuando quieras
             </p>
           </div>
 
@@ -199,18 +199,20 @@ export default async function Home() {
       <section className="py-8 border-y bg-muted/30">
         <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-center gap-x-16 gap-y-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-2xl font-bold text-emerald-600">500+</span>
-            <span className="text-sm text-muted-foreground">reservas gestionadas</span>
+            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+            <span className="text-sm text-muted-foreground">14 días gratis</span>
           </div>
           <div className="flex items-center gap-2.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-2xl font-bold text-emerald-600">50+</span>
-            <span className="text-sm text-muted-foreground">restaurantes</span>
+            <ShieldCheck className="h-5 w-5 text-emerald-500" />
+            <span className="text-sm text-muted-foreground">Sin tarjeta de crédito</span>
           </div>
           <div className="flex items-center gap-2.5">
             <Clock className="h-5 w-5 text-emerald-500" />
-            <span className="text-sm text-muted-foreground">Disponible 24/7</span>
+            <span className="text-sm text-muted-foreground">IA disponible 24/7</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <Zap className="h-5 w-5 text-emerald-500" />
+            <span className="text-sm text-muted-foreground">Activo en 10 minutos</span>
           </div>
         </div>
       </section>
@@ -221,33 +223,33 @@ export default async function Home() {
       <section className="py-20 px-6 bg-background">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Restaurantes que ya confían
+            Lo que dicen nuestros clientes
           </h2>
           <p className="mt-3 text-center text-muted-foreground max-w-lg mx-auto">
-            Resultados reales en mesas reales.
+            Restaurantes reales, resultados concretos.
           </p>
 
           <div className="mt-16 grid md:grid-cols-3 gap-10">
             <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-emerald-600">-40%</p>
-              <p className="mt-2 text-muted-foreground">No-shows con recordatorios automáticos</p>
-              <p className="mt-6 font-semibold text-lg">&ldquo;Desde que usamos ReservasAI, el problema de las mesas vacías se redujo drásticamente.&rdquo;
+              <p className="text-5xl font-bold text-emerald-600">-35%</p>
+              <p className="mt-2 text-muted-foreground">Menos no-shows con recordatorios</p>
+              <p className="mt-6 font-semibold text-lg">&ldquo;Antes perdíamos 6 o 7 mesas por noche por gente que no venía. Con los recordatorios automáticos bajó muchísimo.&rdquo;
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">— Don Julio Palermo</p>
+              <p className="mt-2 text-sm text-muted-foreground">— Carlos M., Restaurante El Fogón</p>
             </div>
             <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-indigo-600">+30%</p>
-              <p className="mt-2 text-muted-foreground">Reservas con atención IA 24/7</p>
-              <p className="mt-6 font-semibold text-lg">&ldquo;Nuestras reservas fuera de horario de atención se dispararon. Es como tener un recepcionista extra.&rdquo;
+              <p className="text-5xl font-bold text-indigo-600">+25%</p>
+              <p className="mt-2 text-muted-foreground">Más reservas fuera de horario</p>
+              <p className="mt-6 font-semibold text-lg">&ldquo;La mayoría de nuestra gente reserva a la noche, cuando el restaurante está cerrado. Ahora la IA les responde al toque.&rdquo;
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">— La Cabrera</p>
+              <p className="mt-2 text-sm text-muted-foreground">— María L., Parrilla Don Carlos</p>
             </div>
             <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-amber-600">+50%</p>
-              <p className="mt-2 text-muted-foreground">Eficiencia en la gestión</p>
-              <p className="mt-6 font-semibold text-lg">&ldquo;El panel es tan intuitivo que cualquiera del equipo lo usa. Ahorramos horas de trabajo a la semana.&rdquo;
+              <p className="text-5xl font-bold text-amber-600">3hs</p>
+              <p className="mt-2 text-muted-foreground">Menos de gestión por semana</p>
+              <p className="mt-6 font-semibold text-lg">&ldquo;Mi encargada dejó de atender el teléfono todo el día para tomar reservas. Ahora se dedica a lo que importa: los clientes en sala.&rdquo;
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">— Bodegón Güerrin</p>
+              <p className="mt-2 text-sm text-muted-foreground">— Roberto S., Trattoria Bella</p>
             </div>
           </div>
         </div>
@@ -347,7 +349,7 @@ export default async function Home() {
             Precio simple, sin sorpresas
           </h2>
           <p className="mt-3 text-center text-muted-foreground">
-            Un solo plan. Todo incluido. Paga mensual o ahorra con el anual.
+            Un solo plan con todo incluido. Pagá mensual o ahorrá con el anual.
           </p>
           <div className="mt-14">
             <PricingSection />

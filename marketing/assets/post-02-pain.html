@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    background: #fafaf9;
+  }
+  .canvas {
+    width: 1080px;
+    height: 1080px;
+    position: relative;
+    background: #fafaf9;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Top accent bar */
+  .top-bar {
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #10b981, #6366f1, #f59e0b);
+  }
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 70px 80px;
+    justify-content: space-between;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 10px;
+    height: 10px;
+    background: #10b981;
+    border-radius: 50%;
+  }
+
+  .logo-text {
+    font-size: 17px;
+    font-weight: 800;
+    color: #111;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: #10b981; }
+
+  .category {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6366f1;
+    background: rgba(99,102,241,0.08);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .question-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ef4444;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .question-label::before {
+    content: '';
+    width: 24px;
+    height: 2px;
+    background: #ef4444;
+    display: block;
+  }
+
+  .big-question {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -3px;
+    color: #111;
+    margin-bottom: 48px;
+    max-width: 780px;
+  }
+
+  .big-question .highlight {
+    color: #ef4444;
+  }
+
+  /* Problem cards */
+  .problems {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .problem-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px 28px;
+    border-left: 4px solid #ef4444;
+  }
+
+  .problem-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fef2f2;
+    border-radius: 12px;
+  }
+
+  .problem-text {
+    flex: 1;
+  }
+
+  .problem-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 3px;
+    letter-spacing: -0.3px;
+  }
+
+  .problem-desc {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 400;
+  }
+
+  .problem-cost {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ef4444;
+    flex-shrink: 0;
+    letter-spacing: -1px;
+  }
+
+  /* Solution teaser */
+  .solution-banner {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 20px;
+    padding: 24px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .solution-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .solution-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .solution-headline {
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.8px;
+  }
+
+  .solution-cta {
+    background: #fff;
+    color: #059669;
+    border-radius: 100px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+  }
+
+  .footer-url {
+    text-align: center;
+    font-size: 13px;
+    color: #9ca3af;
+    font-weight: 500;
+    padding-top: 20px;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="top-bar"></div>
+
+  <div class="content">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        <div class="logo-text">Reservas<span>AI</span></div>
+      </div>
+      <div class="category">Para restaurantes</div>
+    </div>
+
+    <div class="main">
+      <div class="question-label">El problema real</div>
+      <div class="big-question">
+        ¿Cuántas reservas<br>
+        <span class="highlight">perdés</span> hoy?
+      </div>
+
+      <div class="problems">
+        <div class="problem-item">
+          <div class="problem-icon">📵</div>
+          <div class="problem-text">
+            <div class="problem-title">Nadie atiende el teléfono</div>
+            <div class="problem-desc">El servicio está ocupado. El cliente llama, no atienden, busca otro lugar.</div>
+          </div>
+          <div class="problem-cost">-2 mesas</div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">👻</div>
+          <div class="problem-text">
+            <div class="problem-title">No-shows sin aviso</div>
+            <div class="problem-desc">La mesa reservada queda vacía. El turno, desperdiciado.</div>
+          </div>
+          <div class="problem-cost">-$18k ARS</div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">📝</div>
+          <div class="problem-text">
+            <div class="problem-title">Anotaciones en papel</div>
+            <div class="problem-desc">Confusiones, doble booking, caos durante el servicio.</div>
+          </div>
+          <div class="problem-cost">Estrés</div>
+        </div>
+      </div>
+
+      <div class="solution-banner">
+        <div class="solution-text">
+          <div class="solution-label">La solución existe</div>
+          <div class="solution-headline">ReservasAI lo resuelve en 10 min</div>
+        </div>
+        <div class="solution-cta">Probá gratis →</div>
+      </div>
+    </div>
+
+    <div class="footer-url">reservasai.com • Trial gratis 14 días</div>
+  </div>
+</div>
+</body>
+</html>

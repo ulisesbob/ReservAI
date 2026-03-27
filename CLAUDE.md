@@ -104,6 +104,27 @@ src/
 ### Variables de Entorno Requeridas
 - DATABASE_URL, ENCRYPTION_KEY, NEXTAUTH_SECRET, NEXTAUTH_URL
 - OPENAI_API_KEY, WHATSAPP_VERIFY_TOKEN, WHATSAPP_APP_SECRET
+- MERCADOPAGO_ACCESS_TOKEN, MERCADOPAGO_WEBHOOK_SECRET
+
+### MercadoPago — Renovar access token cuando hay 401
+El token `APP_USR-*` que va en `MERCADOPAGO_ACCESS_TOKEN` es de larga duracion pero
+puede expirar o ser revocado. Si el endpoint `/api/settings/billing` devuelve 502 y
+los logs muestran "MercadoPago 401", seguir estos pasos:
+
+1. Ir a https://www.mercadopago.com.ar/developers/panel
+2. Seleccionar la aplicacion del proyecto
+3. En "Credenciales de produccion" copiar el nuevo Access Token
+4. Actualizar `MERCADOPAGO_ACCESS_TOKEN` en el entorno (Vercel env vars o .env local)
+5. Si la app corre en Vercel, hacer redeploy para que tome el nuevo valor
+
+El token de pruebas (TEST-*) solo funciona en el sandbox de MP; en produccion se
+necesita el token de produccion (APP_USR-*). Asegurarse de que ambos tokens
+correspondan al mismo entorno (test vs produccion).
+
+Para el webhook secret (`MERCADOPAGO_WEBHOOK_SECRET`):
+- En el panel de MP, seccion "Webhooks", el secret se genera por aplicacion
+- Si la firma no valida, los logs muestran "[MP webhook] Signature verification failed"
+- Copiar el nuevo secret del panel y actualizar la variable de entorno
 
 ## Roadmap Post-MVP
 

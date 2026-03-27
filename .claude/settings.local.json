@@ -44,7 +44,22 @@
       "Bash(node -e \":*)",
       "Bash(npx skills:*)",
       "Read(//c/Users/Ulise/Desktop/saas para reserva de clientes/$HOME/.claude/**)",
-      "Read(//c/Users/Ulise/Desktop/saas para reserva de clientes/$USERPROFILE/.claude/**)"
+      "Read(//c/Users/Ulise/Desktop/saas para reserva de clientes/$USERPROFILE/.claude/**)",
+      "Bash(powershell -c \"irm https://openclaw.ai/install.ps1 | iex\" 2>&1)",
+      "Bash(openclaw)",
+      "Bash(openclaw --help)",
+      "Bash(openclaw agents:*)",
+      "Bash(openclaw configure:*)",
+      "Bash(openclaw docs:*)",
+      "Bash(openclaw channels:*)",
+      "Bash(openclaw config:*)",
+      "Bash(openclaw doctor:*)",
+      "Bash(openclaw gateway:*)",
+      "Bash(openclaw health:*)",
+      "Bash(openclaw skills:*)",
+      "Bash(where openclaw:*)",
+      "Bash(npm list:*)",
+      "Bash(npx openclaw:*)"
     ]
   }
 }

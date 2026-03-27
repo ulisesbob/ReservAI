@@ -1,0 +1,111 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "search": "Buscar",
+    "noResults": "Sem resultados",
+    "persons": "pessoas"
+  },
+  "nav": {
+    "reservations": "Reservas",
+    "analytics": "Analytics",
+    "customers": "Clientes",
+    "waitlist": "Lista de espera",
+    "chats": "Chats",
+    "settings": "Configurações"
+  },
+  "auth": {
+    "login": "Entrar",
+    "register": "Cadastrar",
+    "logout": "Sair",
+    "email": "E-mail",
+    "password": "Senha",
+    "forgotPassword": "Esqueceu sua senha?",
+    "name": "Nome"
+  },
+  "dashboard": {
+    "title": "Painel de controle",
+    "todayReservations": "Reservas de hoje",
+    "confirmed": "Confirmadas",
+    "totalGuests": "Total de convidados"
+  },
+  "reservations": {
+    "title": "Reservas",
+    "new": "Nova reserva",
+    "customer": "Cliente",
+    "phone": "Telefone",
+    "dateTime": "Data e hora",
+    "partySize": "Pessoas",
+    "status": "Status",
+    "pending": "Pendente",
+    "confirmed": "Confirmada",
+    "cancelled": "Cancelada",
+    "completed": "Concluída"
+  },
+  "waitlist": {
+    "title": "Lista de espera",
+    "waiting": "Aguardando",
+    "notified": "Notificado",
+    "expired": "Expirado",
+    "peopleWaiting": "pessoas aguardando"
+  },
+  "chats": {
+    "title": "Chats",
+    "subtitle": "Conversas com clientes",
+    "noChats": "Sem conversas",
+    "resolve": "Resolver",
+    "sendMessage": "Enviar mensagem",
+    "requestedHuman": "Solicitou humano",
+    "botUnresolved": "Bot não resolveu"
+  },
+  "billing": {
+    "title": "Faturamento",
+    "subtitle": "Gerencie seu plano e pagamentos",
+    "currentPlan": "Plano atual",
+    "changePlan": "Alterar plano",
+    "cancelSubscription": "Cancelar assinatura",
+    "confirmCancel": "Tem certeza que deseja cancelar?",
+    "monthly": "Mensal",
+    "yearly": "Anual",
+    "trial": "Teste",
+    "trialEnds": "O teste termina",
+    "active": "Ativo",
+    "pastDue": "Vencido",
+    "cancelled": "Cancelado",
+    "paymentHistory": "Histórico de pagamentos",
+    "amount": "Valor",
+    "date": "Data",
+    "status": "Status",
+    "managePlan": "Gerenciar plano",
+    "perMonth": "/mês",
+    "perYear": "/ano"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "revenue": "Receita",
+    "mrr": "MRR",
+    "churn": "Churn",
+    "ltv": "LTV",
+    "activeSubscriptions": "Assinaturas ativas",
+    "totalRevenue": "Receita total",
+    "period": "Período"
+  },
+  "settings": {
+    "restaurant": "Restaurante",
+    "whatsapp": "WhatsApp",
+    "knowledgeBase": "Base de conhecimento",
+    "account": "Conta",
+    "team": "Equipe",
+    "billing": "Faturamento",
+    "language": "Idioma"
+  }
+}

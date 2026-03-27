@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 export function DashboardNav({ name, role }: { name: string; role: string }) {
   const [escalatedCount, setEscalatedCount] = useState(0)
@@ -87,6 +88,7 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
           </div>
 
           <div className="flex items-center gap-3">
+            <LanguageSwitcher currentLocale="es" />
             <Badge variant={role === "ADMIN" ? "default" : "secondary"}>
               {role}
             </Badge>

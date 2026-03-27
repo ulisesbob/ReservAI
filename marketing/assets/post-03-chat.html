@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1080px; overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+  .canvas {
+    width: 1080px; height: 1080px;
+    background: linear-gradient(160deg, #111827 0%, #1a2744 50%, #111827 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .orb { position: absolute; border-radius: 50%; }
+  .orb1 { width: 400px; height: 400px; top: -80px; right: 80px;
+    background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%); }
+  .orb2 { width: 350px; height: 350px; bottom: -60px; left: 40px;
+    background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%); }
+
+  .phone {
+    width: 400px;
+    background: #1c2434;
+    border-radius: 36px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+    position: relative;
+    z-index: 10;
+  }
+
+  .phone-header {
+    background: #075e54;
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: #fff;
+  }
+  .contact-info { flex: 1; }
+  .contact-name { font-size: 16px; font-weight: 700; color: #fff; }
+  .contact-status { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+  .status-dot {
+    display: inline-block; width: 7px; height: 7px;
+    background: #34d399; border-radius: 50; margin-right: 4px;
+  }
+
+  .messages {
+    background: #0e1d13;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E");
+    padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    min-height: 520px;
+  }
+
+  .bubble { max-width: 85%; padding: 10px 14px; border-radius: 12px; line-height: 1.4; }
+  .bubble p { font-size: 15px; }
+  .bubble .time { font-size: 11px; opacity: 0.5; margin-top: 4px; text-align: right; }
+
+  .msg-in .bubble {
+    background: #1e2d24;
+    border-radius: 0 12px 12px 12px;
+    color: #e5e7eb;
+    align-self: flex-start;
+  }
+  .msg-out .bubble {
+    background: #025c4c;
+    border-radius: 12px 12px 0 12px;
+    color: #fff;
+    align-self: flex-end;
+    margin-left: auto;
+  }
+  .msg-in, .msg-out { display: flex; flex-direction: column; }
+
+  .typing {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
+  }
+  .dots { display: flex; gap: 4px; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #34d399;
+    animation: bounce 1.4s infinite ease-in-out;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+  .typing-text { font-size: 13px; color: #34d399; }
+
+  .input-bar {
+    background: #1c2434;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .input-field {
+    flex: 1; background: #2a3547; border-radius: 24px;
+    padding: 10px 18px; font-size: 14px; color: rgba(255,255,255,0.4);
+  }
+  .send-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #10b981; display: flex; align-items: center;
+    justify-content: center; font-size: 16px;
+  }
+
+  /* Right side */
+  .info-panel {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex; flex-direction: column; gap: 20px;
+    max-width: 380px;
+  }
+  .info-tag {
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-size: 12px; font-weight: 700;
+    color: #10b981; letter-spacing: 0.8px;
+    text-transform: uppercase; width: fit-content;
+  }
+  .info-headline {
+    font-size: 54px; font-weight: 900;
+    line-height: 1; letter-spacing: -2px;
+    color: #fff;
+  }
+  .info-headline .accent { color: #10b981; }
+  .info-sub {
+    font-size: 16px; color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+  }
+  .info-sub strong { color: rgba(255,255,255,0.85); }
+
+  .logo-bottom {
+    position: absolute; bottom: 40px; right: 60px;
+    font-size: 16px; font-weight: 800;
+    color: rgba(255,255,255,0.3); letter-spacing: -0.3px;
+  }
+  .logo-bottom span { color: #10b981; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <!-- Phone mockup -->
+  <div style="position:absolute;left:60px;top:50%;transform:translateY(-50%);z-index:10;">
+    <div class="phone">
+      <div class="phone-header">
+        <div class="avatar">R</div>
+        <div class="contact-info">
+          <div class="contact-name">Tu Restaurante</div>
+          <div class="contact-status"><span class="status-dot">●</span>En línea</div>
+        </div>
+        <div style="color:rgba(255,255,255,0.4);font-size:20px">⋮</div>
+      </div>
+
+      <div class="messages">
+        <div class="msg-in">
+          <div class="bubble">
+            <p>Hola! Quiero reservar para el sábado a la noche, somos 4</p>
+            <div class="time">21:34</div>
+          </div>
+        </div>
+
+        <div class="msg-out">
+          <div class="bubble">
+            <p>¡Hola! 😊 Tengo disponibilidad el sábado a las 20:00 y 21:30. ¿Cuál preferís?</p>
+            <div class="time">21:34 ✓✓</div>
+          </div>
+        </div>
+
+        <div class="msg-in">
+          <div class="bubble">
+            <p>Las 20hs está perfecto!</p>
+            <div class="time">21:35</div>
+          </div>
+        </div>
+
+        <div class="msg-out">
+          <div class="bubble">
+            <p>✅ <strong>Reserva confirmada</strong><br>📅 Sábado 22/3, 20:00hs<br>👥 4 personas<br><br>Te mando recordatorio el viernes. ¡Te esperamos!</p>
+            <div class="time">21:35 ✓✓</div>
+          </div>
+        </div>
+
+        <div class="typing">
+          <div class="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+          <span class="typing-text">Agente IA respondiendo...</span>
+        </div>
+      </div>
+
+      <div class="input-bar">
+        <div class="input-field">Escribí un mensaje...</div>
+        <div class="send-btn">➤</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info panel -->
+  <div class="info-panel">
+    <div class="info-tag">🤖 IA en acción</div>
+    <div class="info-headline">
+      Así<br>reservan<br>tus<br><span class="accent">clientes.</span>
+    </div>
+    <div class="info-sub">
+      Sin llamadas. Sin formularios.<br>
+      <strong>Solo WhatsApp</strong> — como siempre.
+    </div>
+  </div>
+
+  <div class="logo-bottom">Reservas<span>AI</span></div>
+</div>
+</body>
+</html>

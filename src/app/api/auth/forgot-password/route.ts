@@ -41,10 +41,16 @@ export async function POST(request: Request) {
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
     const resetUrl = `${baseUrl}/reset-password?token=${token}`
 
-    await sendEmail({
+    // Non-blocking: send email but don't let a failure change the HTTP response.
+    // sendEmail never throws — it returns a result object.
+    sendEmail({
       to: user.email,
       subject: "Restablecer contraseña — ReservasAI",
       react: PasswordResetEmail({ name: user.name, resetUrl }),
+    }).then((result) => {
+      if (!result.success && !result.skipped) {
+        console.error("Password reset email failed:", result.error)
+      }
     })
 
     return genericResponse

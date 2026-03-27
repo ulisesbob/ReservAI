@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1080px; overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #fafaf9;
+  }
+  .canvas {
+    width: 1080px; height: 1080px;
+    position: relative;
+    background: #fff;
+    display: flex; flex-direction: column;
+  }
+  .top-bar {
+    height: 8px;
+    background: linear-gradient(90deg, #10b981, #6366f1, #f59e0b);
+  }
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 70px 80px;
+    justify-content: space-between;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: #10b981; }
+  .category {
+    font-size: 12px;
+    font-weight: 700;
+    color: #f59e0b;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .main { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+  .eyebrow {
+    font-size: 15px;
+    font-weight: 600;
+    color: #6366f1;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .headline {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -3px;
+    color: #111;
+    margin-bottom: 50px;
+  }
+  .headline .strike {
+    text-decoration: line-through;
+    color: #d1d5db;
+  }
+  .headline .green { color: #10b981; }
+
+  .pain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .pain-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 28px;
+    background: #fef2f2;
+    border-radius: 16px;
+    border-left: 4px solid #ef4444;
+  }
+  .pain-item.solved {
+    background: #f0fdf4;
+    border-left-color: #10b981;
+  }
+  .pain-icon {
+    font-size: 28px;
+    width: 48px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .pain-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.3;
+  }
+  .pain-item.solved .pain-text { color: #065f46; }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 40px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .footer-tag {
+    font-size: 14px;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+  .footer-cta {
+    background: #10b981;
+    color: #fff;
+    padding: 14px 32px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="top-bar"></div>
+  <div class="content">
+    <div class="header">
+      <div class="logo">Reservas<span>AI</span></div>
+      <div class="category">Gastronomía</div>
+    </div>
+
+    <div class="main">
+      <div class="eyebrow">¿Te pasa esto?</div>
+      <div class="headline">
+        El teléfono<br>
+        <span class="strike">suena</span> y<br>
+        <span class="green">nadie atiende.</span>
+      </div>
+      <div class="pain-list">
+        <div class="pain-item">
+          <div class="pain-icon">📞</div>
+          <div class="pain-text">Perdés reservas porque estás en el servicio</div>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">😤</div>
+          <div class="pain-text">Clientes que no llegan y no avisaron</div>
+        </div>
+        <div class="pain-item solved">
+          <div class="pain-icon">🤖</div>
+          <div class="pain-text">ReservasAI atiende por WhatsApp las 24hs. Sin perderte nada.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-tag">reservasai.com · Probá 14 días gratis</div>
+      <div class="footer-cta">Ver cómo funciona →</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

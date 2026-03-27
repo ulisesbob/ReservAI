@@ -4,6 +4,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { faqs } from "@/data/faqs";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -47,11 +49,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
   const softwareSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -88,7 +92,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="es" className={cn("font-sans", geistSans.variable)}>
+    <html lang={locale} className={cn("font-sans", geistSans.variable)}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -101,7 +105,9 @@ export default function RootLayout({
         <Script id="reservasai-faq-schema" type="application/ld+json">
           {JSON.stringify(faqSchema)}
         </Script>
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
