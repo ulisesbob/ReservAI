@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin()
+    const session = await requireAdmin()
     const { searchParams } = request.nextUrl
     const period = searchParams.get("period") || "30"
     const days = Math.min(Number(period), 365)
@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     startDate.setDate(startDate.getDate() - days)
 
     const subscriptions = await prisma.subscription.findMany({
+      where: { restaurantId: session.restaurantId },
       select: {
         id: true, plan: true, status: true, createdAt: true,
         restaurant: { select: { name: true } },
