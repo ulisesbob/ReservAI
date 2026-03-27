@@ -12,7 +12,7 @@ const INVALID_TOKEN_MSG = "El enlace es inválido o ha expirado. Solicita uno nu
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request)
-    const rl = checkRateLimit(rateLimiter, ip)
+    const rl = await checkRateLimit(rateLimiter, ip)
     if (!rl.allowed) {
       return NextResponse.json(
         { error: "Demasiados intentos. Intenta de nuevo más tarde." },

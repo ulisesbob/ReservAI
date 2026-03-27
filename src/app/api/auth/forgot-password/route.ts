@@ -10,7 +10,7 @@ const rateLimiter = { name: "forgot-password", maxRequests: 3, windowMs: 15 * 60
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request)
-    const rl = checkRateLimit(rateLimiter, ip)
+    const rl = await checkRateLimit(rateLimiter, ip)
     if (!rl.allowed) {
       return NextResponse.json(
         { message: "Si el email existe, recibirás un enlace para restablecer tu contraseña." },

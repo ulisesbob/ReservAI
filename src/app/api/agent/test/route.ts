@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   try {
     // Rate limit: 10 requests per IP per minute
     const ip = getClientIp(request)
-    const rl = checkRateLimit(rateLimiters.agentTest, ip)
+    const rl = await checkRateLimit(rateLimiters.agentTest, ip)
     if (!rl.allowed) {
       return NextResponse.json(
         { error: "Demasiados intentos. Intenta de nuevo más tarde." },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@/generated/prisma/client"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 import { restaurantSettingsSchema, parseBody } from "@/lib/schemas"
 
@@ -61,7 +62,11 @@ export async function PATCH(request: Request) {
         timezone,
         maxCapacity,
         maxPartySize,
-        operatingHours: operatingHours ?? undefined,
+        operatingHours: operatingHours
+          ? (operatingHours as Prisma.InputJsonValue)
+          : operatingHours === null
+            ? Prisma.JsonNull
+            : undefined,
       },
     })
 
