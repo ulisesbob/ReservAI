@@ -1,154 +1,37 @@
-# ReservaYa - SaaS de Reservas para Restaurantes
+# ReservasAI
 
-## Proyecto
+SaaS multi-tenant de reservas para restaurantes. Clientes reservan por WhatsApp (agente IA con OpenAI GPT), restaurantes gestionan desde panel web.
 
-SaaS multi-tenant para restaurantes. Los clientes reservan por WhatsApp a traves de un agente de IA (OpenAI GPT) y los restaurantes gestionan reservas desde un panel web.
+## Stack
+- Next.js 14 (App Router) + Prisma 7.5 + PostgreSQL (Neon) + Vercel
+- NextAuth v5 (JWT) + Tailwind + shadcn/ui + OpenAI API + WhatsApp Business API
+- MercadoPago (pagos) + Resend (emails) + Upstash Redis (rate limiting) + Sentry
+- next-intl (i18n: es/en/pt) + Playwright (E2E tests)
 
-## Tech Stack
+## Reglas Críticas
+1. **Multi-tenancy**: SIEMPRE filtrar por `restaurantId`. Sin excepciones.
+2. **Credenciales encriptadas**: WhatsApp token y OpenAI key usan AES-256-GCM. Usar `safeDecrypt()`.
+3. **Rate limiting async**: `applyRateLimit()` devuelve Promise — siempre `await`.
+4. **OpenAI, NO Anthropic**: el bot de WhatsApp usa OpenAI gpt-4o-mini.
+5. **Zod para validación**: usar schemas de `src/lib/schemas.ts` con `parseBody()`.
+6. **Context7 antes de código**: consultar docs actualizadas antes de escribir.
 
-- **Next.js 14** (App Router) — fullstack
-- **Prisma** — ORM
-- **PostgreSQL** en Neon — base de datos
-- **NextAuth.js** — autenticacion (Credentials, JWT)
-- **Tailwind CSS + shadcn/ui** — UI
-- **OpenAI API** — agente conversacional
-- **WhatsApp Business API** (Meta) — mensajeria
-- **Vercel** — hosting
+## Proceso (simplificado)
+1. Leer estado actual (archivos afectados, no asumir)
+2. Implementar el fix/feature mínimo
+3. `tsc --noEmit` + `npm run build` = 0 errors antes de commit
+4. No mejorar código que no está roto
 
-## Arquitectura
+## Archivos Clave
+- `src/lib/ai-agent.ts` — agente OpenAI con function calling (crear_reserva, buscar_reservas, cancelar_reserva)
+- `src/lib/availability.ts` — chequeo capacidad (ventana ±1h)
+- `src/lib/rate-limit.ts` — Upstash Redis + fallback in-memory (ASYNC)
+- `src/lib/waitlist.ts` — notificación automática de waitlist
+- `src/app/api/whatsapp/webhook/route.ts` — webhook handler principal
+- `prisma/schema.prisma` — 8 modelos + WaitlistEntry
 
-- Monolito fullstack en Next.js
-- Multi-tenancy por `restaurantId` en toda query (desde el dia 1)
-- Webhook WhatsApp en `/api/whatsapp/webhook` (GET verificacion + POST mensajes)
-- Credenciales sensibles encriptadas con AES-256-GCM (key en env var `ENCRYPTION_KEY`)
+## Aprendizajes del codebase
+Ver `LESSONS.md` para errores comunes y cómo evitarlos.
 
-## Modelos Principales
-
-- **Restaurant** — tenant, tiene capacidad, horarios, timezone, KB, credenciales
-- **User** — roles ADMIN / EMPLOYEE, vinculado a un restaurant
-- **Reservation** — dateTime unico, status (PENDING/CONFIRMED/CANCELLED/COMPLETED), source (WHATSAPP/MANUAL)
-- **Conversation** — chat con cliente, status (ACTIVE/COMPLETED/EXPIRED), expira a los 30 min sin actividad
-- **Message** — mensajes individuales de cada conversacion
-
-## Reglas de Desarrollo
-
-- Consultar documentacion actualizada antes de escribir codigo (usar context7)
-- Minimizar errores y alucinaciones: patrones simples y probados
-- Usar OpenAI API (NO Claude/Anthropic) para el agente de IA
-- Diseno moderno y simple
-- Multi-tenancy: SIEMPRE filtrar por `restaurantId` en queries
-
-## Proceso Obligatorio (8 Pasos)
-
-**Los pasos 1-3 son pre-requisitos absolutos — esta PROHIBIDO escribir codigo sin haberlos completado.**
-
-1. **DIAGNOSTICS** — Leer estado actual del sistema (CURRENT_STATE.md, /health, /diagnostics, Sentry). Nunca empezar sin saber el estado.
-2. **REPRODUCIR** — Confirmar el bug/comportamiento en el entorno real (produccion). No fixear sin haber reproducido primero.
-3. **INVESTIGAR** — Invocar el skill correspondiente (systematic-debugging para bugs, brainstorming + writing-plans para features, test-driven-development para codigo nuevo). Lanzar agentes Explore en paralelo. Leer TODOS los archivos afectados ANTES de editar.
-4. **IMPLEMENTAR** — Escribir el fix minimo. Una sola cosa a la vez. No "mejorar" codigo que no esta roto. No bundlear refactoring con el fix.
-5. **DOBLE REVIEW** — Lanzar en paralelo: code-reviewer (bugs, logica, tipos) + security-auditor (si toca auth/queries) + performance-engineer (si toca queries/cache). Corregir TODO antes de continuar.
-6. **VERIFICAR** — `tsc --noEmit` → 0 errors + tests pasan. Si falla algo → volver al paso 4, NO commitear.
-7. **TEST E2E EN PRODUCCION** — Verificar estado post-cambio contra el entorno real (/diagnostics, curl a API, probar todos los canales afectados).
-8. **SCAN PROACTIVO + COMMIT + VERIFY-DEPLOY** — Grep el mismo patron de bug en todo el codebase. Otros archivos tienen el mismo problema? → arreglar. Codigo muerto? → eliminar. Tests cubren el caso? Si no → agregar. Commit + push + verify-deploy.
-
-## Estado del Proyecto (2026-03-18)
-
-**Todos los 10 pasos de implementacion completados.** Proyecto funcional y listo para deploy.
-
-### Pasos Completados
-1. ✅ Setup proyecto (Next.js 14 + Prisma 7.5 + Neon PostgreSQL)
-2. ✅ Autenticacion (NextAuth v5 + Credentials + JWT + bcrypt)
-3. ✅ CRUD reservas + dashboard
-4. ✅ UI del panel con shadcn/ui
-5. ✅ Integracion OpenAI (agente IA gpt-4o-mini + validacion disponibilidad)
-6. ✅ Integracion WhatsApp Business API (webhook + rate limiting)
-7. ✅ Knowledge Base + config restaurante (horarios, capacidad)
-8. ✅ Gestion de equipo (invitar/eliminar empleados)
-9. ✅ Encriptacion AES-256-GCM + seguridad (HMAC webhook, security headers)
-10. ✅ Preparacion deploy (Vercel)
-
-### Estructura de Archivos Clave
-```
-src/
-├── auth.ts, auth.config.ts          # NextAuth v5 config (split para edge)
-├── middleware.ts                     # Proteccion de rutas
-├── lib/
-│   ├── prisma.ts                    # Singleton PrismaClient con PrismaPg adapter
-│   ├── auth.ts                      # getSession, requireSession, requireAdmin
-│   ├── ai-agent.ts                  # Servicio agente OpenAI
-│   ├── availability.ts              # Validacion disponibilidad
-│   ├── whatsapp.ts                  # Envio mensajes WhatsApp
-│   └── encryption.ts                # AES-256-GCM encrypt/decrypt
-├── app/
-│   ├── api/
-│   │   ├── auth/[...nextauth]/      # NextAuth handler
-│   │   ├── register/                # POST registro restaurante+admin
-│   │   ├── reservations/            # GET/POST + [id] PATCH/DELETE
-│   │   ├── agent/test/              # Test endpoint agente IA
-│   │   ├── settings/                # restaurant, knowledge-base, whatsapp, team
-│   │   └── whatsapp/webhook/        # GET verificacion + POST mensajes
-│   ├── dashboard/                   # Lista reservas, form, acciones
-│   ├── settings/                    # Config restaurante, KB, WhatsApp, equipo
-│   ├── login/, register/            # Auth pages
-│   └── page.tsx                     # Landing page
-└── components/ui/                   # shadcn/ui components
-```
-
-### Notas Tecnicas
-- **Prisma 7.5**: usa `prisma.config.ts` para datasource (no en schema.prisma), requiere PrismaPg adapter
-- **NextAuth v5**: config split en auth.config.ts (edge-safe) + auth.ts (Node runtime con Prisma/bcrypt)
-- **Prisma Client**: generado en `src/generated/prisma/`, importar de `@/generated/prisma/client`
-- **Multi-tenancy**: findFirst con restaurantId para ownership checks, luego update/delete con solo { id }
-- **Encriptacion**: formato `iv:authTag:ciphertext` (hex), safeDecrypt() para datos legacy
-
-### Variables de Entorno Requeridas
-- DATABASE_URL, ENCRYPTION_KEY, NEXTAUTH_SECRET, NEXTAUTH_URL
-- OPENAI_API_KEY, WHATSAPP_VERIFY_TOKEN, WHATSAPP_APP_SECRET
-- MERCADOPAGO_ACCESS_TOKEN, MERCADOPAGO_WEBHOOK_SECRET
-
-### MercadoPago — Renovar access token cuando hay 401
-El token `APP_USR-*` que va en `MERCADOPAGO_ACCESS_TOKEN` es de larga duracion pero
-puede expirar o ser revocado. Si el endpoint `/api/settings/billing` devuelve 502 y
-los logs muestran "MercadoPago 401", seguir estos pasos:
-
-1. Ir a https://www.mercadopago.com.ar/developers/panel
-2. Seleccionar la aplicacion del proyecto
-3. En "Credenciales de produccion" copiar el nuevo Access Token
-4. Actualizar `MERCADOPAGO_ACCESS_TOKEN` en el entorno (Vercel env vars o .env local)
-5. Si la app corre en Vercel, hacer redeploy para que tome el nuevo valor
-
-El token de pruebas (TEST-*) solo funciona en el sandbox de MP; en produccion se
-necesita el token de produccion (APP_USR-*). Asegurarse de que ambos tokens
-correspondan al mismo entorno (test vs produccion).
-
-Para el webhook secret (`MERCADOPAGO_WEBHOOK_SECRET`):
-- En el panel de MP, seccion "Webhooks", el secret se genera por aplicacion
-- Si la firma no valida, los logs muestran "[MP webhook] Signature verification failed"
-- Copiar el nuevo secret del panel y actualizar la variable de entorno
-
-## Roadmap Post-MVP
-
-### Fase 1 (Critico — monetizacion)
-1. Planes de pago + billing (Stripe/MercadoPago)
-2. Landing page publica con pricing
-3. Onboarding wizard post-registro
-4. Email transaccional (Resend/SendGrid)
-5. Deploy a Vercel + dominio
-
-### Fase 2 (Retencion)
-6. Reportes/analytics
-7. Notificaciones recordatorio 24h
-8. Calendario visual
-9. Historial de clientes
-10. Export CSV/PDF
-
-### Fase 3 (Diferenciadores)
-11. Widget embebible
-12. Multi-idioma (i18n)
-13. Waitlist
-14. Reviews/feedback post-visita
-15. API publica
-
-## Spec Completa
-
-Ver `docs/superpowers/specs/2026-03-18-reserva-saas-design.md`
+## Env vars requeridas
+DATABASE_URL, ENCRYPTION_KEY, NEXTAUTH_SECRET, OPENAI_API_KEY, WHATSAPP_VERIFY_TOKEN, WHATSAPP_APP_SECRET, MERCADOPAGO_ACCESS_TOKEN, MERCADOPAGO_WEBHOOK_SECRET, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, NEXT_PUBLIC_SENTRY_DSN, RESEND_API_KEY
