@@ -3,17 +3,19 @@ import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth"
 import { createSubscription } from "@/lib/mercadopago"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { billingSchema, parseBody } from "@/lib/schemas"
 
 export async function POST(request: Request) {
   try {
     const blocked = await applyRateLimit(rateLimiters.billing, request)
     if (blocked) return blocked
     const session = await requireAdmin()
-    const { plan } = await request.json()
-
-    if (!plan || !["MONTHLY", "YEARLY"].includes(plan)) {
-      return NextResponse.json({ error: "Plan invalido" }, { status: 400 })
+    const body = await request.json()
+    const parsed = parseBody(billingSchema, body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
     }
+    const { plan } = parsed.data
 
     const subscription = await prisma.subscription.findUnique({
       where: { restaurantId: session.restaurantId },

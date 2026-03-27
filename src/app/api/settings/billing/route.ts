@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createSubscription } from "@/lib/mercadopago"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { billingSchema, parseBody } from "@/lib/schemas"
 
 export async function GET(request: Request) {
   try {
@@ -40,11 +41,11 @@ export async function POST(request: Request) {
     if (blocked) return blocked
     const session = await requireAdmin()
     const body = await request.json()
-    const { plan } = body
-
-    if (plan !== "MONTHLY" && plan !== "YEARLY") {
-      return NextResponse.json({ error: "Plan invalido" }, { status: 400 })
+    const parsed = parseBody(billingSchema, body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
     }
+    const { plan } = parsed.data
 
     // Prevent duplicate subscriptions
     const existing = await prisma.subscription.findUnique({
