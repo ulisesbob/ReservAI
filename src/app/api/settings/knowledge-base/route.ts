@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { knowledgeBaseSchema, parseBody } from "@/lib/schemas"
 
 export async function PATCH(request: Request) {
   try {
@@ -10,22 +11,12 @@ export async function PATCH(request: Request) {
     const session = await requireAdmin()
 
     const body = await request.json()
-    const { knowledgeBase } = body
-
-    if (typeof knowledgeBase !== "string") {
-      return NextResponse.json(
-        { error: "El contenido es obligatorio" },
-        { status: 400 }
-      )
+    const parsed = parseBody(knowledgeBaseSchema, body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
     }
 
-    // Limit to 50KB — this text gets injected into every AI prompt
-    if (knowledgeBase.length > 50000) {
-      return NextResponse.json(
-        { error: "El contenido es demasiado largo (máximo 50.000 caracteres)" },
-        { status: 400 }
-      )
-    }
+    const { knowledgeBase } = parsed.data
 
     await prisma.restaurant.update({
       where: { id: session.restaurantId },
