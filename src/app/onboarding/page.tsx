@@ -7,7 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Store, Clock, Check } from "lucide-react"
+import { Store, Clock, Check, MessageSquare, Brain } from "lucide-react"
+import { StepWhatsApp } from "@/components/onboarding/step-whatsapp"
+import { StepKnowledge } from "@/components/onboarding/step-knowledge"
+import { StepConfirmation } from "@/components/onboarding/step-confirmation"
 
 const DAYS = [
   { key: "lunes", label: "Lunes" },
@@ -34,7 +37,9 @@ type OperatingHours = Record<string, { open: string; close: string } | null>
 const STEPS = [
   { number: 1, label: "Datos", icon: Store },
   { number: 2, label: "Horarios", icon: Clock },
-  { number: 3, label: "Confirmar", icon: Check },
+  { number: 3, label: "WhatsApp", icon: MessageSquare },
+  { number: 4, label: "Bot", icon: Brain },
+  { number: 5, label: "Confirmar", icon: Check },
 ]
 
 export default function OnboardingPage() {
@@ -50,6 +55,13 @@ export default function OnboardingPage() {
   const [maxCapacity, setMaxCapacity] = useState("50")
   const [maxPartySize, setMaxPartySize] = useState("20")
 
+  // Steps 3-4
+  const [whatsappPhoneId, setWhatsappPhoneId] = useState("")
+  const [whatsappToken, setWhatsappToken] = useState("")
+  const [openaiApiKey, setOpenaiApiKey] = useState("")
+  const [knowledgeBase, setKnowledgeBase] = useState("")
+  const [slug, setSlug] = useState("")
+
   // Fetch current restaurant data on mount
   useEffect(() => {
     fetch("/api/settings/restaurant")
@@ -59,6 +71,7 @@ export default function OnboardingPage() {
         if (data.timezone) setTimezone(data.timezone)
         if (data.maxCapacity) setMaxCapacity(String(data.maxCapacity))
         if (data.maxPartySize) setMaxPartySize(String(data.maxPartySize))
+        if (data.slug) setSlug(data.slug)
         setReady(true)
       })
       .catch(() => setReady(true))
@@ -87,6 +100,12 @@ export default function OnboardingPage() {
     }))
   }
 
+  function handleWhatsAppChange(field: string, value: string) {
+    if (field === "whatsappPhoneId") setWhatsappPhoneId(value)
+    else if (field === "whatsappToken") setWhatsappToken(value)
+    else if (field === "openaiApiKey") setOpenaiApiKey(value)
+  }
+
   async function handleFinish() {
     setLoading(true)
     setError("")
@@ -113,6 +132,34 @@ export default function OnboardingPage() {
         const data = await res.json()
         setError(data.error || "Error al guardar")
         return
+      }
+
+      // Save WhatsApp settings if provided
+      if (whatsappPhoneId.trim() && whatsappToken.trim()) {
+        const waRes = await fetch("/api/settings/whatsapp", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ whatsappPhoneId, whatsappToken, openaiApiKey }),
+        })
+        if (!waRes.ok) {
+          const waData = await waRes.json()
+          setError(waData.error || "Error al guardar WhatsApp")
+          return
+        }
+      }
+
+      // Save knowledge base if provided
+      if (knowledgeBase.trim()) {
+        const kbRes = await fetch("/api/settings/knowledge-base", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ knowledgeBase }),
+        })
+        if (!kbRes.ok) {
+          const kbData = await kbRes.json()
+          setError(kbData.error || "Error al guardar base de conocimiento")
+          return
+        }
       }
 
       router.push("/dashboard")
@@ -178,12 +225,16 @@ export default function OnboardingPage() {
             <CardTitle className="text-xl font-semibold tracking-tight">
               {step === 1 && "Datos del restaurante"}
               {step === 2 && "Horarios de atencion"}
-              {step === 3 && "Todo listo!"}
+              {step === 3 && "WhatsApp Bot"}
+              {step === 4 && "Base de conocimiento"}
+              {step === 5 && "Todo listo!"}
             </CardTitle>
             <CardDescription className="mt-1">
               {step === 1 && "Contanos sobre tu restaurante para empezar."}
               {step === 2 && "Configura los dias y horarios de atencion."}
-              {step === 3 && "Revisa la configuracion antes de continuar."}
+              {step === 3 && "Conecta tu bot de WhatsApp Business."}
+              {step === 4 && "Agrega informacion para que el bot responda mejor."}
+              {step === 5 && "Revisa la configuracion antes de continuar."}
             </CardDescription>
           </CardHeader>
           <CardContent className="px-8 pb-8">
@@ -291,40 +342,42 @@ export default function OnboardingPage() {
             )}
 
             {step === 3 && (
-              <div className="space-y-5">
-                <div className="rounded-xl bg-muted/60 border border-border/50 p-5 space-y-3">
-                  <div className="flex justify-between items-center py-1.5 border-b border-border/40">
-                    <span className="text-sm text-muted-foreground">Restaurante</span>
-                    <span className="text-sm font-medium">{restaurantName}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-border/40">
-                    <span className="text-sm text-muted-foreground">Zona horaria</span>
-                    <span className="text-sm font-medium">{timezone.split("/").pop()?.replace(/_/g, " ")}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-border/40">
-                    <span className="text-sm text-muted-foreground">Capacidad</span>
-                    <span className="text-sm font-medium">{maxCapacity} personas</span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-border/40">
-                    <span className="text-sm text-muted-foreground">Max por reserva</span>
-                    <span className="text-sm font-medium">{maxPartySize} personas</span>
-                  </div>
-                  <div className="flex justify-between items-start py-1.5">
-                    <span className="text-sm text-muted-foreground">Dias abiertos</span>
-                    <span className="text-sm font-medium text-right max-w-[60%]">
-                      {openDays.length > 0
-                        ? openDays.map((k) => DAYS.find((d) => d.key === k)?.label).join(", ")
-                        : "Ninguno"}
-                    </span>
-                  </div>
-                </div>
-                <Button className="w-full h-11 text-sm font-medium" onClick={handleFinish} disabled={loading}>
-                  {loading ? "Guardando..." : "Ir al dashboard"}
-                </Button>
-                <Button variant="outline" className="w-full h-11" onClick={() => setStep(2)}>
-                  Modificar
-                </Button>
-              </div>
+              <StepWhatsApp
+                whatsappPhoneId={whatsappPhoneId}
+                whatsappToken={whatsappToken}
+                openaiApiKey={openaiApiKey}
+                onChange={handleWhatsAppChange}
+                onNext={() => setStep(4)}
+                onBack={() => setStep(2)}
+                onSkip={() => setStep(4)}
+              />
+            )}
+
+            {step === 4 && (
+              <StepKnowledge
+                knowledgeBase={knowledgeBase}
+                restaurantName={restaurantName}
+                onChange={setKnowledgeBase}
+                onNext={() => setStep(5)}
+                onBack={() => setStep(3)}
+                onSkip={() => setStep(5)}
+              />
+            )}
+
+            {step === 5 && (
+              <StepConfirmation
+                restaurantName={restaurantName}
+                slug={slug}
+                timezone={timezone}
+                maxCapacity={maxCapacity}
+                maxPartySize={maxPartySize}
+                openDays={openDays.map((k) => DAYS.find((d) => d.key === k)?.label ?? k)}
+                hasWhatsApp={!!(whatsappPhoneId.trim() && whatsappToken.trim())}
+                hasKnowledgeBase={!!knowledgeBase.trim()}
+                onFinish={handleFinish}
+                onBack={() => setStep(4)}
+                loading={loading}
+              />
             )}
           </CardContent>
         </Card>
