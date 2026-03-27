@@ -6,6 +6,7 @@ export function validateEnv() {
   const required = [
     "DATABASE_URL",
     "NEXTAUTH_SECRET",
+    "NEXTAUTH_URL",
     "ENCRYPTION_KEY",
   ]
 

@@ -12,22 +12,17 @@ export async function GET() {
     checks.database = "error"
   }
 
-  // Environment variables
-  checks.env = [
-    "DATABASE_URL",
-    "NEXTAUTH_SECRET",
-    "ENCRYPTION_KEY",
-  ].every((v) => !!process.env[v])
-    ? "ok"
-    : "error"
+  // Environment variables — check presence without exposing names
+  const envOk = ["DATABASE_URL", "NEXTAUTH_SECRET", "ENCRYPTION_KEY"].every(
+    (v) => !!process.env[v]
+  )
 
-  const allOk = Object.values(checks).every((v) => v === "ok")
+  const allOk = checks.database === "ok" && envOk
 
   return NextResponse.json(
     {
       status: allOk ? "healthy" : "degraded",
       timestamp: new Date().toISOString(),
-      checks,
     },
     { status: allOk ? 200 : 503 }
   )
