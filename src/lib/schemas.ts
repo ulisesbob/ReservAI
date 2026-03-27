@@ -70,7 +70,7 @@ export const billingSchema = z.object({
 
 export const depositSettingsSchema = z.object({
   depositEnabled: z.boolean(),
-  depositAmount: z.number().int().min(0, "El monto debe ser mayor o igual a 0"),
+  depositAmount: z.number().int().min(0, "El monto debe ser mayor o igual a 0").max(1000000, "El monto máximo es $1.000.000"),
   depositMinPartySize: z.number().int().min(1, "Minimo 1 persona"),
 })
 
