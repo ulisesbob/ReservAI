@@ -160,9 +160,13 @@ describe("isValidTimezone", () => {
 // ─── VALID_STATUSES ───────────────────────────────────────────────────────
 
 describe("VALID_STATUSES", () => {
-  test("contains exactly the 5 expected statuses", () => {
-    const expected = ["PENDING", "PENDING_DEPOSIT", "CONFIRMED", "CANCELLED", "COMPLETED"]
+  test("contains exactly the 6 expected statuses", () => {
+    const expected = ["PENDING", "PENDING_DEPOSIT", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]
     assert.deepStrictEqual([...VALID_STATUSES], expected)
+  })
+
+  test("includes NO_SHOW", () => {
+    assert.ok((VALID_STATUSES as readonly string[]).includes("NO_SHOW"))
   })
 
   test("each status is a non-empty string", () => {

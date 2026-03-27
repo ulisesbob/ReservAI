@@ -3,29 +3,7 @@
 
 import { test, describe } from "node:test"
 import assert from "node:assert/strict"
-
-// Mirror of parseToolCallArgs from src/lib/ai-agent.ts
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseToolCallArgs(argsJson: string, maxPartySize: number): any {
-  try {
-    const args = JSON.parse(argsJson)
-    const nombre = String(args.nombre || '').slice(0, 100)
-    const fecha = String(args.fecha || '')
-    const hora = String(args.hora || '')
-    const personas = Number(args.personas)
-    const contacto = String(args.contacto || '').slice(0, 200)
-    if (!nombre || !fecha || !hora || !contacto) return null
-    if (!Number.isInteger(personas) || personas < 1 || personas > maxPartySize) return null
-    if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(fecha)) return null
-    if (!/^[0-9]{2}:[0-9]{2}$/.test(hora)) return null
-    return { nombre, fecha, hora, personas, contacto }
-  } catch { return null }
-}
-
-function buildConfirmationText(r: any): string {
-  if (!r) return 'Hubo un problema.'
-  return 'Listo, ' + r.nombre + '! Para ' + r.personas + ' el ' + r.fecha + ' a las ' + r.hora + '.'
-}
+import { parseToolCallArgs, buildConfirmationText } from "../../lib/ai-agent.ts"
 
 const MAX = 20
 

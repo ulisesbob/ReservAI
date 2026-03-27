@@ -4,6 +4,8 @@ import { requireSession } from "@/lib/auth"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 import { reservationUpdateSchema, parseBody } from "@/lib/schemas"
 import { notifyNextInWaitlist } from "@/lib/waitlist"
+import { validateTransition } from "@/lib/status-transitions"
+import type { ReservationStatus } from "@prisma/client"
 
 export async function PATCH(
   request: Request,
@@ -94,7 +96,22 @@ export async function PATCH(
       }
     }
     if (status !== undefined) {
-      data.status = status // Already validated by Zod schema
+      // PENDING_DEPOSIT is set by the payment system only — reject client attempts.
+      if (status === "PENDING_DEPOSIT") {
+        return NextResponse.json(
+          { error: "El estado PENDING_DEPOSIT solo puede ser asignado por el sistema de pagos." },
+          { status: 400 }
+        )
+      }
+      try {
+        validateTransition(existing.status as ReservationStatus, status as ReservationStatus)
+      } catch (err) {
+        return NextResponse.json(
+          { error: err instanceof Error ? err.message : "Transición de estado inválida." },
+          { status: 400 }
+        )
+      }
+      data.status = status
     }
 
     // findFirst above already verified tenant ownership

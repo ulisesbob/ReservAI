@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { faqs } from "@/data/faqs";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 
@@ -99,64 +98,6 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "ReservasAI",
-    url: siteUrl,
-    logo: `${siteUrl}/favicon.ico`,
-    description,
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "customer service",
-      availableLanguage: ["Spanish"],
-    },
-  };
-
-  const softwareSchema = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "ReservasAI",
-    applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Restaurant Management",
-    operatingSystem: "Web",
-    url: siteUrl,
-    description,
-    inLanguage: "es",
-    offers: {
-      "@type": "Offer",
-      price: "25000",
-      priceCurrency: "ARS",
-      availability: "https://schema.org/InStock",
-      url: `${siteUrl}/register`,
-      priceValidUntil: new Date(new Date().getFullYear() + 1, 0, 1).toISOString().split("T")[0],
-    },
-    creator: {
-      "@type": "Organization",
-      name: "ReservasAI",
-      url: siteUrl,
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      ratingCount: "45",
-      bestRating: "5",
-      worstRating: "1",
-    },
-  };
-
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    })),
-  };
 
   return (
     <html lang={locale} className={cn("font-sans", geistSans.variable)}>
@@ -166,21 +107,6 @@ export default async function RootLayout({
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-background focus:px-4 focus:py-2 focus:rounded-md focus:shadow-lg focus:text-foreground">
           Saltar al contenido
         </a>
-        <script
-          id="reservasai-org-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <script
-          id="reservasai-software-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
-        />
-        <script
-          id="reservasai-faq-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

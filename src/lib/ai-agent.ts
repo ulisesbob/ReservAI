@@ -246,7 +246,7 @@ export async function processMessage(
 
 // ─── Parse function call arguments ─────────────────────────────────────────
 
-function parseToolCallArgs(argsJson: string, maxPartySize: number): ReservationData | null {
+export function parseToolCallArgs(argsJson: string, maxPartySize: number): ReservationData | null {
   try {
     const args = JSON.parse(argsJson)
 
@@ -270,7 +270,7 @@ function parseToolCallArgs(argsJson: string, maxPartySize: number): ReservationD
 
 // ─── Build confirmation text ───────────────────────────────────────────────
 
-function buildConfirmationText(reservation: ReservationData | null): string {
+export function buildConfirmationText(reservation: ReservationData | null): string {
   if (!reservation) {
     return "Hubo un problema al procesar la reserva. ¿Podés repetir los datos?"
   }
