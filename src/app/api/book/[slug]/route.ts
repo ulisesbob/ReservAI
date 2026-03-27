@@ -145,7 +145,14 @@ export async function POST(
     })
 
     if (!availability.available) {
-      return NextResponse.json({ error: availability.reason || "No hay disponibilidad" }, { status: 409 })
+      return NextResponse.json(
+        {
+          error: availability.reason || "No hay disponibilidad",
+          waitlistAvailable: true,
+          restaurantId: restaurant.id,
+        },
+        { status: 409 }
+      )
     }
 
     const reservation = await prisma.reservation.create({
