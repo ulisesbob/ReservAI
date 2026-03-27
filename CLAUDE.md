@@ -16,7 +16,13 @@ SaaS multi-tenant de reservas para restaurantes. Clientes reservan por WhatsApp 
 5. **Zod para validación**: usar schemas de `src/lib/schemas.ts` con `parseBody()`.
 6. **Context7 antes de código**: consultar docs actualizadas antes de escribir.
 
-## Proceso (simplificado)
+## Workflow
+- Plan mode para tareas de 3+ pasos. Si algo sale mal, PARAR y re-planificar.
+- Bug reports: arreglar directo sin preguntar. Encontrar root cause, no fix temporal.
+- Nunca marcar tarea completa sin probar que funciona.
+- Después de cada corrección → actualizar LESSONS.md.
+
+## Proceso
 1. Leer estado actual (archivos afectados, no asumir)
 2. Implementar el fix/feature mínimo
 3. `tsc --noEmit` + `npm run build` = 0 errors antes de commit
