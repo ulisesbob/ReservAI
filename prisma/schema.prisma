@@ -97,7 +97,7 @@ model Restaurant {
   onboardingStep      Int      @default(0)
   escalationPhone     String?
   depositEnabled      Boolean  @default(false)
-  depositAmount       Int      @default(0)
+  depositAmount       Decimal  @default(0) @db.Decimal(12, 2)
   depositMinPartySize Int      @default(6)
   createdAt           DateTime @default(now())
 
@@ -134,7 +134,7 @@ model Reservation {
   status               ReservationStatus @default(PENDING)
   source               ReservationSource @default(MANUAL)
   depositStatus        DepositStatus     @default(NONE)
-  depositAmount        Int?
+  depositAmount        Decimal?          @db.Decimal(12, 2)
   mercadoPagoDepositId String?           @unique
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt

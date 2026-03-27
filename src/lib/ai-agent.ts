@@ -198,16 +198,29 @@ export async function processMessage(
       }
 
       if (fnName === "buscar_reservas" || fnName === "cancelar_reserva") {
+        let parsedArgs: Record<string, unknown> = {}
+        try {
+          parsedArgs = JSON.parse(fnArgs)
+        } catch (parseError) {
+          console.error(`Failed to parse ${fnName} arguments:`, parseError, "raw:", fnArgs)
+          return { text: "Hubo un problema procesando tu solicitud. Por favor intenta de nuevo.", reservation: null }
+        }
         const responseText = message.content || ""
         return {
           text: responseText,
           reservation: null,
-          toolCall: { name: fnName, arguments: JSON.parse(fnArgs) },
+          toolCall: { name: fnName, arguments: parsedArgs },
         }
       }
 
       if (fnName === "escalar_a_humano") {
-        const args = JSON.parse(fnArgs) as { motivo: string; resumen: string }
+        let args: { motivo: string; resumen: string }
+        try {
+          args = JSON.parse(fnArgs) as { motivo: string; resumen: string }
+        } catch (parseError) {
+          console.error("Failed to parse escalar_a_humano arguments:", parseError, "raw:", fnArgs)
+          return { text: "Hubo un problema procesando tu solicitud. Por favor intenta de nuevo.", reservation: null }
+        }
         return {
           text: "Te estoy conectando con el equipo del restaurante. Te van a responder a la brevedad.",
           reservation: null,

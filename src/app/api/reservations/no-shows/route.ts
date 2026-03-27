@@ -47,50 +47,37 @@ export async function GET(request: Request) {
       prisma.reservation.count({ where }),
     ])
 
-    // Compute no-show count per customer (across all time)
-    const phones = Array.from(new Set(noShows.map((r) => r.customerPhone)))
-    const noShowCounts: Record<string, number> = {}
-    if (phones.length > 0) {
-      const counts = await prisma.reservation.groupBy({
+    // Single groupBy fetches per-customer no-show counts for the entire restaurant.
+    // From this one result we derive both the page-level counts and repeat offenders,
+    // eliminating the redundant second groupBy and the duplicate totalNoShows count.
+    const [allCounts, totalCompleted] = await Promise.all([
+      prisma.reservation.groupBy({
         by: ["customerPhone"],
+        where: { restaurantId: session.restaurantId, status: NO_SHOW_STATUS },
+        _count: { customerPhone: true },
+      }),
+      prisma.reservation.count({
         where: {
           restaurantId: session.restaurantId,
-          status: NO_SHOW_STATUS,
-          customerPhone: { in: phones },
+          status: { in: ["COMPLETED", NO_SHOW_STATUS] },
         },
-        _count: { customerPhone: true },
-      })
-      for (const row of counts) {
-        const countVal = (row._count as Record<string, number>).customerPhone ?? 0
-        noShowCounts[row.customerPhone] = countVal
+      }),
+    ])
+
+    const noShowCounts: Record<string, number> = {}
+    const flaggedPhones = new Set<string>()
+    for (const row of allCounts) {
+      const countVal = (row._count as Record<string, number>).customerPhone ?? 0
+      noShowCounts[row.customerPhone] = countVal
+      if (countVal >= NO_SHOW_FLAG_THRESHOLD) {
+        flaggedPhones.add(row.customerPhone)
       }
     }
 
-    // Stats
-    const totalNoShows = await prisma.reservation.count({
-      where: { restaurantId: session.restaurantId, status: NO_SHOW_STATUS },
-    })
-    const totalCompleted = await prisma.reservation.count({
-      where: {
-        restaurantId: session.restaurantId,
-        status: { in: ["COMPLETED", NO_SHOW_STATUS] },
-      },
-    })
+    // `total` from the paginated count IS the totalNoShows for this restaurant.
     const noShowRate = totalCompleted > 0
-      ? Math.round((totalNoShows / totalCompleted) * 100)
+      ? Math.round((total / totalCompleted) * 100)
       : 0
-
-    // Flag repeat offenders (3+ no-shows)
-    const repeatOffenders = await prisma.reservation.groupBy({
-      by: ["customerPhone"],
-      where: {
-        restaurantId: session.restaurantId,
-        status: NO_SHOW_STATUS,
-      },
-      _count: { customerPhone: true },
-      having: { customerPhone: { _count: { gte: NO_SHOW_FLAG_THRESHOLD } } },
-    })
-    const flaggedPhones = new Set(repeatOffenders.map((r) => r.customerPhone))
 
     const enriched = noShows.map((r) => ({
       ...r,
@@ -101,7 +88,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       data: enriched,
       stats: {
-        totalNoShows,
+        totalNoShows: total,
         noShowRate,
         flaggedCustomers: flaggedPhones.size,
       },

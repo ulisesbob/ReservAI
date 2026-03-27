@@ -50,7 +50,12 @@ export const whatsappSettingsSchema = z.object({
 })
 
 export const escalationSettingsSchema = z.object({
-  escalationPhone: z.string().max(30, "Teléfono demasiado largo").nullish().or(z.literal("")),
+  escalationPhone: z
+    .string()
+    .max(30, "Teléfono demasiado largo")
+    .regex(/^\+?[1-9]\d{6,14}$/, "Formato de teléfono inválido")
+    .nullish()
+    .or(z.literal("")),
 })
 
 export const accountUpdateSchema = z.object({
@@ -67,6 +72,10 @@ export const depositSettingsSchema = z.object({
   depositEnabled: z.boolean(),
   depositAmount: z.number().int().min(0, "El monto debe ser mayor o igual a 0"),
   depositMinPartySize: z.number().int().min(1, "Minimo 1 persona"),
+})
+
+export const depositRequestSchema = z.object({
+  reservationId: z.string().min(1, "Reservation ID es requerido"),
 })
 
 // ─── Team schemas ──────────────────────────────────────────────────────────

@@ -364,7 +364,7 @@ async function processIncomingMessage(
         where: {
           restaurantId: restaurant.id,
           customerPhone: { contains: String(args.telefono || customerPhone) },
-          status: { in: ["CONFIRMED", "PENDING"] },
+          status: { in: ["CONFIRMED", "PENDING", "PENDING_DEPOSIT"] },
           dateTime: { gte: new Date() },
         },
         orderBy: { dateTime: "asc" },
@@ -482,12 +482,22 @@ async function processIncomingMessage(
           `*Cliente:* ${customerPhone}\n` +
           `*Resumen:* ${resumen}\n\n` +
           `Ingresa al dashboard para ver el historial completo.`
+        // NOTE: WhatsApp Business API requires prior interaction from the recipient
+        // or an approved message template to send outbound messages. If this fails
+        // with a 403/131047 error, the owner must message the bot first, or an
+        // approved template must be configured in Meta Business Manager.
         sendWhatsAppMessage(
           restaurant.whatsappPhoneId,
           decryptedToken,
           ownerEscalationPhone,
           ownerMessage
-        ).catch((err) => console.error("Escalation owner notification error:", err))
+        ).catch((err) =>
+          console.warn(
+            `[WARN] Escalation WhatsApp notification failed for restaurant ${restaurant.id} ` +
+            `(ownerPhone=${ownerEscalationPhone}, motivo=${motivo}):`,
+            err
+          )
+        )
       }
 
       // responseText was already set by the agent: "Te estoy conectando con el equipo..."
