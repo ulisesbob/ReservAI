@@ -2,20 +2,22 @@ import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { encrypt } from "@/lib/encryption"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { whatsappSettingsSchema, parseBody } from "@/lib/schemas"
 
 export async function PATCH(request: Request) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.settings, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
 
     const body = await request.json()
-    const { whatsappPhoneId, whatsappToken, openaiApiKey } = body
-
-    if (typeof whatsappPhoneId !== "string" || typeof whatsappToken !== "string") {
-      return NextResponse.json(
-        { error: "Datos invalidos" },
-        { status: 400 }
-      )
+    const parsed = parseBody(whatsappSettingsSchema, body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
     }
+
+    const { whatsappPhoneId, whatsappToken, openaiApiKey } = parsed.data
 
     // Build update data — only update tokens if new values were provided
     const updateData: { whatsappPhoneId: string | null; whatsappToken?: string | null; openaiApiKey?: string | null } = {
