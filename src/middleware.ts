@@ -7,6 +7,6 @@ export default middleware
 
 export const config = {
   matcher: [
-    "/((?!api/register|api/auth|api/book|api/whatsapp/webhook|api/webhooks|api/cron|book|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/register|api/auth|api/book|api/waitlist|api/whatsapp/webhook|api/webhooks|api/cron|book|_next/static|_next/image|favicon.ico).*)",
   ],
 }
