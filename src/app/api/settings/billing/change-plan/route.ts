@@ -25,8 +25,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ya estas en este plan" }, { status: 400 })
     }
 
-    const origin = request.headers.get("origin") || process.env.NEXTAUTH_URL || ""
-    const backUrl = `${origin}/settings/billing`
+    const trustedOrigin = process.env.NEXTAUTH_URL || ""
+    const backUrl = `${trustedOrigin}/settings/billing`
 
     let mpSubscription
     try {

@@ -61,8 +61,8 @@ export async function POST(request: Request) {
       )
     }
 
-    const origin = request.headers.get("origin") || process.env.NEXTAUTH_URL || ""
-    const backUrl = `${origin}/settings/billing`
+    const trustedOrigin = process.env.NEXTAUTH_URL || ""
+    const backUrl = `${trustedOrigin}/settings/billing`
 
     let mpSubscription
     try {
