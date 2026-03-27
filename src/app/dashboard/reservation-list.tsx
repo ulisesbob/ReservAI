@@ -26,6 +26,8 @@ type Reservation = {
   partySize: number
   status: string
   source: string
+  depositStatus: string | null
+  depositAmount: number | null
 }
 
 type PaginationInfo = {
@@ -37,16 +39,34 @@ type PaginationInfo = {
 
 const STATUS_CLASSES: Record<string, string> = {
   PENDING: "border-yellow-500 text-yellow-700 bg-yellow-50",
+  PENDING_DEPOSIT: "border-amber-500 text-amber-700 bg-amber-50",
   CONFIRMED: "border-transparent bg-green-100 text-green-800",
   CANCELLED: "border-transparent bg-red-100 text-red-800",
   COMPLETED: "border-transparent bg-gray-100 text-gray-700",
+  NO_SHOW: "border-transparent bg-orange-100 text-orange-800",
 }
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendiente",
+  PENDING_DEPOSIT: "Esperando sena",
   CONFIRMED: "Confirmada",
   CANCELLED: "Cancelada",
   COMPLETED: "Completada",
+  NO_SHOW: "No asistio",
+}
+
+const DEPOSIT_STATUS_LABELS: Record<string, string> = {
+  NONE: "",
+  PENDING: "Sena pendiente",
+  PAID: "Sena pagada",
+  REFUNDED: "Sena reembolsada",
+}
+
+const DEPOSIT_STATUS_CLASSES: Record<string, string> = {
+  NONE: "",
+  PENDING: "border-amber-300 text-amber-700 bg-amber-50",
+  PAID: "border-emerald-300 text-emerald-700 bg-emerald-50",
+  REFUNDED: "border-gray-300 text-gray-600 bg-gray-50",
 }
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -164,6 +184,7 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
           <SelectContent>
             <SelectItem value="ALL">Todas</SelectItem>
             <SelectItem value="PENDING">Pendientes</SelectItem>
+            <SelectItem value="PENDING_DEPOSIT">Esperando sena</SelectItem>
             <SelectItem value="CONFIRMED">Confirmadas</SelectItem>
             <SelectItem value="CANCELLED">Canceladas</SelectItem>
             <SelectItem value="COMPLETED">Completadas</SelectItem>
@@ -225,6 +246,7 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Personas</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Sena</TableHead>
                   <TableHead>Origen</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
@@ -243,6 +265,22 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
                       <Badge className={STATUS_CLASSES[r.status] || ""}>
                         {STATUS_LABELS[r.status] || r.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {r.depositStatus && r.depositStatus !== "NONE" ? (
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="outline" className={DEPOSIT_STATUS_CLASSES[r.depositStatus] || ""}>
+                            {DEPOSIT_STATUS_LABELS[r.depositStatus] || r.depositStatus}
+                          </Badge>
+                          {r.depositAmount && (
+                            <span className="text-xs text-muted-foreground">
+                              ${r.depositAmount.toLocaleString("es-AR")}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={SOURCE_CLASSES[r.source] || ""}>

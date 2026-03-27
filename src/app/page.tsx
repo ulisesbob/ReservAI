@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation"
+import type { Metadata } from "next"
 import Link from "next/link"
 import { auth } from "@/auth"
 import { Button } from "@/components/ui/button"
@@ -13,10 +14,21 @@ import {
   Clock,
   CheckCircle2,
   ShieldCheck,
+  Star,
+  TrendingUp,
 } from "lucide-react"
 import { PricingSection } from "@/components/pricing-section"
 import { LandingNav } from "./landing-nav"
 import { faqs } from "@/data/faqs"
+
+export const metadata: Metadata = {
+  title: "ReservasAI | Reservas por WhatsApp con IA para Restaurantes",
+  description:
+    "Automatiza las reservas de tu restaurante con un bot de IA en WhatsApp. Tus clientes reservan 24/7 en segundos, sin apps ni formularios. Probalo gratis 14 dias.",
+  alternates: {
+    canonical: "https://www.reservasai.com",
+  },
+}
 
 const features = [
   {
@@ -72,7 +84,7 @@ export default async function Home() {
       {/* ============================================ */}
       {/* HERO — the star of the page                  */}
       {/* ============================================ */}
-      <section className="relative pt-28 pb-28 sm:pt-36 sm:pb-32 px-6 overflow-hidden gradient-hero">
+      <section id="main-content" className="relative pt-28 pb-28 sm:pt-36 sm:pb-32 px-6 overflow-hidden gradient-hero">
         {/* Decorative blobs */}
         <div className="absolute top-10 right-0 w-[500px] h-[500px] bg-emerald-400/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-400/10 rounded-full blur-3xl" />
@@ -81,21 +93,36 @@ export default async function Home() {
         <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           {/* Left — copy */}
           <div>
+            {/* Social proof badge */}
+            <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-full px-4 py-1.5 mb-6">
+              <div className="flex -space-x-1">
+                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+              </div>
+              <span className="text-xs font-medium text-emerald-700">Usado por restaurantes en Argentina</span>
+            </div>
+
             <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-[1.05]">
-              Reservas por WhatsApp
-              <span className="text-gradient"> con IA</span>
+              Tu restaurante recibe reservas
+              <span className="text-gradient"> por WhatsApp con IA</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-lg leading-relaxed">
-              Los comensales reservan por WhatsApp con nuestra IA — 24/7, sin esperas, sin apps que descargar.
-              Vos solo recibís la confirmación y empezás el turno con todo organizado.
+              Un bot de inteligencia artificial atiende tu WhatsApp 24/7, toma reservas en segundos y organiza tu turno. Sin apps, sin formularios, sin llamadas perdidas.
             </p>
-            <ul className="mt-4 space-y-2 text-muted-foreground max-w-lg text-base sm:text-lg">
+            <ul className="mt-5 space-y-2.5 text-muted-foreground max-w-lg text-base sm:text-lg">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
                 <span>El comensal reserva como ya habla: por WhatsApp.</span>
               </li>
               <li className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-indigo-500 flex-shrink-0" />
+                <TrendingUp className="h-5 w-5 text-indigo-500 flex-shrink-0" />
+                <span>-35% de no-shows con recordatorios automaticos.</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-amber-500 flex-shrink-0" />
                 <span>Cero caos en el turno. Todo organizado de antes.</span>
               </li>
             </ul>
@@ -106,7 +133,7 @@ export default async function Home() {
                 className="h-13 text-base px-8 rounded-xl font-semibold gradient-cta text-white shadow-lg hover:shadow-xl transition-shadow glow-green border-0"
               >
                 <Link href="/register">
-                  Probá 14 días gratis
+                  Empeza gratis — 14 dias de prueba
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -116,16 +143,16 @@ export default async function Home() {
                 size="lg"
                 className="h-13 text-base px-8 text-muted-foreground"
               >
-                <Link href="#como-funciona">Ver cómo funciona</Link>
+                <Link href="#como-funciona">Ver como funciona</Link>
               </Button>
             </div>
             <p className="mt-5 text-sm text-muted-foreground/70">
-              14 días gratis &middot; Sin tarjeta de crédito &middot; Cancelá cuando quieras
+              Sin tarjeta de credito &middot; Setup en 10 minutos &middot; Cancela cuando quieras
             </p>
           </div>
 
           {/* Right — WhatsApp chat mockup */}
-          <div className="hidden lg:block">
+          <div className="hidden md:block" aria-hidden="true">
             <div className="relative">
               {/* Phone frame */}
               <div className="bg-gradient-to-b from-white/80 to-white/40 rounded-3xl p-6 border border-emerald-100 shadow-2xl max-w-sm ml-auto glow-green">
@@ -218,39 +245,42 @@ export default async function Home() {
       </section>
 
       {/* ============================================ */}
-      {/* SOCIAL PROOF REAL                            */}
+      {/* SOCIAL PROOF — RESULTS                       */}
       {/* ============================================ */}
-      <section className="py-20 px-6 bg-background">
+      <section className="py-20 px-6 bg-background" aria-labelledby="testimonials-heading">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Lo que dicen nuestros clientes
+          <h2 id="testimonials-heading" className="text-3xl sm:text-4xl font-bold tracking-tight">
+            Resultados reales de restaurantes reales
           </h2>
           <p className="mt-3 text-center text-muted-foreground max-w-lg mx-auto">
-            Restaurantes reales, resultados concretos.
+            Estos numeros vienen de restaurantes que ya usan ReservasAI en su dia a dia.
           </p>
 
           <div className="mt-16 grid md:grid-cols-3 gap-10">
-            <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-emerald-600">-35%</p>
-              <p className="mt-2 text-muted-foreground">Menos no-shows con recordatorios</p>
-              <p className="mt-6 font-semibold text-lg">&ldquo;Antes perdíamos 6 o 7 mesas por noche por gente que no venía. Con los recordatorios automáticos bajó muchísimo.&rdquo;
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">— Carlos M., Restaurante El Fogón</p>
-            </div>
-            <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-indigo-600">+25%</p>
-              <p className="mt-2 text-muted-foreground">Más reservas fuera de horario</p>
-              <p className="mt-6 font-semibold text-lg">&ldquo;La mayoría de nuestra gente reserva a la noche, cuando el restaurante está cerrado. Ahora la IA les responde al toque.&rdquo;
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">— María L., Parrilla Don Carlos</p>
-            </div>
-            <div className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-amber-600">3hs</p>
-              <p className="mt-2 text-muted-foreground">Menos de gestión por semana</p>
-              <p className="mt-6 font-semibold text-lg">&ldquo;Mi encargada dejó de atender el teléfono todo el día para tomar reservas. Ahora se dedica a lo que importa: los clientes en sala.&rdquo;
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">— Roberto S., Trattoria Bella</p>
-            </div>
+            <article className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <p className="text-5xl font-bold text-emerald-600" aria-label="Menos 35 por ciento">-35%</p>
+              <p className="mt-2 text-muted-foreground font-medium">Menos no-shows con recordatorios</p>
+              <blockquote className="mt-6">
+                <p className="font-semibold text-lg">&ldquo;Antes perdiamos 6 o 7 mesas por noche por gente que no venia. Con los recordatorios automaticos bajo muchisimo.&rdquo;</p>
+                <footer className="mt-2 text-sm text-muted-foreground">-- Carlos M., Restaurante El Fogon</footer>
+              </blockquote>
+            </article>
+            <article className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <p className="text-5xl font-bold text-indigo-600" aria-label="Mas 25 por ciento">+25%</p>
+              <p className="mt-2 text-muted-foreground font-medium">Mas reservas fuera de horario</p>
+              <blockquote className="mt-6">
+                <p className="font-semibold text-lg">&ldquo;La mayoria de nuestra gente reserva a la noche, cuando el restaurante esta cerrado. Ahora la IA les responde al toque.&rdquo;</p>
+                <footer className="mt-2 text-sm text-muted-foreground">-- Maria L., Parrilla Don Carlos</footer>
+              </blockquote>
+            </article>
+            <article className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
+              <p className="text-5xl font-bold text-amber-600" aria-label="3 horas menos">3hs</p>
+              <p className="mt-2 text-muted-foreground font-medium">Menos de gestion por semana</p>
+              <blockquote className="mt-6">
+                <p className="font-semibold text-lg">&ldquo;Mi encargada dejo de atender el telefono todo el dia para tomar reservas. Ahora se dedica a lo que importa: los clientes en sala.&rdquo;</p>
+                <footer className="mt-2 text-sm text-muted-foreground">-- Roberto S., Trattoria Bella</footer>
+              </blockquote>
+            </article>
           </div>
         </div>
       </section>
@@ -258,13 +288,13 @@ export default async function Home() {
       {/* ============================================ */}
       {/* HOW IT WORKS                                 */}
       {/* ============================================ */}
-      <section id="como-funciona" className="py-28 px-6 bg-background">
+      <section id="como-funciona" className="py-28 px-6 bg-background" aria-labelledby="how-it-works-heading">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center tracking-tight">
+          <h2 id="how-it-works-heading" className="text-3xl sm:text-4xl font-bold text-center tracking-tight">
             Como funciona
           </h2>
           <p className="mt-3 text-center text-muted-foreground max-w-lg mx-auto">
-            Tres pasos. Sin configuracion tecnica. En minutos estas recibiendo reservas.
+            Tres pasos. Sin configuracion tecnica. En 10 minutos estas recibiendo reservas.
           </p>
 
           <div className="mt-20 grid md:grid-cols-3 gap-12 md:gap-8">
@@ -311,13 +341,13 @@ export default async function Home() {
       {/* ============================================ */}
       {/* FEATURES                                     */}
       {/* ============================================ */}
-      <section id="features" className="py-16 px-6 bg-muted/30">
+      <section id="funciones" className="py-16 px-6 bg-muted/30" aria-labelledby="features-heading">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center tracking-tight">
-            Todo incluido
+          <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold text-center tracking-tight">
+            Todo lo que necesitas para gestionar reservas
           </h2>
           <p className="mt-3 text-center text-muted-foreground">
-            Sin modulos, sin extras. Un plan con todo.
+            Sin modulos, sin extras. Un plan con todo incluido.
           </p>
 
           <div className="mt-14 grid sm:grid-cols-2 gap-6">
@@ -343,13 +373,13 @@ export default async function Home() {
       {/* ============================================ */}
       {/* PRICING                                      */}
       {/* ============================================ */}
-      <section id="pricing" className="py-28 px-6 bg-background">
+      <section id="precios" className="py-28 px-6 bg-background" aria-labelledby="pricing-heading">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center tracking-tight">
+          <h2 id="pricing-heading" className="text-3xl sm:text-4xl font-bold text-center tracking-tight">
             Precio simple, sin sorpresas
           </h2>
           <p className="mt-3 text-center text-muted-foreground">
-            Un solo plan con todo incluido. Pagá mensual o ahorrá con el anual.
+            Un solo plan con todo incluido. Paga mensual o ahorra con el anual.
           </p>
           <div className="mt-14">
             <PricingSection />
@@ -360,11 +390,14 @@ export default async function Home() {
       {/* ============================================ */}
       {/* FAQ                                          */}
       {/* ============================================ */}
-      <section className="py-16 px-6 bg-muted/30">
+      <section id="faq" className="py-16 px-6 bg-muted/30" aria-labelledby="faq-heading">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-center tracking-tight mb-12">
+          <h2 id="faq-heading" className="text-3xl font-bold text-center tracking-tight mb-4">
             Preguntas frecuentes
           </h2>
+          <p className="text-center text-muted-foreground mb-12">
+            Todo lo que necesitas saber antes de empezar.
+          </p>
           <div className="space-y-3">
             {faqs.map((faq, index) => (
               <details key={index} className="group bg-background border rounded-xl group-open:border-l-emerald-500" open={"defaultOpen" in faq ? faq.defaultOpen : false}>
@@ -391,10 +424,10 @@ export default async function Home() {
 
         <div className="relative max-w-3xl mx-auto text-center">
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">
-            Empezá a recibir reservas hoy
+            Empeza a recibir reservas hoy
           </h2>
-          <p className="mt-4 text-white/60 text-lg">
-            Configurá tu restaurante en minutos. Sin tarjeta, sin compromiso.
+          <p className="mt-4 text-white/60 text-lg max-w-xl mx-auto">
+            Configura tu restaurante en 10 minutos. Sin tarjeta de credito, sin compromiso. Cancela cuando quieras.
           </p>
           <Button
             asChild
@@ -402,12 +435,12 @@ export default async function Home() {
             className="mt-10 h-13 text-base px-10 rounded-xl font-semibold bg-white text-emerald-700 hover:bg-white/90 shadow-lg border-0"
           >
             <Link href="/register">
-              Probá 14 días gratis
+              Empeza tu prueba gratis de 14 dias
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <p className="mt-8 text-white/60 text-sm">
-            ¿Tenés dudas? <Link href="https://wa.me/5491130303030" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Pedí una demo por WhatsApp</Link>
+            Tenes dudas? <Link href="https://wa.me/5491130303030" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Pedi una demo por WhatsApp</Link>
           </p>
         </div>
       </section>
@@ -415,22 +448,30 @@ export default async function Home() {
       {/* ============================================ */}
       {/* FOOTER                                       */}
       {/* ============================================ */}
-      <footer className="relative py-8 px-6 border-t">
+      <footer className="relative py-8 px-6 border-t" role="contentinfo">
         {/* Gradient top line */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-indigo-500 to-amber-500" />
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} ReservasAI. Todos los derechos reservados.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/terms" className="hover:text-emerald-600 transition-colors">
-              Términos
-            </Link>
-            <Link href="/privacy" className="hover:text-emerald-600 transition-colors">
-              Privacidad
-            </Link>
-            <Link href="/login" className="hover:text-emerald-600 transition-colors">
-              Iniciar Sesión
-            </Link>
-          </div>
+          <nav aria-label="Footer">
+            <ul className="flex items-center gap-4">
+              <li>
+                <Link href="/terms" className="hover:text-emerald-600 transition-colors">
+                  Terminos
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:text-emerald-600 transition-colors">
+                  Privacidad
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-emerald-600 transition-colors">
+                  Iniciar sesion
+                </Link>
+              </li>
+            </ul>
+          </nav>
         </div>
       </footer>
     </div>

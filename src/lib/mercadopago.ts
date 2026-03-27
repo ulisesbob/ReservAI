@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import { MercadoPagoConfig, PreApproval } from "mercadopago"
+import { MercadoPagoConfig, PreApproval, Preference } from "mercadopago"
 
 // Factory function — never cache the client as a module-level singleton.
 // In Next.js serverless/edge and during hot reload the module can persist while
@@ -114,6 +114,55 @@ export function verifyWebhookSignature(
     console.warn("[MP webhook] Signature comparison error:", err)
     return false
   }
+}
+
+/**
+ * Create a one-time MercadoPago Preference for a deposit payment.
+ * Returns the Preference object with init_point for redirecting the payer.
+ */
+export async function createDepositPreference({
+  reservationId,
+  restaurantName,
+  amount,
+  payerEmail,
+  backUrl,
+  notificationUrl,
+}: {
+  reservationId: string
+  restaurantName: string
+  amount: number
+  payerEmail?: string
+  backUrl: string
+  notificationUrl: string
+}) {
+  const client = createClient()
+  const preference = new Preference(client)
+
+  const result = await preference.create({
+    body: {
+      items: [
+        {
+          id: reservationId,
+          title: `Sena - Reserva en ${restaurantName}`,
+          quantity: 1,
+          unit_price: amount,
+          currency_id: "ARS",
+        },
+      ],
+      ...(payerEmail ? { payer: { email: payerEmail } } : {}),
+      back_urls: {
+        success: `${backUrl}?deposit=success`,
+        failure: `${backUrl}?deposit=failure`,
+        pending: `${backUrl}?deposit=pending`,
+      },
+      auto_return: "approved",
+      external_reference: reservationId,
+      notification_url: notificationUrl,
+      statement_descriptor: "ReservasAI Sena",
+    },
+  })
+
+  return result
 }
 
 /** Returns a fresh MercadoPagoConfig instance using the current env token. */

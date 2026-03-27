@@ -25,6 +25,11 @@ const STATUS_STYLES: Record<string, { dot: string; badge: string; label: string 
     badge: "border-yellow-500 text-yellow-700 bg-yellow-50",
     label: "Pendiente",
   },
+  PENDING_DEPOSIT: {
+    dot: "bg-amber-400",
+    badge: "border-amber-500 text-amber-700 bg-amber-50",
+    label: "Esperando sena",
+  },
   CONFIRMED: {
     dot: "bg-emerald-500",
     badge: "border-transparent bg-emerald-100 text-emerald-800",
@@ -39,6 +44,11 @@ const STATUS_STYLES: Record<string, { dot: string; badge: string; label: string 
     dot: "bg-gray-400",
     badge: "border-transparent bg-gray-100 text-gray-700",
     label: "Completada",
+  },
+  NO_SHOW: {
+    dot: "bg-orange-400",
+    badge: "border-transparent bg-orange-100 text-orange-800",
+    label: "No asistio",
   },
 }
 
@@ -75,7 +85,7 @@ export function CalendarDayView({
     return {
       total: active.length,
       confirmed: active.filter((r) => r.status === "CONFIRMED").length,
-      pending: active.filter((r) => r.status === "PENDING").length,
+      pending: active.filter((r) => r.status === "PENDING" || r.status === "PENDING_DEPOSIT").length,
       guests: active.reduce((sum, r) => sum + r.partySize, 0),
     }
   }, [dayReservations])
@@ -181,7 +191,7 @@ export function CalendarDayView({
 
                           {/* Action buttons */}
                           <div className="flex items-center gap-1 shrink-0 ml-2">
-                            {r.status === "PENDING" && (
+                            {(r.status === "PENDING" || r.status === "PENDING_DEPOSIT") && (
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -191,7 +201,7 @@ export function CalendarDayView({
                                 Confirmar
                               </Button>
                             )}
-                            {(r.status === "PENDING" || r.status === "CONFIRMED") && (
+                            {(r.status === "PENDING" || r.status === "PENDING_DEPOSIT" || r.status === "CONFIRMED") && (
                               <Button
                                 size="sm"
                                 variant="ghost"

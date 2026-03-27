@@ -155,6 +155,12 @@ export async function POST(
       )
     }
 
+    // Determine if a deposit is required for this reservation
+    const requiresDeposit =
+      restaurant.depositEnabled &&
+      restaurant.depositAmount > 0 &&
+      partySize >= restaurant.depositMinPartySize
+
     const reservation = await prisma.reservation.create({
       data: {
         restaurantId: restaurant.id,
@@ -164,12 +170,15 @@ export async function POST(
         dateTime: parsedDate,
         partySize,
         source: "MANUAL",
-        status: "PENDING",
+        status: requiresDeposit ? "PENDING_DEPOSIT" : "PENDING",
+        depositStatus: requiresDeposit ? "PENDING" : "NONE",
+        depositAmount: requiresDeposit ? restaurant.depositAmount : null,
       },
     })
 
     return NextResponse.json({
       success: true,
+      requiresDeposit,
       reservation: {
         id: reservation.id,
         dateTime: reservation.dateTime,
