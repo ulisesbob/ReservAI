@@ -6,6 +6,7 @@ import { reservationUpdateSchema, parseBody } from "@/lib/schemas"
 import { notifyNextInWaitlist } from "@/lib/waitlist"
 import { validateTransition } from "@/lib/status-transitions"
 import type { ReservationStatus } from "@prisma/client"
+import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "@/lib/google-calendar"
 
 export async function PATCH(
   request: Request,
@@ -128,6 +129,30 @@ export async function PATCH(
         existing.partySize
       ).catch((err) => console.error("Waitlist notification error:", err))
     }
+
+    // Fire-and-forget: sync to Google Calendar (does not block the response)
+    void (async () => {
+      try {
+        const rest = await prisma.restaurant.findUnique({
+          where: { id: session.restaurantId },
+          select: {
+            name: true,
+            timezone: true,
+            googleCalendarToken: true,
+            googleCalendarId: true,
+            googleCalendarEnabled: true,
+          },
+        })
+        if (!rest) return
+        if (reservation.status === "CANCELLED") {
+          await deleteCalendarEvent(reservation, rest)
+        } else {
+          await updateCalendarEvent(reservation, rest)
+        }
+      } catch (err) {
+        console.error("[GoogleCalendar] calendar sync error (PATCH):", err)
+      }
+    })()
 
     return NextResponse.json(reservation)
   } catch (error) {

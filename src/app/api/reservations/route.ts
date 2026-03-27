@@ -6,6 +6,7 @@ import { ReservationConfirmationEmail } from "@/lib/email-templates/reservation-
 import { VALID_STATUSES } from "@/lib/validation"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 import { reservationCreateSchema, parseBody } from "@/lib/schemas"
+import { createCalendarEvent } from "@/lib/google-calendar"
 
 export async function GET(request: Request) {
   try {
@@ -194,6 +195,27 @@ export async function POST(request: Request) {
         }),
       }).catch((err) => console.error("Confirmation email failed:", err))
     }
+
+    // Fire-and-forget: sync to Google Calendar (does not block the response)
+    void (async () => {
+      try {
+        const rest = await prisma.restaurant.findUnique({
+          where: { id: session.restaurantId },
+          select: {
+            name: true,
+            timezone: true,
+            googleCalendarToken: true,
+            googleCalendarId: true,
+            googleCalendarEnabled: true,
+          },
+        })
+        if (rest) {
+          await createCalendarEvent(reservation, rest)
+        }
+      } catch (err) {
+        console.error("[GoogleCalendar] createCalendarEvent error (reservations POST):", err)
+      }
+    })()
 
     return NextResponse.json(reservation, { status: 201 })
   } catch (error) {

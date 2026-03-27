@@ -18,6 +18,9 @@ export function validateEnv() {
     "MERCADOPAGO_ACCESS_TOKEN",
     "MERCADOPAGO_WEBHOOK_SECRET",
     "CRON_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REDIRECT_URI",
   ]
 
   const missing = required.filter((key) => !process.env[key])

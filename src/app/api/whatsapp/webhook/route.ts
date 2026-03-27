@@ -9,6 +9,7 @@ import { safeDecrypt, verifyWebhookSignature } from "@/lib/encryption"
 import { notifyNextInWaitlist, confirmWaitlistEntry, expireAndNotifyNext } from "@/lib/waitlist"
 import { notifyNewReservation, notifyCancel, notifyWaitlistFreed } from "@/lib/notifications"
 import { upsertGuest } from "@/lib/guest-ops"
+import { createCalendarEvent } from "@/lib/google-calendar"
 
 // ---------------------------------------------------------------------------
 // Rate limiting — in-memory, per-phone, max 10 messages/minute
@@ -436,6 +437,11 @@ async function processIncomingMessage(
           status: "COMPLETED",
         },
       })
+
+      // Fire-and-forget: sync to Google Calendar (does not block WhatsApp reply)
+      createCalendarEvent(reservation, restaurant).catch((err) =>
+        console.error("[GoogleCalendar] createCalendarEvent error (whatsapp):", err)
+      )
     } else {
       // Append availability error so the customer knows
       responseText += `\n\n${availability.reason}`

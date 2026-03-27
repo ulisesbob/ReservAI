@@ -82,24 +82,27 @@ enum WaitlistStatus {
 // === MODELS ===
 
 model Restaurant {
-  id                  String   @id @default(cuid())
-  name                String
-  slug                String   @unique
-  timezone            String   @default("America/Argentina/Buenos_Aires")
-  maxCapacity         Int
-  maxPartySize        Int      @default(20)
-  operatingHours      Json?
-  whatsappPhoneId     String?
-  whatsappToken       String?
-  openaiApiKey        String?
-  knowledgeBase       String?  @db.Text
-  email               String?
-  onboardingStep      Int      @default(0)
-  escalationPhone     String?
-  depositEnabled      Boolean  @default(false)
-  depositAmount       Decimal  @default(0) @db.Decimal(12, 2)
-  depositMinPartySize Int      @default(6)
-  createdAt           DateTime @default(now())
+  id                    String   @id @default(cuid())
+  name                  String
+  slug                  String   @unique
+  timezone              String   @default("America/Argentina/Buenos_Aires")
+  maxCapacity           Int
+  maxPartySize          Int      @default(20)
+  operatingHours        Json?
+  whatsappPhoneId       String?
+  whatsappToken         String?
+  openaiApiKey          String?
+  knowledgeBase         String?  @db.Text
+  email                 String?
+  onboardingStep        Int      @default(0)
+  escalationPhone       String?
+  depositEnabled        Boolean  @default(false)
+  depositAmount         Decimal  @default(0) @db.Decimal(12, 2)
+  depositMinPartySize   Int      @default(6)
+  googleCalendarToken   String?  @db.Text
+  googleCalendarId      String?
+  googleCalendarEnabled Boolean  @default(false)
+  createdAt             DateTime @default(now())
 
   users           User[]
   reservations    Reservation[]
