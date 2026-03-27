@@ -2,9 +2,12 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth"
 import { createSubscription } from "@/lib/mercadopago"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function POST(request: Request) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.billing, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
     const { plan } = await request.json()
 

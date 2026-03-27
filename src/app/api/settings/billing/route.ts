@@ -2,9 +2,12 @@ import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { createSubscription } from "@/lib/mercadopago"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.billing, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
 
     const subscription = await prisma.subscription.findUnique({
@@ -33,6 +36,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.billing, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
     const body = await request.json()
     const { plan } = body

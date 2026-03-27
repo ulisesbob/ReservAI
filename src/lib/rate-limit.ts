@@ -74,6 +74,7 @@ export const rateLimiters = {
   reservationRead: { name: "reservationRead", maxRequests: 60, windowMs: 60 * 1000 },
   settings: { name: "settings", maxRequests: 20, windowMs: 60 * 1000 },
   export: { name: "export", maxRequests: 5, windowMs: 60 * 1000 },
+  billing: { name: "billing", maxRequests: 5, windowMs: 60 * 1000 },
 } as const
 
 export async function applyRateLimit(config: RateLimitConfig, request: Request): Promise<Response | null> {

@@ -3,9 +3,12 @@ import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth"
 import { getMercadoPagoClient } from "@/lib/mercadopago"
 import { PreApproval } from "mercadopago"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.billing, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
     const subscription = await prisma.subscription.findUnique({
       where: { restaurantId: session.restaurantId },
