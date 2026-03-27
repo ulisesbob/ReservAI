@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getMercadoPagoClient, verifyWebhookSignature } from "@/lib/mercadopago"
 import { Payment as MPPayment } from "mercadopago"
+import { notifyDepositPaid } from "@/lib/notifications"
 
 /**
  * POST /api/webhooks/deposits
@@ -104,12 +105,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Payment amount mismatch" }, { status: 400 })
       }
 
-      await prisma.reservation.update({
+      const updatedReservation = await prisma.reservation.update({
         where: { id: reservation.id },
         data: {
           depositStatus: "PAID",
           status: reservation.status === "PENDING_DEPOSIT" ? "PENDING" : reservation.status,
         },
+      })
+      // Fire-and-forget: notify owner that deposit was received
+      notifyDepositPaid({
+        ...updatedReservation,
+        depositAmount: updatedReservation.depositAmount?.toString() ?? null,
       })
       console.log("[Deposit webhook] Deposit PAID for reservation:", reservation.id)
     } else if (paymentInfo.status === "rejected") {

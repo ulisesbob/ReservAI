@@ -7,6 +7,8 @@ import { checkAvailability } from "@/lib/availability"
 import { sendWhatsAppMessage } from "@/lib/whatsapp"
 import { safeDecrypt, verifyWebhookSignature } from "@/lib/encryption"
 import { notifyNextInWaitlist, confirmWaitlistEntry, expireAndNotifyNext } from "@/lib/waitlist"
+import { notifyNewReservation, notifyCancel, notifyWaitlistFreed } from "@/lib/notifications"
+import { upsertGuest } from "@/lib/guest-ops"
 
 // ---------------------------------------------------------------------------
 // Rate limiting — in-memory, per-phone, max 10 messages/minute
@@ -248,6 +250,66 @@ async function processIncomingMessage(
     }
   }
 
+  // Check if this is a review response (rating 1-5 from a customer who received a review request)
+  const reviewRatingMatch = messageText.trim().match(/^([1-5])(?:\s|$)/)
+  if (reviewRatingMatch) {
+    // Only capture as a review if there is a recently completed reservation for this phone
+    const recentCompleted = await prisma.reservation.findFirst({
+      where: {
+        restaurantId: restaurant.id,
+        customerPhone,
+        status: "COMPLETED",
+        reviewRequestSent: true,
+        dateTime: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      },
+      orderBy: { dateTime: "desc" },
+    })
+
+    if (recentCompleted) {
+      const rating = parseInt(reviewRatingMatch[1], 10)
+      // Extract optional comment from rest of message (after the digit)
+      const commentPart = messageText.trim().slice(1).trim()
+
+      // Avoid duplicate reviews for the same reservation period
+      const alreadyReviewed = await prisma.review.findFirst({
+        where: {
+          restaurantId: restaurant.id,
+          customerPhone,
+          createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+        },
+      })
+
+      if (!alreadyReviewed) {
+        await prisma.review.create({
+          data: {
+            restaurantId: restaurant.id,
+            customerName: recentCompleted.customerName,
+            customerPhone,
+            rating,
+            comment: commentPart || null,
+            source: "WHATSAPP",
+          },
+        })
+
+        const googleReviewSuggestion =
+          rating >= 4
+            ? "\n\n¡Nos alegra mucho! Si tenes un minuto, nos ayudaria muchisimo que dejes tu opinion en Google: https://g.page/r/review"
+            : ""
+        const reply =
+          `Gracias por tu valoración de ${rating}/5! Tu opinion nos ayuda a mejorar.${googleReviewSuggestion}`
+
+        await prisma.message.create({
+          data: { conversationId: conversation.id, role: "ASSISTANT", content: reply },
+        })
+        if (restaurant.whatsappToken) {
+          const decryptedToken = safeDecrypt(restaurant.whatsappToken)
+          await sendWhatsAppMessage(phoneNumberId, decryptedToken, customerPhone, reply)
+        }
+        return
+      }
+    }
+  }
+
   // Skip bot processing if conversation is escalated
   if (conversation.status === "ESCALATED") {
     return
@@ -349,6 +411,17 @@ async function processIncomingMessage(
         },
       })
 
+      // Fire-and-forget: notify owner of new reservation via bot
+      notifyNewReservation(reservation)
+
+      // Upsert Guest CRM record
+      upsertGuest({
+        restaurantId: restaurant.id,
+        name: r.nombre,
+        phone: customerPhone,
+        email: r.contacto.includes("@") ? r.contacto : null,
+      }).catch((err) => console.error("[webhook] Guest upsert error:", err))
+
       if (needsDeposit) {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ""
         const depositLink = `${baseUrl}/book/${restaurant.slug}?deposit=pay&reservation=${reservation.id}`
@@ -448,6 +521,8 @@ async function processIncomingMessage(
           where: { id: reservationId },
           data: { status: "CANCELLED" },
         })
+        // Fire-and-forget: notify owner of cancellation
+        notifyCancel(reservation)
         // Free up waitlist spot
         notifyNextInWaitlist(restaurant.id, reservation.dateTime, reservation.partySize).catch(
           (err) => console.error("Waitlist notification error:", err)

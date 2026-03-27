@@ -75,6 +75,10 @@ export const rateLimiters = {
   settings: { name: "settings", maxRequests: 20, windowMs: 60 * 1000 },
   export: { name: "export", maxRequests: 5, windowMs: 60 * 1000 },
   billing: { name: "billing", maxRequests: 5, windowMs: 60 * 1000 },
+  guestWrite: { name: "guestWrite", maxRequests: 30, windowMs: 60 * 1000 },
+  guestRead: { name: "guestRead", maxRequests: 60, windowMs: 60 * 1000 },
+  reviewWrite: { name: "reviewWrite", maxRequests: 20, windowMs: 60 * 1000 },
+  reviewRead: { name: "reviewRead", maxRequests: 60, windowMs: 60 * 1000 },
 } as const
 
 export async function applyRateLimit(config: RateLimitConfig, request: Request): Promise<Response | null> {

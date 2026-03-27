@@ -139,6 +139,32 @@ const escalarAHumanoTool: ChatCompletionTool = {
   },
 }
 
+const dejarResenaTool: ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "dejar_resena",
+    description:
+      "Guarda la reseña de un cliente cuando este proporciona explícitamente una calificación del 1 al 5 sobre su visita reciente. " +
+      "Usar solo cuando el cliente responde a un pedido de reseña con un número entre 1 y 5.",
+    parameters: {
+      type: "object",
+      properties: {
+        rating: {
+          type: "integer",
+          description: "Calificación del cliente del 1 al 5",
+          minimum: 1,
+          maximum: 5,
+        },
+        comment: {
+          type: "string",
+          description: "Comentario opcional del cliente sobre su experiencia",
+        },
+      },
+      required: ["rating"],
+    },
+  },
+}
+
 // ─── Main process function ─────────────────────────────────────────────────
 
 export async function processMessage(
@@ -172,7 +198,7 @@ export async function processMessage(
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages,
-      tools: [reservationTool, buscarReservasTool, cancelarReservaTool, escalarAHumanoTool],
+      tools: [reservationTool, buscarReservasTool, cancelarReservaTool, escalarAHumanoTool, dejarResenaTool],
       tool_choice: "auto",
       temperature: 0.7,
       max_tokens: 500,
@@ -210,6 +236,22 @@ export async function processMessage(
           text: responseText,
           reservation: null,
           toolCall: { name: fnName, arguments: parsedArgs },
+        }
+      }
+
+      if (fnName === "dejar_resena") {
+        let args: { rating: number; comment?: string }
+        try {
+          args = JSON.parse(fnArgs) as { rating: number; comment?: string }
+        } catch (parseError) {
+          console.error("Failed to parse dejar_resena arguments:", parseError, "raw:", fnArgs)
+          return { text: "Hubo un problema procesando tu reseña. Por favor intenta de nuevo.", reservation: null }
+        }
+        const responseText = message.content || ""
+        return {
+          text: responseText,
+          reservation: null,
+          toolCall: { name: fnName, arguments: args },
         }
       }
 

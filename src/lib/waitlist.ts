@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { sendWhatsAppMessage } from "@/lib/whatsapp"
 import { safeDecrypt } from "@/lib/encryption"
+import { notifyWaitlistFreed } from "@/lib/notifications"
 
 /**
  * Find the next WAITING entry for a given restaurant/time window and notify them.
@@ -46,6 +47,12 @@ export async function notifyNextInWaitlist(
       notifiedAt: new Date(),
       expiresAt,
     },
+  })
+
+  // Fire-and-forget: notify owner that a waitlist spot was freed and customer was notified
+  notifyWaitlistFreed({
+    ...nextEntry,
+    restaurantId,
   })
 
   const dateStr = dateTime.toLocaleDateString("es-AR", {
