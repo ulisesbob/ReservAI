@@ -35,13 +35,6 @@ enum DepositStatus {
   REFUNDED
 }
 
-enum DepositStatus {
-  NONE
-  PENDING
-  PAID
-  REFUNDED
-}
-
 enum ReservationSource {
   WHATSAPP
   MANUAL
