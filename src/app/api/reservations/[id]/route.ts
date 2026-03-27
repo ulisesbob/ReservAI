@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
-import { VALID_STATUSES } from "@/lib/validation"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { reservationUpdateSchema, parseBody } from "@/lib/schemas"
 
 export async function PATCH(
   request: Request,
@@ -28,28 +28,16 @@ export async function PATCH(
 
     const body = await request.json()
 
-    // Only allow updating safe fields
-    const { customerName, customerPhone, customerEmail, dateTime, partySize, status } = body
+    const parsed = parseBody(reservationUpdateSchema, body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
+    }
+    const { customerName, customerPhone, customerEmail, dateTime, partySize, status } = parsed.data
     const data: Record<string, unknown> = {}
 
-    if (customerName !== undefined) {
-      if (typeof customerName !== "string" || customerName.length > 200) {
-        return NextResponse.json({ error: "Nombre demasiado largo" }, { status: 400 })
-      }
-      data.customerName = customerName
-    }
-    if (customerPhone !== undefined) {
-      if (typeof customerPhone !== "string" || customerPhone.length > 30) {
-        return NextResponse.json({ error: "Teléfono demasiado largo" }, { status: 400 })
-      }
-      data.customerPhone = customerPhone
-    }
-    if (customerEmail !== undefined) {
-      if (customerEmail !== null && (typeof customerEmail !== "string" || customerEmail.length > 255)) {
-        return NextResponse.json({ error: "Email demasiado largo" }, { status: 400 })
-      }
-      data.customerEmail = customerEmail
-    }
+    if (customerName !== undefined) data.customerName = customerName
+    if (customerPhone !== undefined) data.customerPhone = customerPhone
+    if (customerEmail !== undefined) data.customerEmail = customerEmail
     if (dateTime !== undefined) {
       const parsedDate = new Date(dateTime)
       if (isNaN(parsedDate.getTime())) {
@@ -68,17 +56,13 @@ export async function PATCH(
     })
 
     if (partySize !== undefined) {
-      const size = Number(partySize)
-      if (!Number.isInteger(size) || size < 1) {
-        return NextResponse.json({ error: "partySize debe ser un entero positivo" }, { status: 400 })
-      }
-      if (restaurant && size > restaurant.maxPartySize) {
+      if (restaurant && partySize > restaurant.maxPartySize) {
         return NextResponse.json(
           { error: `El máximo de personas por reserva es ${restaurant.maxPartySize}` },
           { status: 400 }
         )
       }
-      data.partySize = size
+      data.partySize = partySize
     }
 
     // Validate capacity if partySize or dateTime changed
@@ -109,10 +93,7 @@ export async function PATCH(
       }
     }
     if (status !== undefined) {
-      if (!VALID_STATUSES.includes(status)) {
-        return NextResponse.json({ error: "Status inválido" }, { status: 400 })
-      }
-      data.status = status
+      data.status = status // Already validated by Zod schema
     }
 
     // findFirst above already verified tenant ownership

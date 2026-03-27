@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/email"
 import { ReservationConfirmationEmail } from "@/lib/email-templates/reservation-confirmation"
 import { VALID_STATUSES } from "@/lib/validation"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { reservationCreateSchema, parseBody } from "@/lib/schemas"
 
 export async function GET(request: Request) {
   try {
@@ -108,21 +109,11 @@ export async function POST(request: Request) {
     const session = await requireSession()
     const body = await request.json()
 
-    const { customerName, customerPhone, customerEmail, dateTime, partySize } =
-      body
-
-    if (!customerName || !customerPhone || !dateTime || !partySize) {
-      return NextResponse.json(
-        { error: "Faltan campos requeridos: customerName, customerPhone, dateTime, partySize" },
-        { status: 400 }
-      )
+    const parsed = parseBody(reservationCreateSchema, body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
     }
-
-    if (typeof customerName !== "string" || customerName.length > 200 ||
-        typeof customerPhone !== "string" || customerPhone.length > 30 ||
-        (customerEmail && (typeof customerEmail !== "string" || customerEmail.length > 255))) {
-      return NextResponse.json({ error: "Datos demasiado largos o inválidos" }, { status: 400 })
-    }
+    const { customerName, customerPhone, customerEmail, dateTime, partySize: size } = parsed.data
 
     const parsedDate = new Date(dateTime)
     if (isNaN(parsedDate.getTime())) {
@@ -130,11 +121,6 @@ export async function POST(request: Request) {
     }
     if (parsedDate < new Date()) {
       return NextResponse.json({ error: "No se pueden crear reservas en el pasado" }, { status: 400 })
-    }
-
-    const size = Number(partySize)
-    if (!Number.isInteger(size) || size < 1) {
-      return NextResponse.json({ error: "Cantidad de personas debe ser un entero positivo" }, { status: 400 })
     }
 
     // Validate against restaurant maxPartySize and maxCapacity
