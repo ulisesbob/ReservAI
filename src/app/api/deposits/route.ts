@@ -47,9 +47,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Monto de sena invalido" }, { status: 400 })
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.headers.get("origin") || ""
+    // FIX 3: Never use the client-controlled Origin header to construct the
+    // notificationUrl — an attacker could redirect MercadoPago callbacks to an
+    // arbitrary server. NEXT_PUBLIC_APP_URL must be set in the environment.
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!baseUrl) {
+      console.error("[Deposits] NEXT_PUBLIC_APP_URL is not configured")
+      return NextResponse.json({ error: "Error de configuracion del servidor" }, { status: 500 })
+    }
     const backUrl = `${baseUrl}/book/${reservation.restaurant.slug}`
     const notificationUrl = `${baseUrl}/api/webhooks/deposits`
+
+    // FIX 4: Idempotency check — if a preference already exists for this
+    // reservation, return the existing init_point instead of creating a new one.
+    // This prevents duplicate charges when the client retries the request.
+    if (reservation.mercadoPagoDepositId) {
+      console.log("[Deposits] Returning existing preference for reservation:", reservation.id)
+      // We don't store init_point so we reconstruct the MP checkout URL from the id.
+      const existingInitPoint = `https://www.mercadopago.com.ar/checkout/v1/redirect?preference-id=${reservation.mercadoPagoDepositId}`
+      return NextResponse.json({
+        initPoint: existingInitPoint,
+        preferenceId: reservation.mercadoPagoDepositId,
+      })
+    }
 
     const preference = await createDepositPreference({
       reservationId: reservation.id,

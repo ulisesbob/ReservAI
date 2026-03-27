@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getMercadoPagoClient } from "@/lib/mercadopago"
+import { getMercadoPagoClient, verifyWebhookSignature } from "@/lib/mercadopago"
 import { Payment as MPPayment } from "mercadopago"
 
 /**
@@ -22,6 +22,13 @@ export async function POST(request: Request) {
     const topic = url.searchParams.get("topic") || url.searchParams.get("type")
     let paymentId: string | null = url.searchParams.get("id")
 
+    // FIX 1: Verify MercadoPago webhook signature before processing any payload.
+    // For IPN-style requests the id arrives as a query param; for the newer
+    // webhook format it arrives in the JSON body. We must extract it first so
+    // we can pass it to verifyWebhookSignature as the manifest's dataId.
+    const xSignature = request.headers.get("x-signature")
+    const xRequestId = request.headers.get("x-request-id")
+
     // Newer webhook format: JSON body with { type, data: { id } }
     if (!paymentId) {
       try {
@@ -35,6 +42,15 @@ export async function POST(request: Request) {
       } catch {
         // Body might not be JSON for IPN-style notifications
       }
+    }
+
+    // FIX 1 (continued): Reject the request if the signature is invalid.
+    // paymentId is the canonical dataId used in the MP manifest. If we still
+    // have no id at this point, we reject with 400 below — but only after
+    // verifying the signature when an id is present.
+    if (paymentId && !verifyWebhookSignature(xSignature, xRequestId, paymentId)) {
+      console.error("[Deposit webhook] Signature verification failed for paymentId:", paymentId)
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
     }
 
     // We only care about payment notifications
@@ -71,6 +87,23 @@ export async function POST(request: Request) {
     }
 
     if (paymentInfo.status === "approved") {
+      // FIX 2: Validate that the paid amount matches the expected deposit amount
+      // before marking as PAID. A mismatch indicates a tampered or wrong payment
+      // and must never result in a PAID status update.
+      const paidAmount = paymentInfo.transaction_amount
+      const expectedAmount = reservation.depositAmount
+      if (paidAmount == null || expectedAmount == null || paidAmount !== expectedAmount) {
+        console.error(
+          "[Deposit webhook] Amount mismatch — expected:",
+          expectedAmount,
+          "received:",
+          paidAmount,
+          "reservationId:",
+          reservation.id,
+        )
+        return NextResponse.json({ error: "Payment amount mismatch" }, { status: 400 })
+      }
+
       await prisma.reservation.update({
         where: { id: reservation.id },
         data: {
@@ -100,7 +133,10 @@ export async function POST(request: Request) {
       (error instanceof Error && error.message.includes("not found"))
 
     if (isPermanent) {
-      return NextResponse.json({ error: "Permanent error" }, { status: 200 })
+      // FIX 5: Return 400 (not 200) for permanent errors. MercadoPago retries
+      // on 5xx but stops on 4xx, which is the desired behavior for unrecoverable
+      // conditions like malformed JSON or unknown resources.
+      return NextResponse.json({ error: "Permanent error, will not retry" }, { status: 400 })
     }
     return NextResponse.json({ error: "Transient error" }, { status: 500 })
   }
