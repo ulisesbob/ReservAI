@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 import { reservationUpdateSchema, parseBody } from "@/lib/schemas"
+import { notifyNextInWaitlist } from "@/lib/waitlist"
 
 export async function PATCH(
   request: Request,
@@ -101,6 +102,15 @@ export async function PATCH(
       where: { id },
       data,
     })
+
+    // Trigger waitlist notification when reservation is cancelled
+    if (status === "CANCELLED" && existing.status !== "CANCELLED") {
+      notifyNextInWaitlist(
+        session.restaurantId,
+        existing.dateTime,
+        existing.partySize
+      ).catch((err) => console.error("Waitlist notification error:", err))
+    }
 
     return NextResponse.json(reservation)
   } catch (error) {
