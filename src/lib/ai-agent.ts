@@ -14,6 +14,7 @@ interface RestaurantConfig {
   maxPartySize: number
   maxCapacity: number
   openaiApiKey: string | null
+  escalationPhone?: string | null
 }
 
 interface ReservationData {
@@ -28,6 +29,7 @@ interface AgentResponse {
   text: string
   reservation: ReservationData | null
   toolCall?: { name: string; arguments: Record<string, unknown> }
+  escalate?: boolean
 }
 
 export type { AgentMessage, RestaurantConfig, ReservationData, AgentResponse }
@@ -96,7 +98,8 @@ const cancelarReservaTool: ChatCompletionTool = {
   function: {
     name: "cancelar_reserva",
     description:
-      "Cancela una reserva existente del cliente. SOLO usar después de que el cliente confirmó cuál reserva quiere cancelar.",
+      "Cancela una reserva existente del cliente. SOLO usar después de que el cliente confirmó cuál reserva quiere cancelar. " +
+      "Si el cliente dice 'cancelar' o similar, primero usar buscar_reservas para mostrar las reservas disponibles, luego confirmar cuál cancelar.",
     parameters: {
       type: "object",
       properties: {
@@ -106,6 +109,32 @@ const cancelarReservaTool: ChatCompletionTool = {
         },
       },
       required: ["reservationId"],
+    },
+  },
+}
+
+const escalarAHumanoTool: ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "escalar_a_humano",
+    description:
+      "Escala la conversación a un humano del restaurante. Usar cuando: " +
+      "1) El cliente pide hablar con una persona/encargado/humano explícitamente. " +
+      "2) No se pudo resolver la consulta del cliente después de 2 intentos. " +
+      "3) La situación requiere intervención humana (reclamos, situaciones especiales, etc).",
+    parameters: {
+      type: "object",
+      properties: {
+        motivo: {
+          type: "string",
+          description: "Motivo de la escalación (ej: 'solicitud_cliente', 'no_resuelto', 'reclamo')",
+        },
+        resumen: {
+          type: "string",
+          description: "Resumen breve de la conversación y el problema del cliente",
+        },
+      },
+      required: ["motivo", "resumen"],
     },
   },
 }
@@ -143,7 +172,7 @@ export async function processMessage(
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages,
-      tools: [reservationTool, buscarReservasTool, cancelarReservaTool],
+      tools: [reservationTool, buscarReservasTool, cancelarReservaTool, escalarAHumanoTool],
       tool_choice: "auto",
       temperature: 0.7,
       max_tokens: 500,
@@ -174,6 +203,16 @@ export async function processMessage(
           text: responseText,
           reservation: null,
           toolCall: { name: fnName, arguments: JSON.parse(fnArgs) },
+        }
+      }
+
+      if (fnName === "escalar_a_humano") {
+        const args = JSON.parse(fnArgs) as { motivo: string; resumen: string }
+        return {
+          text: "Te estoy conectando con el equipo del restaurante. Te van a responder a la brevedad.",
+          reservation: null,
+          escalate: true,
+          toolCall: { name: fnName, arguments: args },
         }
       }
     }
@@ -285,10 +324,10 @@ Necesitás obtener estos 5 datos:
 - Si no tiene reservas, decile que no encontraste reservas a su nombre.
 
 ## Escalación a humano
-- Si el cliente pide explícitamente hablar con una persona, humano, encargado u operador, respondé:
-  "[ESCALATE:solicitud_cliente] Te conecto con nuestro equipo. Te van a responder a la brevedad."
-- Si no podés resolver la consulta del cliente después de 2 intentos sobre el mismo tema, respondé:
-  "[ESCALATE:no_resuelto] Parece que necesitás ayuda especializada. Te conecto con nuestro equipo."
+- Si el cliente pide explícitamente hablar con una persona, humano, encargado u operador, llamá la función escalar_a_humano con motivo "solicitud_cliente".
+- Si no podés resolver la consulta del cliente después de 2 intentos sobre el mismo tema, llamá escalar_a_humano con motivo "no_resuelto".
+- En el campo "resumen", incluí un resumen breve de la conversación y lo que el cliente necesita.
+- NUNCA usar marcadores de texto como [ESCALATE:...], usar siempre la función escalar_a_humano.
 
 ## Ejemplo de conversación
 Cliente: "Hola quiero reservar para el viernes a las 21"

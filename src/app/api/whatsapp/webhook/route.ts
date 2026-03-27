@@ -285,6 +285,8 @@ async function processIncomingMessage(
     maxPartySize: restaurant.maxPartySize,
     maxCapacity: restaurant.maxCapacity,
     openaiApiKey: decryptedOpenaiKey,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    escalationPhone: (restaurant as any).escalationPhone as string | null | undefined,
   }
 
   // 7. Call AI agent
@@ -353,27 +355,7 @@ async function processIncomingMessage(
     }
   }
 
-  // Check for escalation pattern in response
-  const escalateMatch = responseText.match(/\[ESCALATE:([^\]]+)\]/)
-  if (escalateMatch) {
-    responseText = responseText.replace(/\[ESCALATE:[^\]]+\]\s*/g, "").trim()
-    await prisma.conversation.update({
-      where: { id: conversation.id },
-      data: { status: "ESCALATED", escalatedAt: new Date(), escalatedReason: escalateMatch[1] },
-    })
-  }
-
-  // Check for escalation keywords in customer message
-  const escalationKeywords = ["humano", "persona", "hablar con alguien", "operador", "agente", "encargado"]
-  if (escalationKeywords.some((kw) => messageText.toLowerCase().includes(kw)) && conversation.status === "ACTIVE") {
-    responseText = "Te conecto con nuestro equipo. Te van a responder a la brevedad."
-    await prisma.conversation.update({
-      where: { id: conversation.id },
-      data: { status: "ESCALATED", escalatedAt: new Date(), escalatedReason: "customer_request" },
-    })
-  }
-
-  // Handle cancellation tool calls
+  // Handle tool calls (cancellations, escalation)
   if (agentResponse.toolCall) {
     const { name, arguments: args } = agentResponse.toolCall
 
@@ -393,15 +375,47 @@ async function processIncomingMessage(
         responseText = "No encontré reservas futuras a tu nombre."
       } else if (reservations.length === 1) {
         const r = reservations[0]
-        const dateStr = r.dateTime.toLocaleDateString("es-AR", { timeZone: restaurant.timezone, weekday: "long", day: "numeric", month: "long" })
-        const timeStr = r.dateTime.toLocaleTimeString("es-AR", { timeZone: restaurant.timezone, hour: "2-digit", minute: "2-digit", hour12: false })
-        responseText = `Tenés una reserva para ${r.partySize} personas el ${dateStr} a las ${timeStr} a nombre de ${r.customerName}. ¿Querés cancelarla? (ID: ${r.id})`
+        const dateStr = r.dateTime.toLocaleDateString("es-AR", {
+          timeZone: restaurant.timezone,
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        })
+        const timeStr = r.dateTime.toLocaleTimeString("es-AR", {
+          timeZone: restaurant.timezone,
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+        responseText =
+          `Tenés una reserva para ${r.partySize} personas el ${dateStr} a las ${timeStr} a nombre de ${r.customerName}. ` +
+          `¿Confirmás que querés cancelarla?`
+        // Store reservation id temporarily in conversation for next message confirmation
+        await prisma.conversation.update({
+          where: { id: conversation.id },
+          data: { reservationId: r.id },
+        })
       } else {
-        responseText = "Tus reservas:\n" + reservations.map((r, i) => {
-          const dateStr = r.dateTime.toLocaleDateString("es-AR", { timeZone: restaurant.timezone, weekday: "long", day: "numeric", month: "long" })
-          const timeStr = r.dateTime.toLocaleTimeString("es-AR", { timeZone: restaurant.timezone, hour: "2-digit", minute: "2-digit", hour12: false })
-          return `${i + 1}. ${dateStr} a las ${timeStr} — ${r.partySize} personas (${r.customerName})`
-        }).join("\n") + "\n\n¿Cuál querés cancelar?"
+        responseText =
+          "Tus reservas:\n" +
+          reservations
+            .map((r, i) => {
+              const dateStr = r.dateTime.toLocaleDateString("es-AR", {
+                timeZone: restaurant.timezone,
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })
+              const timeStr = r.dateTime.toLocaleTimeString("es-AR", {
+                timeZone: restaurant.timezone,
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })
+              return `${i + 1}. ${dateStr} a las ${timeStr} — ${r.partySize} personas (${r.customerName})`
+            })
+            .join("\n") +
+          "\n\n¿Cuál querés cancelar? Respondé con el número."
       }
     }
 
@@ -413,13 +427,81 @@ async function processIncomingMessage(
 
       if (!reservation) {
         responseText = "No encontré esa reserva."
+      } else if (reservation.status === "CANCELLED") {
+        responseText = "Esa reserva ya estaba cancelada."
       } else {
-        await prisma.reservation.update({ where: { id: reservationId }, data: { status: "CANCELLED" } })
-        notifyNextInWaitlist(restaurant.id, reservation.dateTime, reservation.partySize)
-          .catch((err) => console.error("Waitlist notification error:", err))
-        responseText = `Tu reserva para ${reservation.partySize} personas fue cancelada. Si querés reservar de nuevo, escribime.`
+        await prisma.reservation.update({
+          where: { id: reservationId },
+          data: { status: "CANCELLED" },
+        })
+        // Free up waitlist spot
+        notifyNextInWaitlist(restaurant.id, reservation.dateTime, reservation.partySize).catch(
+          (err) => console.error("Waitlist notification error:", err)
+        )
+        const dateStr = reservation.dateTime.toLocaleDateString("es-AR", {
+          timeZone: restaurant.timezone,
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        })
+        const timeStr = reservation.dateTime.toLocaleTimeString("es-AR", {
+          timeZone: restaurant.timezone,
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+        responseText =
+          `Tu reserva del ${dateStr} a las ${timeStr} para ${reservation.partySize} personas fue cancelada exitosamente. ` +
+          `Si querés hacer una nueva reserva, escribime cuando quieras.`
       }
     }
+
+    if (name === "escalar_a_humano") {
+      const escalateArgs = args as { motivo?: string; resumen?: string }
+      const motivo = String(escalateArgs.motivo || "solicitud_cliente")
+      const resumen = String(escalateArgs.resumen || "Sin resumen")
+
+      // Mark conversation as escalated
+      await prisma.conversation.update({
+        where: { id: conversation.id },
+        data: {
+          status: "ESCALATED",
+          escalatedAt: new Date(),
+          escalatedReason: motivo,
+        },
+      })
+
+      // Send WhatsApp notification to restaurant owner if escalationPhone is configured
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ownerEscalationPhone = (restaurant as any).escalationPhone as string | null | undefined
+      if (ownerEscalationPhone && restaurant.whatsappToken && restaurant.whatsappPhoneId) {
+        const decryptedToken = safeDecrypt(restaurant.whatsappToken)
+        const ownerMessage =
+          `*Nueva conversacion escalada — ${restaurant.name}*\n\n` +
+          `*Motivo:* ${motivo}\n` +
+          `*Cliente:* ${customerPhone}\n` +
+          `*Resumen:* ${resumen}\n\n` +
+          `Ingresa al dashboard para ver el historial completo.`
+        sendWhatsAppMessage(
+          restaurant.whatsappPhoneId,
+          decryptedToken,
+          ownerEscalationPhone,
+          ownerMessage
+        ).catch((err) => console.error("Escalation owner notification error:", err))
+      }
+
+      // responseText was already set by the agent: "Te estoy conectando con el equipo..."
+    }
+  }
+
+  // Fallback: handle legacy [ESCALATE:...] text markers for backwards compatibility
+  const escalateMatch = responseText.match(/\[ESCALATE:([^\]]+)\]/)
+  if (escalateMatch) {
+    responseText = responseText.replace(/\[ESCALATE:[^\]]+\]\s*/g, "").trim()
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { status: "ESCALATED", escalatedAt: new Date(), escalatedReason: escalateMatch[1] },
+    })
   }
 
   // 9. Save assistant response

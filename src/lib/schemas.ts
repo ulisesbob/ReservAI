@@ -16,7 +16,7 @@ export const reservationUpdateSchema = z.object({
   customerEmail: z.string().email("Email inválido").max(255).nullish(),
   dateTime: z.string().optional(),
   partySize: z.coerce.number().int("Debe ser entero").min(1, "Mínimo 1 persona").optional(),
-  status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]).optional(),
+  status: z.enum(["PENDING", "PENDING_DEPOSIT", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]).optional(),
 })
 
 // ─── Register schema ────────────────────────────────────────────────────────
@@ -49,6 +49,10 @@ export const whatsappSettingsSchema = z.object({
   openaiApiKey: z.string().nullish(),
 })
 
+export const escalationSettingsSchema = z.object({
+  escalationPhone: z.string().max(30, "Teléfono demasiado largo").nullish().or(z.literal("")),
+})
+
 export const accountUpdateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   currentPassword: z.string().optional(),
@@ -57,6 +61,12 @@ export const accountUpdateSchema = z.object({
 
 export const billingSchema = z.object({
   plan: z.enum(["MONTHLY", "YEARLY"]),
+})
+
+export const depositSettingsSchema = z.object({
+  depositEnabled: z.boolean(),
+  depositAmount: z.number().int().min(0, "El monto debe ser mayor o igual a 0"),
+  depositMinPartySize: z.number().int().min(1, "Minimo 1 persona"),
 })
 
 // ─── Team schemas ──────────────────────────────────────────────────────────

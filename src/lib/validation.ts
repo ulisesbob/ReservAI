@@ -13,7 +13,7 @@ export function validatePassword(password: string): string | null {
 }
 
 /** Valid reservation status values */
-export const VALID_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"] as const
+export const VALID_STATUSES = ["PENDING", "PENDING_DEPOSIT", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"] as const
 
 /** Validate that a timezone string is a valid IANA timezone */
 export function isValidTimezone(tz: string): boolean {

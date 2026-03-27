@@ -79,6 +79,9 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
                   )}
                 </Link>
               </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard/no-shows">No-shows</Link>
+              </Button>
               {role === "ADMIN" && (
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/settings/restaurant">Configuracion</Link>
