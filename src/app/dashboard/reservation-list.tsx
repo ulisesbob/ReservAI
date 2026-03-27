@@ -226,8 +226,9 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
 
       {/* Table */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <span className="sr-only">Cargando reservas</span>
         </div>
       ) : reservations.length === 0 ? (
         <div className="rounded-lg border bg-card p-8 text-center">
@@ -241,14 +242,14 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Hora</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Personas</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Sena</TableHead>
-                  <TableHead>Origen</TableHead>
-                  <TableHead>Acciones</TableHead>
+                  <TableHead scope="col">Hora</TableHead>
+                  <TableHead scope="col">Fecha</TableHead>
+                  <TableHead scope="col">Cliente</TableHead>
+                  <TableHead scope="col">Personas</TableHead>
+                  <TableHead scope="col">Estado</TableHead>
+                  <TableHead scope="col">Sena</TableHead>
+                  <TableHead scope="col">Origen</TableHead>
+                  <TableHead scope="col">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

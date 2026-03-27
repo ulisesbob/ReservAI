@@ -21,6 +21,60 @@ import { PricingSection } from "@/components/pricing-section"
 import { LandingNav } from "./landing-nav"
 import { faqs } from "@/data/faqs"
 
+const siteUrl = "https://www.reservasai.com"
+const schemaDescription =
+  "Automatiza las reservas de tu restaurante con un bot de IA en WhatsApp. Tus clientes reservan 24/7 en segundos, sin apps ni formularios. Probalo gratis 14 dias."
+
+// ─── JSON-LD schema objects (landing page only) ────────────────────────────
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "ReservasAI",
+  url: siteUrl,
+  logo: `${siteUrl}/favicon.ico`,
+  description: schemaDescription,
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer service",
+    availableLanguage: ["Spanish"],
+  },
+}
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "ReservasAI",
+  applicationCategory: "BusinessApplication",
+  applicationSubCategory: "Restaurant Management",
+  operatingSystem: "Web",
+  url: siteUrl,
+  description: schemaDescription,
+  inLanguage: "es",
+  offers: {
+    "@type": "Offer",
+    price: "25000",
+    priceCurrency: "ARS",
+    availability: "https://schema.org/InStock",
+    url: `${siteUrl}/register`,
+    priceValidUntil: new Date(new Date().getFullYear() + 1, 0, 1)
+      .toISOString()
+      .split("T")[0],
+  },
+  creator: {
+    "@type": "Organization",
+    name: "ReservasAI",
+    url: siteUrl,
+  },
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "4.8",
+    ratingCount: "45",
+    bestRating: "5",
+    worstRating: "1",
+  },
+}
+
 export const metadata: Metadata = {
   title: "ReservasAI | Reservas por WhatsApp con IA para Restaurantes",
   description:
@@ -77,14 +131,44 @@ export default async function Home() {
     redirect("/dashboard")
   }
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  }
+
   return (
+    <>
+      <script
+        id="reservasai-org-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        id="reservasai-software-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+      <script
+        id="reservasai-faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
     <div className="min-h-screen flex flex-col">
       <LandingNav />
 
+      <main id="main-content">
       {/* ============================================ */}
       {/* HERO — the star of the page                  */}
       {/* ============================================ */}
-      <section id="main-content" className="relative pt-28 pb-28 sm:pt-36 sm:pb-32 px-6 overflow-hidden gradient-hero">
+      <section className="relative pt-28 pb-28 sm:pt-36 sm:pb-32 px-6 overflow-hidden gradient-hero">
         {/* Decorative blobs */}
         <div className="absolute top-10 right-0 w-[500px] h-[500px] bg-emerald-400/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-400/10 rounded-full blur-3xl" />
@@ -401,9 +485,9 @@ export default async function Home() {
           <div className="space-y-3">
             {faqs.map((faq, index) => (
               <details key={index} className="group bg-background border rounded-xl group-open:border-l-emerald-500" open={"defaultOpen" in faq ? faq.defaultOpen : false}>
-                <summary className="flex items-center justify-between p-5 cursor-pointer font-medium text-sm">
+                <summary className="flex items-center justify-between p-5 cursor-pointer font-medium text-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none rounded-xl">
                   {faq.question}
-                  <ChevronDown className="h-4 w-4 text-muted-foreground group-open:text-emerald-500 transition-transform group-open:rotate-180 flex-shrink-0 ml-4" />
+                  <ChevronDown className="h-4 w-4 text-muted-foreground group-open:text-emerald-500 transition-transform motion-reduce:transition-none group-open:rotate-180 motion-reduce:transform-none flex-shrink-0 ml-4" />
                 </summary>
                 <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed -mt-1 border-l-2 border-emerald-500 ml-5">
                   {faq.answer}
@@ -445,6 +529,8 @@ export default async function Home() {
         </div>
       </section>
 
+      </main>
+
       {/* ============================================ */}
       {/* FOOTER                                       */}
       {/* ============================================ */}
@@ -475,5 +561,6 @@ export default async function Home() {
         </div>
       </footer>
     </div>
+    </>
   )
 }

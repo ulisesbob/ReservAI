@@ -32,7 +32,9 @@ export function PricingSection() {
       {/* Toggle */}
       <div className="flex items-center gap-1 bg-muted rounded-full p-1">
         <button
-          className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+          aria-pressed={!annual}
+          aria-label="Facturacion mensual"
+          className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all motion-reduce:transition-none ${
             !annual
               ? "gradient-cta text-white shadow-lg"
               : "text-muted-foreground hover:text-foreground"
@@ -42,7 +44,9 @@ export function PricingSection() {
           Mensual
         </button>
         <button
-          className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+          aria-pressed={annual}
+          aria-label="Facturacion anual"
+          className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all motion-reduce:transition-none ${
             annual
               ? "gradient-cta text-white shadow-lg"
               : "text-muted-foreground hover:text-foreground"
@@ -98,7 +102,7 @@ export function PricingSection() {
           <Button
             asChild
             size="lg"
-            className="w-full mt-8 h-12 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow gradient-cta text-white border-0"
+            className="w-full mt-8 h-12 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow motion-reduce:transition-none gradient-cta text-white border-0"
           >
             <Link href="/register">
               Empeza gratis — 14 dias de prueba

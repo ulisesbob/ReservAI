@@ -332,7 +332,7 @@ export function BookingForm({
             </div>
 
             {/* Date pills */}
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-1" role="listbox" aria-label="Dias disponibles">
               {visibleDays.map((day) => {
                 const dayOfWeek = day.getDay()
                 const isOpen = openDayNumbers.includes(dayOfWeek)
@@ -343,14 +343,27 @@ export function BookingForm({
                 return (
                   <button
                     key={day.toISOString()}
+                    role="option"
+                    aria-selected={!!isSelected}
+                    aria-label={format(day, "EEEE d 'de' MMMM", { locale: es })}
                     disabled={disabled}
                     onClick={() => {
                       setSelectedDate(day)
                       setSelectedTime(null)
                       setStep("time")
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        if (!disabled) {
+                          setSelectedDate(day)
+                          setSelectedTime(null)
+                          setStep("time")
+                        }
+                      }
+                    }}
                     className={`
-                      flex flex-col items-center py-2 px-1 rounded-lg text-xs transition-colors
+                      flex flex-col items-center py-2 px-1 rounded-lg text-xs transition-colors motion-reduce:transition-none
                       ${disabled ? "opacity-30 cursor-not-allowed" : "hover:bg-accent cursor-pointer"}
                       ${isSelected ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
                     `}
@@ -380,24 +393,35 @@ export function BookingForm({
             </Label>
 
             {loadingSlots ? (
-              <div className="flex items-center justify-center py-6">
+              <div className="flex items-center justify-center py-6" role="status" aria-live="polite">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <span className="sr-only">Cargando horarios disponibles</span>
               </div>
             ) : timeSlots.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
                 No hay horarios disponibles para este dia
               </p>
             ) : (
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-4 gap-1.5" role="listbox" aria-label="Horarios disponibles">
                 {timeSlots.map((time) => (
                   <button
                     key={time}
+                    role="option"
+                    aria-selected={selectedTime === time}
+                    aria-label={`${time} horas`}
                     onClick={() => {
                       setSelectedTime(time)
                       setStep("details")
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        setSelectedTime(time)
+                        setStep("details")
+                      }
+                    }}
                     className={`
-                      py-2 px-2 rounded-md text-sm font-medium transition-colors
+                      py-2 px-2 rounded-md text-sm font-medium transition-colors motion-reduce:transition-none
                       ${selectedTime === time
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted hover:bg-accent"
@@ -426,18 +450,20 @@ export function BookingForm({
             </div>
 
             <div>
-              <Label htmlFor="name">Nombre *</Label>
+              <Label htmlFor="name">Nombre <span aria-label="requerido">*</span></Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Tu nombre"
                 required
+                aria-required="true"
+                aria-describedby={error ? "error-form" : undefined}
               />
             </div>
 
             <div>
-              <Label htmlFor="phone">Telefono *</Label>
+              <Label htmlFor="phone">Telefono <span aria-label="requerido">*</span></Label>
               <Input
                 id="phone"
                 type="tel"
@@ -445,6 +471,8 @@ export function BookingForm({
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+54 11 1234-5678"
                 required
+                aria-required="true"
+                aria-describedby={error ? "error-form" : undefined}
               />
             </div>
 
@@ -460,7 +488,7 @@ export function BookingForm({
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+              <div id="error-form" role="alert" className="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
                 {error}
               </div>
             )}
@@ -478,9 +506,13 @@ export function BookingForm({
               className="w-full h-11"
               disabled={!name || !phone || submitting}
               onClick={handleSubmit}
+              aria-busy={submitting}
             >
               {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span role="status" aria-live="polite">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span className="sr-only">Enviando reserva</span>
+                </span>
               ) : null}
               {requiresDeposit ? "Continuar al pago de sena" : "Confirmar reserva"}
             </Button>
