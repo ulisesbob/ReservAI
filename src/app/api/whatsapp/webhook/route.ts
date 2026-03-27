@@ -11,9 +11,19 @@ import { safeDecrypt, verifyWebhookSignature } from "@/lib/encryption"
 // Rate limiting — in-memory, per-phone, max 10 messages/minute
 // ---------------------------------------------------------------------------
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+let lastCleanup = Date.now()
 
 function checkRateLimit(phone: string): boolean {
   const now = Date.now()
+
+  // Cleanup expired entries every 5 minutes to prevent memory leak
+  if (now - lastCleanup > 5 * 60 * 1000) {
+    for (const [key, val] of rateLimitMap) {
+      if (now > val.resetAt) rateLimitMap.delete(key)
+    }
+    lastCleanup = now
+  }
+
   const entry = rateLimitMap.get(phone)
   if (!entry || now > entry.resetAt) {
     rateLimitMap.set(phone, { count: 1, resetAt: now + 60000 })

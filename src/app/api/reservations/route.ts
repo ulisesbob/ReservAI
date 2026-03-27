@@ -95,6 +95,12 @@ export async function POST(request: Request) {
       )
     }
 
+    if (typeof customerName !== "string" || customerName.length > 200 ||
+        typeof customerPhone !== "string" || customerPhone.length > 30 ||
+        (customerEmail && (typeof customerEmail !== "string" || customerEmail.length > 255))) {
+      return NextResponse.json({ error: "Datos demasiado largos o inválidos" }, { status: 400 })
+    }
+
     const parsedDate = new Date(dateTime)
     if (isNaN(parsedDate.getTime())) {
       return NextResponse.json({ error: "Fecha/hora inválida" }, { status: 400 })

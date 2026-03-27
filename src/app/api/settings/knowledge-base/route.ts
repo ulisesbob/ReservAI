@@ -16,6 +16,14 @@ export async function PATCH(request: Request) {
       )
     }
 
+    // Limit to 50KB — this text gets injected into every AI prompt
+    if (knowledgeBase.length > 50000) {
+      return NextResponse.json(
+        { error: "El contenido es demasiado largo (máximo 50.000 caracteres)" },
+        { status: 400 }
+      )
+    }
+
     await prisma.restaurant.update({
       where: { id: session.restaurantId },
       data: { knowledgeBase },

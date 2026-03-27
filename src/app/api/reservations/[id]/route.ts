@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
+import { VALID_STATUSES } from "@/lib/validation"
 
 export async function PATCH(
   request: Request,
@@ -27,9 +28,24 @@ export async function PATCH(
     const { customerName, customerPhone, customerEmail, dateTime, partySize, status } = body
     const data: Record<string, unknown> = {}
 
-    if (customerName !== undefined) data.customerName = customerName
-    if (customerPhone !== undefined) data.customerPhone = customerPhone
-    if (customerEmail !== undefined) data.customerEmail = customerEmail
+    if (customerName !== undefined) {
+      if (typeof customerName !== "string" || customerName.length > 200) {
+        return NextResponse.json({ error: "Nombre demasiado largo" }, { status: 400 })
+      }
+      data.customerName = customerName
+    }
+    if (customerPhone !== undefined) {
+      if (typeof customerPhone !== "string" || customerPhone.length > 30) {
+        return NextResponse.json({ error: "Teléfono demasiado largo" }, { status: 400 })
+      }
+      data.customerPhone = customerPhone
+    }
+    if (customerEmail !== undefined) {
+      if (customerEmail !== null && (typeof customerEmail !== "string" || customerEmail.length > 255)) {
+        return NextResponse.json({ error: "Email demasiado largo" }, { status: 400 })
+      }
+      data.customerEmail = customerEmail
+    }
     if (dateTime !== undefined) {
       const parsedDate = new Date(dateTime)
       if (isNaN(parsedDate.getTime())) {
@@ -89,7 +105,6 @@ export async function PATCH(
       }
     }
     if (status !== undefined) {
-      const VALID_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]
       if (!VALID_STATUSES.includes(status)) {
         return NextResponse.json({ error: "Status inválido" }, { status: 400 })
       }

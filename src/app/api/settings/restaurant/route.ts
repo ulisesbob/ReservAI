@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { isValidTimezone } from "@/lib/validation"
 
 export async function GET() {
   try {
@@ -43,6 +44,13 @@ export async function PATCH(request: Request) {
     if (typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
         { error: "El nombre es obligatorio" },
+        { status: 400 }
+      )
+    }
+
+    if (timezone && !isValidTimezone(timezone)) {
+      return NextResponse.json(
+        { error: "Zona horaria inválida" },
         { status: 400 }
       )
     }

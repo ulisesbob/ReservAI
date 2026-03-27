@@ -14,3 +14,13 @@ export function validatePassword(password: string): string | null {
 
 /** Valid reservation status values */
 export const VALID_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"] as const
+
+/** Validate that a timezone string is a valid IANA timezone */
+export function isValidTimezone(tz: string): boolean {
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz })
+    return true
+  } catch {
+    return false
+  }
+}

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { sendEmail } from "@/lib/email"
 import { WelcomeEmail } from "@/lib/email-templates/welcome"
 import { checkRateLimit, rateLimiters, getClientIp } from "@/lib/rate-limit"
-import { validatePassword } from "@/lib/validation"
+import { validatePassword, isValidTimezone } from "@/lib/validation"
 
 export async function POST(request: Request) {
   try {
@@ -19,9 +19,9 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { restaurantName, name, email, password, timezone } = body
+    const { restaurantName, name, email: rawEmail, password, timezone } = body
 
-    if (!restaurantName || !name || !email || !password) {
+    if (!restaurantName || !name || !rawEmail || !password) {
       return NextResponse.json(
         { error: "Todos los campos son obligatorios" },
         { status: 400 }
@@ -32,6 +32,8 @@ export async function POST(request: Request) {
     if (passwordError) {
       return NextResponse.json({ error: passwordError }, { status: 400 })
     }
+
+    const email = rawEmail.toLowerCase().trim()
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
@@ -48,13 +50,17 @@ export async function POST(request: Request) {
       )
     }
 
+    if (timezone && !isValidTimezone(timezone)) {
+      return NextResponse.json({ error: "Zona horaria inválida" }, { status: 400 })
+    }
+
     const existingUser = await prisma.user.findUnique({
       where: { email },
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "El email ya está registrado" },
+        { error: "No se pudo completar el registro. Si ya tenés cuenta, intentá iniciar sesión." },
         { status: 409 }
       )
     }
