@@ -59,16 +59,20 @@ type ViewMode = "month" | "week" | "day"
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-yellow-400",
+  PENDING_DEPOSIT: "bg-amber-400",
   CONFIRMED: "bg-emerald-500",
   CANCELLED: "bg-red-400",
   COMPLETED: "bg-gray-400",
+  NO_SHOW: "bg-orange-400",
 }
 
 const STATUS_BADGE: Record<string, string> = {
   PENDING: "border-yellow-500 text-yellow-700 bg-yellow-50",
+  PENDING_DEPOSIT: "border-amber-500 text-amber-700 bg-amber-50",
   CONFIRMED: "border-transparent bg-emerald-100 text-emerald-800",
   CANCELLED: "border-transparent bg-red-100 text-red-800",
   COMPLETED: "border-transparent bg-gray-100 text-gray-700",
+  NO_SHOW: "border-transparent bg-orange-100 text-orange-800",
 }
 
 const WEEKDAYS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"]
@@ -198,7 +202,7 @@ export function ReservationCalendar() {
       date: day,
       reservations: dayReservations,
       confirmed: dayReservations.filter((r) => r.status === "CONFIRMED").length,
-      pending: dayReservations.filter((r) => r.status === "PENDING").length,
+      pending: dayReservations.filter((r) => r.status === "PENDING" || r.status === "PENDING_DEPOSIT").length,
       totalGuests: dayReservations
         .filter((r) => r.status !== "CANCELLED")
         .reduce((sum, r) => sum + r.partySize, 0),
@@ -432,7 +436,7 @@ export function ReservationCalendar() {
                             </div>
                           </div>
                           <div className="flex items-center gap-1">
-                            {r.status === "PENDING" && (
+                            {(r.status === "PENDING" || r.status === "PENDING_DEPOSIT") && (
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -442,7 +446,7 @@ export function ReservationCalendar() {
                                 Confirmar
                               </Button>
                             )}
-                            {(r.status === "PENDING" || r.status === "CONFIRMED") && (
+                            {(r.status === "PENDING" || r.status === "PENDING_DEPOSIT" || r.status === "CONFIRMED") && (
                               <Button
                                 size="sm"
                                 variant="ghost"

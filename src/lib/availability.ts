@@ -107,7 +107,7 @@ export async function checkAvailability(
     where: {
       restaurantId,
       dateTime: { gte: windowStart, lte: windowEnd },
-      status: { in: ["PENDING", "CONFIRMED"] },
+      status: { in: ["PENDING", "PENDING_DEPOSIT", "CONFIRMED"] },
     },
     select: { partySize: true },
   })

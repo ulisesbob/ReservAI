@@ -324,6 +324,12 @@ async function processIncomingMessage(
     })
 
     if (availability.available) {
+      // Determine if a deposit is required
+      const needsDeposit =
+        restaurant.depositEnabled &&
+        restaurant.depositAmount > 0 &&
+        r.personas >= restaurant.depositMinPartySize
+
       const reservation = await prisma.reservation.create({
         data: {
           restaurantId: restaurant.id,
@@ -334,10 +340,18 @@ async function processIncomingMessage(
             : null,
           dateTime,
           partySize: r.personas,
-          status: "CONFIRMED",
+          status: needsDeposit ? "PENDING_DEPOSIT" : "CONFIRMED",
           source: "WHATSAPP",
+          depositStatus: needsDeposit ? "PENDING" : "NONE",
+          depositAmount: needsDeposit ? restaurant.depositAmount : null,
         },
       })
+
+      if (needsDeposit) {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ""
+        const depositLink = `${baseUrl}/book/${restaurant.slug}?deposit=pay&reservation=${reservation.id}`
+        responseText += `\n\nPara confirmar tu reserva, necesitamos una sena de $${restaurant.depositAmount.toLocaleString("es-AR")} ARS. Podes pagarla en este link: ${depositLink}`
+      }
 
       // Link reservation to conversation
       await prisma.conversation.update({
@@ -382,7 +396,7 @@ async function processIncomingMessage(
         where: {
           restaurantId: restaurant.id,
           customerPhone: { contains: String(args.telefono || customerPhone) },
-          status: { in: ["CONFIRMED", "PENDING"] },
+          status: { in: ["CONFIRMED", "PENDING", "PENDING_DEPOSIT"] },
           dateTime: { gte: new Date() },
         },
         orderBy: { dateTime: "asc" },

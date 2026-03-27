@@ -147,7 +147,7 @@ export async function POST(request: Request) {
         where: {
           restaurantId: session.restaurantId,
           dateTime: { gte: dayStart, lte: dayEnd },
-          status: { in: ["PENDING", "CONFIRMED"] },
+          status: { in: ["PENDING", "PENDING_DEPOSIT", "CONFIRMED"] },
         },
         _sum: { partySize: true },
       })

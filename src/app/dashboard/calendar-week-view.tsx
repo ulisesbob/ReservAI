@@ -30,9 +30,11 @@ type Reservation = {
 
 const STATUS_COLORS: Record<string, { bg: string; border: string; text: string }> = {
   PENDING: { bg: "bg-yellow-100", border: "border-l-yellow-400", text: "text-yellow-800" },
+  PENDING_DEPOSIT: { bg: "bg-amber-100", border: "border-l-amber-400", text: "text-amber-800" },
   CONFIRMED: { bg: "bg-emerald-100", border: "border-l-emerald-500", text: "text-emerald-800" },
   CANCELLED: { bg: "bg-red-100", border: "border-l-red-400", text: "text-red-700" },
   COMPLETED: { bg: "bg-gray-100", border: "border-l-gray-400", text: "text-gray-600" },
+  NO_SHOW: { bg: "bg-orange-100", border: "border-l-orange-400", text: "text-orange-800" },
 }
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 8) // 08:00 - 23:00

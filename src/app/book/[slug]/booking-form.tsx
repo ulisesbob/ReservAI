@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import {
   ChevronLeft,
   ChevronRight,
@@ -22,6 +23,7 @@ import {
   Users,
   Check,
   Loader2,
+  Banknote,
 } from "lucide-react"
 
 const SPANISH_DAYS: Record<string, number> = {
@@ -29,16 +31,22 @@ const SPANISH_DAYS: Record<string, number> = {
   jueves: 4, viernes: 5, sabado: 6,
 }
 
-type Step = "date" | "time" | "details" | "success"
+type Step = "date" | "time" | "details" | "success" | "deposit"
 
 export function BookingForm({
   slug,
   maxPartySize,
   openDays,
+  depositEnabled,
+  depositAmount,
+  depositMinPartySize,
 }: {
   slug: string
   maxPartySize: number
   openDays: string[]
+  depositEnabled: boolean
+  depositAmount: number
+  depositMinPartySize: number
 }) {
   const [step, setStep] = useState<Step>("date")
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -91,6 +99,8 @@ export function BookingForm({
     fetchSlots()
   }, [selectedDate, slug])
 
+  const requiresDeposit = depositEnabled && partySize >= depositMinPartySize && depositAmount > 0
+
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime || !name || !phone) return
     setSubmitting(true)
@@ -116,12 +126,104 @@ export function BookingForm({
         return
       }
 
-      setStep("success")
+      // If the reservation requires a deposit, go to deposit step
+      if (data.requiresDeposit && data.reservation?.id) {
+        setReservationId(data.reservation.id)
+        setStep("deposit")
+      } else {
+        setStep("success")
+      }
     } catch {
-      setError("Error de conexión. Intenta de nuevo.")
+      setError("Error de conexion. Intenta de nuevo.")
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const [reservationId, setReservationId] = useState<string | null>(null)
+  const [depositLoading, setDepositLoading] = useState(false)
+
+  const handlePayDeposit = async () => {
+    if (!reservationId) return
+    setDepositLoading(true)
+    setError("")
+
+    try {
+      const res = await fetch("/api/deposits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reservationId,
+          payerEmail: email || undefined,
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Error al procesar el pago")
+        return
+      }
+
+      if (data.initPoint) {
+        window.location.href = data.initPoint
+      } else {
+        setError("No se recibio el enlace de pago. Intenta de nuevo.")
+      }
+    } catch {
+      setError("Error de conexion. Intenta de nuevo.")
+    } finally {
+      setDepositLoading(false)
+    }
+  }
+
+  if (step === "deposit") {
+    return (
+      <Card>
+        <CardContent className="pt-8 pb-8 text-center space-y-4">
+          <div className="mx-auto h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center">
+            <Banknote className="h-8 w-8 text-amber-600" />
+          </div>
+          <h2 className="text-xl font-semibold">Sena requerida</h2>
+          <div className="text-muted-foreground space-y-1">
+            <p className="capitalize">
+              {selectedDate && format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
+            </p>
+            <p>{selectedTime} hs — {partySize} {partySize === 1 ? "persona" : "personas"}</p>
+            <p className="font-medium text-foreground">{name}</p>
+          </div>
+          <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+            <p className="text-sm text-amber-800">
+              Para reservas de {depositMinPartySize} o mas personas se requiere una sena de{" "}
+              <span className="font-bold">${depositAmount.toLocaleString("es-AR")} ARS</span>.
+            </p>
+            <p className="text-xs text-amber-700 mt-1">
+              La sena se descuenta de tu cuenta al llegar al restaurante.
+            </p>
+          </div>
+
+          {error && (
+            <div className="p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+
+          <Button
+            className="w-full h-11"
+            onClick={handlePayDeposit}
+            disabled={depositLoading}
+          >
+            {depositLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : null}
+            Pagar sena — ${depositAmount.toLocaleString("es-AR")} ARS
+          </Button>
+
+          <p className="text-xs text-muted-foreground">
+            Seras redirigido a MercadoPago para completar el pago.
+          </p>
+        </CardContent>
+      </Card>
+    )
   }
 
   if (step === "success") {
@@ -151,6 +253,7 @@ export function BookingForm({
               setName("")
               setPhone("")
               setEmail("")
+              setReservationId(null)
             }}
           >
             Hacer otra reserva
@@ -362,6 +465,15 @@ export function BookingForm({
               </div>
             )}
 
+            {requiresDeposit && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                <Banknote className="h-4 w-4 flex-shrink-0" />
+                <span>
+                  Se requiere una sena de <strong>${depositAmount.toLocaleString("es-AR")} ARS</strong> para esta reserva.
+                </span>
+              </div>
+            )}
+
             <Button
               className="w-full h-11"
               disabled={!name || !phone || submitting}
@@ -370,7 +482,7 @@ export function BookingForm({
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              Confirmar reserva
+              {requiresDeposit ? "Continuar al pago de sena" : "Confirmar reserva"}
             </Button>
 
             <button
