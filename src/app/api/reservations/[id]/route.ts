@@ -2,12 +2,16 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
 import { VALID_STATUSES } from "@/lib/validation"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const blocked = applyRateLimit(rateLimiters.reservationWrite, request)
+    if (blocked) return blocked
+
     const session = await requireSession()
     const { id } = await params
 
@@ -135,10 +139,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const blocked = applyRateLimit(rateLimiters.reservationWrite, request)
+    if (blocked) return blocked
+
     const session = await requireSession()
     const { id } = await params
 

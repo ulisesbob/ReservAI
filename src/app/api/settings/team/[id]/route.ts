@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const blocked = applyRateLimit(rateLimiters.settings, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
     const { id } = await params
 

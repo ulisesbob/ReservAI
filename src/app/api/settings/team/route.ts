@@ -5,9 +5,12 @@ import bcrypt from "bcryptjs"
 import { sendEmail } from "@/lib/email"
 import { validatePassword } from "@/lib/validation"
 import { TeamInviteEmail } from "@/lib/email-templates/team-invite"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const blocked = applyRateLimit(rateLimiters.settings, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
 
     const users = await prisma.user.findMany({
@@ -38,6 +41,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const blocked = applyRateLimit(rateLimiters.settings, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
 
     const body = await request.json()

@@ -4,9 +4,13 @@ import { requireSession } from "@/lib/auth"
 import { sendEmail } from "@/lib/email"
 import { ReservationConfirmationEmail } from "@/lib/email-templates/reservation-confirmation"
 import { VALID_STATUSES } from "@/lib/validation"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function GET(request: Request) {
   try {
+    const blocked = applyRateLimit(rateLimiters.reservationRead, request)
+    if (blocked) return blocked
+
     const session = await requireSession()
     const { searchParams } = new URL(request.url)
 
@@ -30,8 +34,24 @@ export async function GET(request: Request) {
     }
 
     if (date) {
+      // Fetch restaurant timezone to calculate correct day boundaries
+      const restaurant = await prisma.restaurant.findUnique({
+        where: { id: session.restaurantId },
+        select: { timezone: true },
+      })
+      const tz = restaurant?.timezone || "America/Argentina/Buenos_Aires"
+
+      // Calculate UTC offset for the restaurant's timezone
+      const sample = new Date(`${date}T12:00:00Z`)
+      const localStr = sample.toLocaleString("en-US", { timeZone: tz, hour: "numeric", hour12: false })
+      const localHour = parseInt(localStr, 10)
+      const offsetHours = 12 - localHour // positive = ahead of UTC
+
       const dayStart = new Date(`${date}T00:00:00.000Z`)
-      const dayEnd = new Date(`${date}T23:59:59.999Z`)
+      dayStart.setUTCHours(-offsetHours, 0, 0, 0)
+      const dayEnd = new Date(`${date}T00:00:00.000Z`)
+      dayEnd.setUTCHours(23 - offsetHours, 59, 59, 999)
+
       where.dateTime = { gte: dayStart, lte: dayEnd }
     }
 
@@ -82,6 +102,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const blocked = applyRateLimit(rateLimiters.reservationWrite, request)
+    if (blocked) return blocked
+
     const session = await requireSession()
     const body = await request.json()
 

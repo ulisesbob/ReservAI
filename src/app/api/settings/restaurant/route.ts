@@ -2,9 +2,12 @@ import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { isValidTimezone } from "@/lib/validation"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const blocked = applyRateLimit(rateLimiters.settings, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
 
     const restaurant = await prisma.restaurant.findUniqueOrThrow({
@@ -35,6 +38,8 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    const blocked = applyRateLimit(rateLimiters.settings, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
 
     const body = await request.json()

@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function PATCH(request: Request) {
   try {
+    const blocked = applyRateLimit(rateLimiters.settings, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
 
     const body = await request.json()

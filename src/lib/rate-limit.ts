@@ -59,10 +59,33 @@ export function checkRateLimit(
 
 /** Pre-configured limiters */
 export const rateLimiters = {
-  login: { name: "login", maxRequests: 5, windowMs: 15 * 60 * 1000 },       // 5 per 15 min
-  register: { name: "register", maxRequests: 3, windowMs: 60 * 60 * 1000 }, // 3 per hour
-  agentTest: { name: "agentTest", maxRequests: 10, windowMs: 60 * 1000 },   // 10 per min
+  login: { name: "login", maxRequests: 5, windowMs: 15 * 60 * 1000 },                  // 5 per 15 min
+  register: { name: "register", maxRequests: 3, windowMs: 60 * 60 * 1000 },            // 3 per hour
+  agentTest: { name: "agentTest", maxRequests: 10, windowMs: 60 * 1000 },              // 10 per min
+  reservationWrite: { name: "reservationWrite", maxRequests: 30, windowMs: 60 * 1000 }, // 30 per min
+  reservationRead: { name: "reservationRead", maxRequests: 60, windowMs: 60 * 1000 },  // 60 per min
+  settings: { name: "settings", maxRequests: 20, windowMs: 60 * 1000 },                // 20 per min
+  export: { name: "export", maxRequests: 5, windowMs: 60 * 1000 },                     // 5 per min
 } as const
+
+/**
+ * Check rate limit and return a 429 response if exceeded, or null if allowed.
+ * Usage: const blocked = applyRateLimit(rateLimiters.settings, request); if (blocked) return blocked;
+ */
+export function applyRateLimit(
+  config: RateLimitConfig,
+  request: Request
+): Response | null {
+  const ip = getClientIp(request)
+  const rl = checkRateLimit(config, ip)
+  if (!rl.allowed) {
+    return Response.json(
+      { error: "Demasiados intentos. Intenta de nuevo más tarde." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+    )
+  }
+  return null
+}
 
 /**
  * Extract client IP from request headers (works with Vercel/Cloudflare).
