@@ -5,11 +5,13 @@ import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 /** Escape CSV value to prevent formula injection (CWE-1236) */
 function escapeCsv(value: string): string {
-  // Always wrap in double quotes for safety, escape internal quotes
-  const escaped = value.replace(/"/g, '""')
-  // Prefix formula-triggering characters with tab inside quotes
-  if (/^[=+\-@\t\r]/.test(escaped)) {
-    return `"\t${escaped}"`
+  // Strip control characters that could be used for injection
+  const sanitized = value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+  // Escape internal double quotes
+  const escaped = sanitized.replace(/"/g, '""')
+  // Prefix formula-triggering characters with single quote (OWASP recommendation)
+  if (/^[=+\-@\t\r|%]/.test(escaped)) {
+    return `"'${escaped}"`
   }
   return `"${escaped}"`
 }
