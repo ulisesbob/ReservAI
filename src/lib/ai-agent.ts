@@ -27,6 +27,7 @@ interface ReservationData {
 interface AgentResponse {
   text: string
   reservation: ReservationData | null
+  toolCall?: { name: string; arguments: Record<string, unknown> }
 }
 
 export type { AgentMessage, RestaurantConfig, ReservationData, AgentResponse }
@@ -70,6 +71,45 @@ const reservationTool: ChatCompletionTool = {
   },
 }
 
+const buscarReservasTool: ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "buscar_reservas",
+    description:
+      "Busca reservas futuras confirmadas o pendientes del cliente por su número de teléfono. " +
+      "Usar cuando el cliente quiere cancelar o consultar sus reservas.",
+    parameters: {
+      type: "object",
+      properties: {
+        telefono: {
+          type: "string",
+          description: "Número de teléfono del cliente (el mismo que está usando en WhatsApp)",
+        },
+      },
+      required: ["telefono"],
+    },
+  },
+}
+
+const cancelarReservaTool: ChatCompletionTool = {
+  type: "function",
+  function: {
+    name: "cancelar_reserva",
+    description:
+      "Cancela una reserva existente del cliente. SOLO usar después de que el cliente confirmó cuál reserva quiere cancelar.",
+    parameters: {
+      type: "object",
+      properties: {
+        reservationId: {
+          type: "string",
+          description: "ID de la reserva a cancelar",
+        },
+      },
+      required: ["reservationId"],
+    },
+  },
+}
+
 // ─── Main process function ─────────────────────────────────────────────────
 
 export async function processMessage(
@@ -103,7 +143,7 @@ export async function processMessage(
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages,
-      tools: [reservationTool],
+      tools: [reservationTool, buscarReservasTool, cancelarReservaTool],
       tool_choice: "auto",
       temperature: 0.7,
       max_tokens: 500,
@@ -119,13 +159,22 @@ export async function processMessage(
     // Check if the model wants to call our function
     if (message.tool_calls && message.tool_calls.length > 0) {
       const toolCall = message.tool_calls[0] as { type: string; function?: { name: string; arguments: string } }
-      if (toolCall.function?.name === "crear_reserva") {
-        const reservation = parseToolCallArgs(toolCall.function.arguments, restaurant.maxPartySize)
+      const fnName = toolCall.function?.name
+      const fnArgs = toolCall.function?.arguments || "{}"
 
-        // The model may also include a text response alongside the tool call
+      if (fnName === "crear_reserva") {
+        const reservation = parseToolCallArgs(fnArgs, restaurant.maxPartySize)
         const responseText = message.content || buildConfirmationText(reservation)
-
         return { text: responseText, reservation }
+      }
+
+      if (fnName === "buscar_reservas" || fnName === "cancelar_reserva") {
+        const responseText = message.content || ""
+        return {
+          text: responseText,
+          reservation: null,
+          toolCall: { name: fnName, arguments: JSON.parse(fnArgs) },
+        }
       }
     }
 
@@ -227,6 +276,19 @@ Necesitás obtener estos 5 datos:
 - SOLO cuando tengas los 5 datos confirmados por el cliente.
 - Antes de llamar la función, confirmá los datos con el cliente en un mensaje.
 - Si algún dato es ambiguo, pedí aclaración primero.
+
+## Cancelaciones
+- Si el cliente quiere cancelar una reserva, usá la función buscar_reservas con su número de teléfono.
+- Si tiene una sola reserva futura, preguntá si quiere cancelar esa.
+- Si tiene varias, listálas numeradas y pedí que elija.
+- SOLO cancelar después de que el cliente confirmó.
+- Si no tiene reservas, decile que no encontraste reservas a su nombre.
+
+## Escalación a humano
+- Si el cliente pide explícitamente hablar con una persona, humano, encargado u operador, respondé:
+  "[ESCALATE:solicitud_cliente] Te conecto con nuestro equipo. Te van a responder a la brevedad."
+- Si no podés resolver la consulta del cliente después de 2 intentos sobre el mismo tema, respondé:
+  "[ESCALATE:no_resuelto] Parece que necesitás ayuda especializada. Te conecto con nuestro equipo."
 
 ## Ejemplo de conversación
 Cliente: "Hola quiero reservar para el viernes a las 21"

@@ -6,6 +6,7 @@ import type { RestaurantConfig, AgentMessage } from "@/lib/ai-agent"
 import { checkAvailability } from "@/lib/availability"
 import { sendWhatsAppMessage } from "@/lib/whatsapp"
 import { safeDecrypt, verifyWebhookSignature } from "@/lib/encryption"
+import { notifyNextInWaitlist, confirmWaitlistEntry, expireAndNotifyNext } from "@/lib/waitlist"
 
 // ---------------------------------------------------------------------------
 // Rate limiting — in-memory, per-phone, max 10 messages/minute
@@ -206,6 +207,55 @@ async function processIncomingMessage(
     },
   })
 
+  // Check if this is a waitlist response
+  const notifiedEntry = await prisma.waitlistEntry.findFirst({
+    where: {
+      restaurantId: restaurant.id,
+      customerPhone,
+      status: "NOTIFIED",
+      expiresAt: { gt: new Date() },
+    },
+  })
+
+  if (notifiedEntry) {
+    const lower = messageText.toLowerCase().trim()
+    const affirmative = ["sí", "si", "yes", "dale", "confirmo", "confirmar", "ok", "bueno"]
+    const negative = ["no", "cancelar", "cancelo", "paso"]
+
+    if (affirmative.some((w) => lower.includes(w))) {
+      const result = await confirmWaitlistEntry(notifiedEntry.id)
+      const reply = result.success
+        ? "¡Tu reserva fue confirmada! Te esperamos."
+        : `No se pudo confirmar: ${result.error}`
+      await prisma.message.create({ data: { conversationId: conversation.id, role: "ASSISTANT", content: reply } })
+      if (restaurant.whatsappToken) {
+        const decryptedToken = safeDecrypt(restaurant.whatsappToken)
+        await sendWhatsAppMessage(phoneNumberId, decryptedToken, customerPhone, reply)
+      }
+      return
+    }
+
+    if (negative.some((w) => lower.includes(w))) {
+      await prisma.waitlistEntry.update({ where: { id: notifiedEntry.id }, data: { status: "CANCELLED" } })
+      await notifyNextInWaitlist(restaurant.id, notifiedEntry.dateTime, notifiedEntry.partySize)
+      const reply = "Entendido, cancelamos tu lugar en la lista de espera."
+      await prisma.message.create({ data: { conversationId: conversation.id, role: "ASSISTANT", content: reply } })
+      if (restaurant.whatsappToken) {
+        const decryptedToken = safeDecrypt(restaurant.whatsappToken)
+        await sendWhatsAppMessage(phoneNumberId, decryptedToken, customerPhone, reply)
+      }
+      return
+    }
+  }
+
+  // Skip bot processing if conversation is escalated
+  if (conversation.status === "ESCALATED") {
+    return
+  }
+
+  // Expire stale waitlist entries
+  await expireAndNotifyNext(restaurant.id)
+
   // 5. Load conversation history (last 20 messages)
   const dbMessages = await prisma.message.findMany({
     where: { conversationId: conversation.id },
@@ -300,6 +350,75 @@ async function processIncomingMessage(
     } else {
       // Append availability error so the customer knows
       responseText += `\n\n${availability.reason}`
+    }
+  }
+
+  // Check for escalation pattern in response
+  const escalateMatch = responseText.match(/\[ESCALATE:([^\]]+)\]/)
+  if (escalateMatch) {
+    responseText = responseText.replace(/\[ESCALATE:[^\]]+\]\s*/g, "").trim()
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { status: "ESCALATED", escalatedAt: new Date(), escalatedReason: escalateMatch[1] },
+    })
+  }
+
+  // Check for escalation keywords in customer message
+  const escalationKeywords = ["humano", "persona", "hablar con alguien", "operador", "agente", "encargado"]
+  if (escalationKeywords.some((kw) => messageText.toLowerCase().includes(kw)) && conversation.status === "ACTIVE") {
+    responseText = "Te conecto con nuestro equipo. Te van a responder a la brevedad."
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { status: "ESCALATED", escalatedAt: new Date(), escalatedReason: "customer_request" },
+    })
+  }
+
+  // Handle cancellation tool calls
+  if (agentResponse.toolCall) {
+    const { name, arguments: args } = agentResponse.toolCall
+
+    if (name === "buscar_reservas") {
+      const reservations = await prisma.reservation.findMany({
+        where: {
+          restaurantId: restaurant.id,
+          customerPhone: { contains: String(args.telefono || customerPhone) },
+          status: { in: ["CONFIRMED", "PENDING"] },
+          dateTime: { gte: new Date() },
+        },
+        orderBy: { dateTime: "asc" },
+        take: 10,
+      })
+
+      if (reservations.length === 0) {
+        responseText = "No encontré reservas futuras a tu nombre."
+      } else if (reservations.length === 1) {
+        const r = reservations[0]
+        const dateStr = r.dateTime.toLocaleDateString("es-AR", { timeZone: restaurant.timezone, weekday: "long", day: "numeric", month: "long" })
+        const timeStr = r.dateTime.toLocaleTimeString("es-AR", { timeZone: restaurant.timezone, hour: "2-digit", minute: "2-digit", hour12: false })
+        responseText = `Tenés una reserva para ${r.partySize} personas el ${dateStr} a las ${timeStr} a nombre de ${r.customerName}. ¿Querés cancelarla? (ID: ${r.id})`
+      } else {
+        responseText = "Tus reservas:\n" + reservations.map((r, i) => {
+          const dateStr = r.dateTime.toLocaleDateString("es-AR", { timeZone: restaurant.timezone, weekday: "long", day: "numeric", month: "long" })
+          const timeStr = r.dateTime.toLocaleTimeString("es-AR", { timeZone: restaurant.timezone, hour: "2-digit", minute: "2-digit", hour12: false })
+          return `${i + 1}. ${dateStr} a las ${timeStr} — ${r.partySize} personas (${r.customerName})`
+        }).join("\n") + "\n\n¿Cuál querés cancelar?"
+      }
+    }
+
+    if (name === "cancelar_reserva") {
+      const reservationId = String(args.reservationId)
+      const reservation = await prisma.reservation.findFirst({
+        where: { id: reservationId, restaurantId: restaurant.id },
+      })
+
+      if (!reservation) {
+        responseText = "No encontré esa reserva."
+      } else {
+        await prisma.reservation.update({ where: { id: reservationId }, data: { status: "CANCELLED" } })
+        notifyNextInWaitlist(restaurant.id, reservation.dateTime, reservation.partySize)
+          .catch((err) => console.error("Waitlist notification error:", err))
+        responseText = `Tu reserva para ${reservation.partySize} personas fue cancelada. Si querés reservar de nuevo, escribime.`
+      }
     }
   }
 
