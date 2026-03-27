@@ -1,32 +1,9 @@
-/**
- * Simple in-memory rate limiter for serverless environments.
- * NOTE: On Vercel serverless, each cold start gets a fresh Map,
- * so this provides best-effort protection. For production hardening,
- * replace with @upstash/ratelimit + Redis.
- */
-
-interface RateLimitEntry {
-  count: number
-  resetAt: number
-}
-
-const stores = new Map<string, Map<string, RateLimitEntry>>()
-
-function getStore(name: string): Map<string, RateLimitEntry> {
-  let store = stores.get(name)
-  if (!store) {
-    store = new Map()
-    stores.set(name, store)
-  }
-  return store
-}
+import { Ratelimit } from "@upstash/ratelimit"
+import { Redis } from "@upstash/redis"
 
 interface RateLimitConfig {
-  /** Unique name for this limiter (e.g. "login", "register") */
   name: string
-  /** Max requests allowed within the window */
   maxRequests: number
-  /** Window duration in milliseconds */
   windowMs: number
 }
 
@@ -36,48 +13,72 @@ interface RateLimitResult {
   resetAt: number
 }
 
-export function checkRateLimit(
-  config: RateLimitConfig,
-  key: string
-): RateLimitResult {
-  const store = getStore(config.name)
+let redis: Redis | null = null
+function getRedis(): Redis | null {
+  if (redis) return redis
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) return null
+  redis = new Redis({ url, token })
+  return redis
+}
+
+const upstashLimiters = new Map<string, Ratelimit>()
+function getUpstashLimiter(config: RateLimitConfig): Ratelimit | null {
+  const r = getRedis()
+  if (!r) return null
+  let limiter = upstashLimiters.get(config.name)
+  if (!limiter) {
+    limiter = new Ratelimit({
+      redis: r,
+      limiter: Ratelimit.slidingWindow(config.maxRequests, `${config.windowMs}ms`),
+      prefix: `rl:${config.name}`,
+    })
+    upstashLimiters.set(config.name, limiter)
+  }
+  return limiter
+}
+
+interface InMemoryEntry { count: number; resetAt: number }
+const inMemoryStores = new Map<string, Map<string, InMemoryEntry>>()
+function checkInMemory(config: RateLimitConfig, key: string): RateLimitResult {
+  let store = inMemoryStores.get(config.name)
+  if (!store) { store = new Map(); inMemoryStores.set(config.name, store) }
   const now = Date.now()
   const entry = store.get(key)
-
   if (!entry || now > entry.resetAt) {
     store.set(key, { count: 1, resetAt: now + config.windowMs })
     return { allowed: true, remaining: config.maxRequests - 1, resetAt: now + config.windowMs }
   }
-
   if (entry.count >= config.maxRequests) {
     return { allowed: false, remaining: 0, resetAt: entry.resetAt }
   }
-
   entry.count++
   return { allowed: true, remaining: config.maxRequests - entry.count, resetAt: entry.resetAt }
 }
 
-/** Pre-configured limiters */
+export async function checkRateLimit(config: RateLimitConfig, key: string): Promise<RateLimitResult> {
+  const upstash = getUpstashLimiter(config)
+  if (upstash) {
+    const result = await upstash.limit(key)
+    return { allowed: result.success, remaining: result.remaining, resetAt: result.reset }
+  }
+  return checkInMemory(config, key)
+}
+
 export const rateLimiters = {
-  login: { name: "login", maxRequests: 5, windowMs: 15 * 60 * 1000 },                  // 5 per 15 min
-  register: { name: "register", maxRequests: 3, windowMs: 60 * 60 * 1000 },            // 3 per hour
-  agentTest: { name: "agentTest", maxRequests: 10, windowMs: 60 * 1000 },              // 10 per min
-  reservationWrite: { name: "reservationWrite", maxRequests: 30, windowMs: 60 * 1000 }, // 30 per min
-  reservationRead: { name: "reservationRead", maxRequests: 60, windowMs: 60 * 1000 },  // 60 per min
-  settings: { name: "settings", maxRequests: 20, windowMs: 60 * 1000 },                // 20 per min
-  export: { name: "export", maxRequests: 5, windowMs: 60 * 1000 },                     // 5 per min
+  login: { name: "login", maxRequests: 5, windowMs: 15 * 60 * 1000 },
+  register: { name: "register", maxRequests: 3, windowMs: 60 * 60 * 1000 },
+  agentTest: { name: "agentTest", maxRequests: 10, windowMs: 60 * 1000 },
+  reservationWrite: { name: "reservationWrite", maxRequests: 30, windowMs: 60 * 1000 },
+  reservationRead: { name: "reservationRead", maxRequests: 60, windowMs: 60 * 1000 },
+  settings: { name: "settings", maxRequests: 20, windowMs: 60 * 1000 },
+  export: { name: "export", maxRequests: 5, windowMs: 60 * 1000 },
 } as const
 
-/**
- * Check rate limit and return a 429 response if exceeded, or null if allowed.
- * Usage: const blocked = applyRateLimit(rateLimiters.settings, request); if (blocked) return blocked;
- */
-export function applyRateLimit(
-  config: RateLimitConfig,
-  request: Request
-): Response | null {
+export async function applyRateLimit(config: RateLimitConfig, request: Request): Promise<Response | null> {
   const ip = getClientIp(request)
-  const rl = checkRateLimit(config, ip)
+  const rl = await checkRateLimit(config, ip)
   if (!rl.allowed) {
     return Response.json(
       { error: "Demasiados intentos. Intenta de nuevo más tarde." },
@@ -87,14 +88,7 @@ export function applyRateLimit(
   return null
 }
 
-/**
- * Extract client IP from request headers (works with Vercel/Cloudflare).
- */
 export function getClientIp(request: Request): string {
   const headers = request.headers
-  return (
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headers.get("x-real-ip") ||
-    "unknown"
-  )
+  return headers.get("x-forwarded-for")?.split(",")[0]?.trim() || headers.get("x-real-ip") || "unknown"
 }
