@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, TrendingUp, Users, XCircle, Clock, MessageCircle, PenLine } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Loader2, TrendingUp, Users, XCircle, Clock, MessageCircle, PenLine, DollarSign } from "lucide-react"
+import Link from "next/link"
 
 interface Stats {
   period: { days: number }
@@ -51,6 +53,13 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
           <p className="text-muted-foreground">Estadísticas de reservas de tu restaurante.</p>
         </div>
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/analytics/revenue">
+            <Button variant="outline" size="sm">
+              <DollarSign className="w-4 h-4 mr-1" />
+              Ver Revenue Analytics
+            </Button>
+          </Link>
         <Select value={days} onValueChange={setDays}>
           <SelectTrigger className="w-[150px]" aria-label="Periodo de tiempo">
             <SelectValue />
@@ -61,6 +70,7 @@ export default function AnalyticsPage() {
             <SelectItem value="90">Últimos 90 días</SelectItem>
           </SelectContent>
         </Select>
+        </div>
       </div>
 
       {/* KPI Cards */}
