@@ -59,6 +59,17 @@ export const billingSchema = z.object({
   plan: z.enum(["MONTHLY", "YEARLY"]),
 })
 
+// ─── Waitlist schemas ────────────────────────────────────────────────────────
+
+export const waitlistCreateSchema = z.object({
+  restaurantId: z.string().min(1, "Restaurant ID es requerido"),
+  customerName: z.string().min(1, "Nombre es requerido").max(200),
+  customerPhone: z.string().min(1, "Teléfono es requerido").max(30),
+  customerEmail: z.string().email("Email inválido").max(255).nullish().or(z.literal("")),
+  dateTime: z.string().min(1, "Fecha/hora es requerida"),
+  partySize: z.coerce.number().int().min(1, "Mínimo 1 persona"),
+})
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 /** Parse a Zod schema and return a formatted error response or the parsed data */
