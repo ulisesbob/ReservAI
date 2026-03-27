@@ -3,6 +3,8 @@ import { timingSafeEqual } from "crypto"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, isEmailConfigured } from "@/lib/email"
 import { ReservationReminderEmail } from "@/lib/email-templates/reservation-reminder"
+import { sendWhatsAppMessage } from "@/lib/whatsapp"
+import { safeDecrypt } from "@/lib/encryption"
 
 /**
  * Returns UTC start/end of "tomorrow" in the given IANA timezone.
@@ -57,64 +59,96 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // Bail out early with a clear warning when email is not configured.
-  if (!isEmailConfigured()) {
-    console.warn("[cron/reminders] Skipping — RESEND_API_KEY is not configured.")
-    return NextResponse.json({ status: "skipped", reason: "email_not_configured" })
-  }
-
   try {
-    // Fetch all restaurants to query per-timezone
+    // Fetch all restaurants with WhatsApp config for reminders
     const restaurants = await prisma.restaurant.findMany({
-      select: { id: true, name: true, timezone: true },
+      select: {
+        id: true,
+        name: true,
+        timezone: true,
+        whatsappPhoneId: true,
+        whatsappToken: true,
+      },
     })
 
-    let sent = 0
-    let failed = 0
+    const emailEnabled = isEmailConfigured()
+    let emailSent = 0
+    let emailFailed = 0
+    let whatsappSent = 0
+    let whatsappFailed = 0
     let total = 0
 
     for (const rest of restaurants) {
       const tz = rest.timezone || "America/Argentina/Buenos_Aires"
       const { start, end } = getTomorrowRangeUTC(tz)
 
+      // Fetch ALL confirmed reservations for tomorrow (not just those with email)
       const reservations = await prisma.reservation.findMany({
         where: {
           restaurantId: rest.id,
           dateTime: { gte: start, lte: end },
           status: "CONFIRMED",
-          customerEmail: { not: null },
         },
-        take: 100,
+        take: 200,
       })
 
+      // Decrypt WhatsApp token once per restaurant
+      const waPhoneId = rest.whatsappPhoneId
+      const waToken = rest.whatsappToken ? safeDecrypt(rest.whatsappToken) : null
+
       for (const r of reservations) {
-        if (!r.customerEmail) continue
         total++
-
         const dateObj = new Date(r.dateTime)
-        const result = await sendEmail({
-          to: r.customerEmail,
-          subject: `Recordatorio: tu reserva en ${rest.name} es mañana`,
-          react: ReservationReminderEmail({
-            customerName: r.customerName,
-            restaurantName: rest.name,
-            date: dateObj.toLocaleDateString("es-AR", { timeZone: tz }),
-            time: dateObj.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", timeZone: tz }),
-            partySize: r.partySize,
-          }),
-        })
+        const dateStr = dateObj.toLocaleDateString("es-AR", { timeZone: tz })
+        const timeStr = dateObj.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", timeZone: tz })
 
-        if (result.success) {
-          sent++
-        } else {
-          failed++
-          console.error(`[cron/reminders] Failed for reservation ${r.id} (${r.customerEmail}):`, result.error)
+        // Send email reminder (if configured and customer has email)
+        if (emailEnabled && r.customerEmail) {
+          const result = await sendEmail({
+            to: r.customerEmail,
+            subject: `Recordatorio: tu reserva en ${rest.name} es mañana`,
+            react: ReservationReminderEmail({
+              customerName: r.customerName,
+              restaurantName: rest.name,
+              date: dateStr,
+              time: timeStr,
+              partySize: r.partySize,
+            }),
+          })
+          if (result.success) emailSent++
+          else {
+            emailFailed++
+            console.error(`[cron/reminders] Email failed for ${r.id}:`, result.error)
+          }
+        }
+
+        // Send WhatsApp reminder (if restaurant has WhatsApp configured)
+        if (waPhoneId && waToken && r.customerPhone) {
+          try {
+            const waMessage =
+              `Hola ${r.customerName}! Te recordamos tu reserva en ${rest.name} ` +
+              `para mañana ${dateStr} a las ${timeStr} ` +
+              `(${r.partySize} ${r.partySize === 1 ? "persona" : "personas"}). ` +
+              `¡Te esperamos!`
+
+            await sendWhatsAppMessage(waPhoneId, waToken, r.customerPhone, waMessage)
+            whatsappSent++
+          } catch (err) {
+            whatsappFailed++
+            console.error(`[cron/reminders] WhatsApp failed for ${r.id}:`, err)
+          }
         }
       }
     }
 
-    console.info(`[cron/reminders] Done — sent: ${sent}, failed: ${failed}, total: ${total}`)
-    return NextResponse.json({ status: "ok", sent, failed, total })
+    const summary = {
+      status: "ok",
+      total,
+      email: { sent: emailSent, failed: emailFailed },
+      whatsapp: { sent: whatsappSent, failed: whatsappFailed },
+    }
+    console.info(`[cron/reminders] Done —`, JSON.stringify(summary))
+    return NextResponse.json(summary)
   } catch (error) {
     console.error("Cron reminders error:", error instanceof Error ? error.message : "Unknown error")
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
