@@ -9,7 +9,7 @@ import { reservationCreateSchema, parseBody } from "@/lib/schemas"
 
 export async function GET(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.reservationRead, request)
+    const blocked = await applyRateLimit(rateLimiters.reservationRead, request)
     if (blocked) return blocked
 
     const session = await requireSession()
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.reservationWrite, request)
+    const blocked = await applyRateLimit(rateLimiters.reservationWrite, request)
     if (blocked) return blocked
 
     const session = await requireSession()

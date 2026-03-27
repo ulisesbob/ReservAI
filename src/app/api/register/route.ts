@@ -3,51 +3,25 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { sendEmail } from "@/lib/email"
 import { WelcomeEmail } from "@/lib/email-templates/welcome"
-import { checkRateLimit, rateLimiters, getClientIp } from "@/lib/rate-limit"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 import { validatePassword, isValidTimezone } from "@/lib/validation"
+import { registerSchema, parseBody } from "@/lib/schemas"
 
 export async function POST(request: Request) {
   try {
-    // Rate limit: 3 registrations per IP per hour
-    const ip = getClientIp(request)
-    const rl = checkRateLimit(rateLimiters.register, ip)
-    if (!rl.allowed) {
-      return NextResponse.json(
-        { error: "Demasiados intentos. Intenta de nuevo más tarde." },
-        { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
-      )
-    }
+    const blocked = await applyRateLimit(rateLimiters.register, request)
+    if (blocked) return blocked
 
     const body = await request.json()
-    const { restaurantName, name, email: rawEmail, password, timezone } = body
-
-    if (!restaurantName || !name || !rawEmail || !password) {
-      return NextResponse.json(
-        { error: "Todos los campos son obligatorios" },
-        { status: 400 }
-      )
+    const parsed = parseBody(registerSchema, body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
     }
+    const { restaurantName, name, email, password, timezone } = parsed.data
 
     const passwordError = validatePassword(password)
     if (passwordError) {
       return NextResponse.json({ error: passwordError }, { status: 400 })
-    }
-
-    const email = rawEmail.toLowerCase().trim()
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "Email inválido" },
-        { status: 400 }
-      )
-    }
-
-    if (restaurantName.length > 100 || name.length > 100 || email.length > 255) {
-      return NextResponse.json(
-        { error: "Datos demasiado largos" },
-        { status: 400 }
-      )
     }
 
     if (timezone && !isValidTimezone(timezone)) {

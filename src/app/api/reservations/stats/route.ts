@@ -5,7 +5,7 @@ import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function GET(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.reservationRead, request)
+    const blocked = await applyRateLimit(rateLimiters.reservationRead, request)
     if (blocked) return blocked
 
     const session = await requireAdmin()

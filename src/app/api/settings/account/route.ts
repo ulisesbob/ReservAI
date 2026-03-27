@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
 import { validatePassword } from "@/lib/validation"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { accountUpdateSchema, parseBody } from "@/lib/schemas"
 
 export async function GET(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.settings, request)
+    const blocked = await applyRateLimit(rateLimiters.settings, request)
     if (blocked) return blocked
     const session = await requireSession()
     const user = await prisma.user.findUnique({
@@ -28,11 +29,13 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.settings, request)
+    const blocked = await applyRateLimit(rateLimiters.settings, request)
     if (blocked) return blocked
     const session = await requireSession()
     const body = await request.json()
-    const { name, currentPassword, newPassword } = body
+    const parsed = parseBody(accountUpdateSchema, body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 })
+    const { name, currentPassword, newPassword } = parsed.data
 
     const user = await prisma.user.findUnique({
       where: { id: session.userId },

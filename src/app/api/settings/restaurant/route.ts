@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { isValidTimezone } from "@/lib/validation"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { restaurantSettingsSchema, parseBody } from "@/lib/schemas"
 
 export async function GET(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.settings, request)
+    const blocked = await applyRateLimit(rateLimiters.settings, request)
     if (blocked) return blocked
     const session = await requireAdmin()
 
@@ -38,41 +38,14 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.settings, request)
+    const blocked = await applyRateLimit(rateLimiters.settings, request)
     if (blocked) return blocked
     const session = await requireAdmin()
 
     const body = await request.json()
-    const { name, timezone, maxCapacity, maxPartySize, operatingHours } = body
-
-    // Validations
-    if (typeof name !== "string" || name.trim().length === 0) {
-      return NextResponse.json(
-        { error: "El nombre es obligatorio" },
-        { status: 400 }
-      )
-    }
-
-    if (timezone && !isValidTimezone(timezone)) {
-      return NextResponse.json(
-        { error: "Zona horaria inválida" },
-        { status: 400 }
-      )
-    }
-
-    if (typeof maxCapacity !== "number" || maxCapacity <= 0) {
-      return NextResponse.json(
-        { error: "La capacidad maxima debe ser mayor a 0" },
-        { status: 400 }
-      )
-    }
-
-    if (typeof maxPartySize !== "number" || maxPartySize <= 0) {
-      return NextResponse.json(
-        { error: "El maximo por reserva debe ser mayor a 0" },
-        { status: 400 }
-      )
-    }
+    const parsed = parseBody(restaurantSettingsSchema, body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 })
+    const { name, timezone, maxCapacity, maxPartySize, operatingHours } = parsed.data
 
     if (maxPartySize > maxCapacity) {
       return NextResponse.json(

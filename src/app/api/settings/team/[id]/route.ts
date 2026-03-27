@@ -8,7 +8,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const blocked = applyRateLimit(rateLimiters.settings, request)
+    const blocked = await applyRateLimit(rateLimiters.settings, request)
     if (blocked) return blocked
     const session = await requireAdmin()
     const { id } = await params

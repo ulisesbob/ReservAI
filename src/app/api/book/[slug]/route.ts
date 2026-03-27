@@ -18,7 +18,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const blocked = applyRateLimit(rateLimiters.reservationRead, request)
+    const blocked = await applyRateLimit(rateLimiters.reservationRead, request)
     if (blocked) return blocked
 
     const { slug } = await params
@@ -106,7 +106,7 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const blocked = applyRateLimit(rateLimiters.reservationWrite, request)
+    const blocked = await applyRateLimit(rateLimiters.reservationWrite, request)
     if (blocked) return blocked
 
     const { slug } = await params

@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 // POST — Join waitlist (public, rate-limited)
 export async function POST(request: NextRequest) {
   try {
-    const blocked = applyRateLimit(rateLimiters.reservationWrite, request)
+    const blocked = await applyRateLimit(rateLimiters.reservationWrite, request)
     if (blocked) return blocked
 
     const body = await request.json()

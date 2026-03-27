@@ -16,7 +16,7 @@ function escapeCsv(value: string): string {
 
 export async function GET(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.export, request)
+    const blocked = await applyRateLimit(rateLimiters.export, request)
     if (blocked) return blocked
 
     const session = await requireSession()

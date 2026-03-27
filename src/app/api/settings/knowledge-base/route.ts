@@ -5,7 +5,7 @@ import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function PATCH(request: Request) {
   try {
-    const blocked = applyRateLimit(rateLimiters.settings, request)
+    const blocked = await applyRateLimit(rateLimiters.settings, request)
     if (blocked) return blocked
     const session = await requireAdmin()
 

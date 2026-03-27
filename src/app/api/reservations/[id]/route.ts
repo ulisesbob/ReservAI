@@ -10,7 +10,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const blocked = applyRateLimit(rateLimiters.reservationWrite, request)
+    const blocked = await applyRateLimit(rateLimiters.reservationWrite, request)
     if (blocked) return blocked
 
     const session = await requireSession()
@@ -134,7 +134,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const blocked = applyRateLimit(rateLimiters.reservationWrite, request)
+    const blocked = await applyRateLimit(rateLimiters.reservationWrite, request)
     if (blocked) return blocked
 
     const session = await requireSession()
