@@ -101,16 +101,32 @@ export function PricingSection() {
             className="w-full mt-8 h-12 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow gradient-cta text-white border-0"
           >
             <Link href="/register">
-              Empezá tu prueba gratis
+              Empeza gratis — 14 dias de prueba
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
+
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Sin tarjeta de credito. Cancelas cuando quieras.
+          </p>
         </div>
       </div>
 
-      <p className="text-center text-sm text-muted-foreground mt-2">
-        14 días gratis. Sin tarjeta de crédito. Cancelás cuando quieras.
-      </p>
+      {/* Trust signals */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-muted-foreground mt-4">
+        <div className="flex items-center gap-2">
+          <Check className="h-4 w-4 text-emerald-500" />
+          <span>Sin tarjeta de credito</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Check className="h-4 w-4 text-emerald-500" />
+          <span>Setup en 10 minutos</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Check className="h-4 w-4 text-emerald-500" />
+          <span>Soporte humano incluido</span>
+        </div>
+      </div>
     </div>
   )
 }
