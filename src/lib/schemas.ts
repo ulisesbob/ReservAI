@@ -59,6 +59,14 @@ export const billingSchema = z.object({
   plan: z.enum(["MONTHLY", "YEARLY"]),
 })
 
+// ─── Team schemas ──────────────────────────────────────────────────────────
+
+export const teamMemberCreateSchema = z.object({
+  name: z.string().min(1, "Nombre es requerido").max(100, "Nombre demasiado largo").transform((s) => s.trim()),
+  email: z.string().email("Email inválido").max(255).transform((e) => e.toLowerCase().trim()),
+  password: z.string().min(8, "Mínimo 8 caracteres").max(128, "Contraseña demasiado larga"),
+})
+
 // ─── Waitlist schemas ────────────────────────────────────────────────────────
 
 export const waitlistCreateSchema = z.object({

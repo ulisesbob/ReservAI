@@ -3,9 +3,9 @@ import { requireAdmin } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { sendEmail } from "@/lib/email"
-import { validatePassword } from "@/lib/validation"
 import { TeamInviteEmail } from "@/lib/email-templates/team-invite"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { teamMemberCreateSchema, parseBody } from "@/lib/schemas"
 
 export async function GET(request: Request) {
   try {
@@ -46,40 +46,16 @@ export async function POST(request: Request) {
     const session = await requireAdmin()
 
     const body = await request.json()
-    const { name, email, password } = body
-
-    // Validate required fields
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      return NextResponse.json(
-        { error: "El nombre es obligatorio" },
-        { status: 400 }
-      )
+    const parsed = parseBody(teamMemberCreateSchema, body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 })
     }
 
-    if (!email || typeof email !== "string") {
-      return NextResponse.json(
-        { error: "El email es obligatorio" },
-        { status: 400 }
-      )
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "El formato del email no es valido" },
-        { status: 400 }
-      )
-    }
-
-    const passwordError = validatePassword(password)
-    if (passwordError) {
-      return NextResponse.json({ error: passwordError }, { status: 400 })
-    }
+    const { name, email, password } = parsed.data
 
     // Check email uniqueness
     const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+      where: { email },
     })
 
     if (existingUser) {
@@ -95,8 +71,8 @@ export async function POST(request: Request) {
     // Create user
     const user = await prisma.user.create({
       data: {
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
+        name,
+        email,
         password: hashedPassword,
         role: "EMPLOYEE",
         restaurantId: session.restaurantId,
