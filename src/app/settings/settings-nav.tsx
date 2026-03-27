@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Store, Brain, MessageCircle, Users, CreditCard } from "lucide-react"
+import { Store, Brain, MessageCircle, Users, CreditCard, CalendarDays } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { href: "/settings/whatsapp", label: "WhatsApp", icon: MessageCircle },
   { href: "/settings/team", label: "Equipo", icon: Users },
   { href: "/settings/billing", label: "Facturacion", icon: CreditCard },
+  { href: "/settings/google-calendar", label: "Google Calendar", icon: CalendarDays },
 ]
 
 export function SettingsNav({
