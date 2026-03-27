@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireAdmin()
+    await requireAdmin()
     const { searchParams } = request.nextUrl
     const period = searchParams.get("period") || "30"
     const days = Math.min(Number(period), 365)
