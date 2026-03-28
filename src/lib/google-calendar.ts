@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto"
 import { google } from "googleapis"
 import { safeDecrypt } from "@/lib/encryption"
 
@@ -210,15 +211,19 @@ export async function listCalendars(
 }
 
 /**
- * Returns the Google OAuth consent screen URL.
+ * Returns the Google OAuth consent screen URL and a random CSRF state value.
+ * The caller must store the state in an HttpOnly cookie and validate it in the callback.
  */
-export function getAuthUrl(): string {
+export function getAuthUrl(): { url: string; state: string } {
   const oauth2Client = getOAuth2Client()
-  return oauth2Client.generateAuthUrl({
+  const state = randomBytes(32).toString("hex")
+  const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
     scope: ["https://www.googleapis.com/auth/calendar"],
+    state,
   })
+  return { url, state }
 }
 
 /**

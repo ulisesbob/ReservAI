@@ -1,11 +1,14 @@
+import { timingSafeEqual } from "crypto"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { createDepositPreference } from "@/lib/mercadopago"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
+import { generateDepositToken } from "@/app/api/book/[slug]/route"
 import { z } from "zod"
 
 const depositRequestSchema = z.object({
   reservationId: z.string().min(1),
+  depositToken: z.string().min(1),
   payerEmail: z.string().email().optional(),
 })
 
@@ -25,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Datos invalidos" }, { status: 400 })
     }
 
-    const { reservationId, payerEmail } = parsed.data
+    const { reservationId, depositToken, payerEmail } = parsed.data
 
     const reservation = await prisma.reservation.findUnique({
       where: { id: reservationId },
@@ -34,6 +37,19 @@ export async function POST(request: Request) {
 
     if (!reservation) {
       return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 })
+    }
+
+    // Validate the time-limited HMAC token to prevent unauthenticated callers
+    // from creating MercadoPago preferences for arbitrary reservations.
+    try {
+      const expectedToken = generateDepositToken(reservation.id, reservation.createdAt)
+      const expected = Buffer.from(expectedToken, "hex")
+      const provided = Buffer.from(depositToken, "hex")
+      if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+        return NextResponse.json({ error: "Token invalido" }, { status: 403 })
+      }
+    } catch {
+      return NextResponse.json({ error: "Error de configuracion del servidor" }, { status: 500 })
     }
 
     if (reservation.status !== "PENDING_DEPOSIT") {

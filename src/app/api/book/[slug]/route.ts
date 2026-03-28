@@ -1,8 +1,17 @@
+import { createHmac } from "crypto"
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { checkAvailability } from "@/lib/availability"
 import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 import { z } from "zod"
+
+export function generateDepositToken(reservationId: string, createdAt: Date): string {
+  const key = process.env.ENCRYPTION_KEY
+  if (!key) throw new Error("ENCRYPTION_KEY is not configured")
+  return createHmac("sha256", key)
+    .update(reservationId + createdAt.toISOString())
+    .digest("hex")
+}
 
 const bookingSchema = z.object({
   customerName: z.string().min(1, "Nombre es requerido").max(200).transform((s) => s.trim()),
@@ -178,9 +187,14 @@ export async function POST(
       },
     })
 
+    const depositToken = requiresDeposit
+      ? generateDepositToken(reservation.id, reservation.createdAt)
+      : undefined
+
     return NextResponse.json({
       success: true,
       requiresDeposit,
+      depositToken,
       reservation: {
         id: reservation.id,
         dateTime: reservation.dateTime,

@@ -41,4 +41,9 @@ export function validateEnv() {
       `[env] Optional variables not set (some features disabled): ${missingOptional.join(", ")}`
     )
   }
+
+  if (process.env.MERCADOPAGO_ACCESS_TOKEN && !process.env.MERCADOPAGO_WEBHOOK_SECRET) {
+    console.error("CRITICAL: MERCADOPAGO_WEBHOOK_SECRET is required when MERCADOPAGO_ACCESS_TOKEN is set")
+    process.exit(1)
+  }
 }

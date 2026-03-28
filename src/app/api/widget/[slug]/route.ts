@@ -24,7 +24,14 @@ export async function GET(
     })
   }
 
-  const origin = new URL(request.url).origin
+  const origin = process.env.NEXT_PUBLIC_APP_URL
+  if (!origin) {
+    console.error("[Widget] NEXT_PUBLIC_APP_URL is not configured")
+    return new NextResponse("// Server configuration error", {
+      status: 500,
+      headers: { "Content-Type": "application/javascript; charset=utf-8" },
+    })
+  }
 
   const script = `
 (function() {
