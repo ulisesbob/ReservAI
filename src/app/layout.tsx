@@ -56,6 +56,12 @@ export const metadata: Metadata = {
       "es": siteUrl,
     },
   },
+  verification: {
+    google: "google4ba4c661b938e70b",
+    other: {
+      "msvalidate.01": "CE0F3E1452E648F2E6E307A029595FC5",
+    },
+  },
   category: "technology",
   other: {
     "mobile-web-app-capable": "yes",
