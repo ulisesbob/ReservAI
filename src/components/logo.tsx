@@ -1,18 +1,14 @@
 "use client"
 
-import { useId } from "react"
 import { cn } from "@/lib/utils"
 
 /**
  * ReservasAI Logo System
  *
- * Logomark: a rounded rectangle with a speech-bubble tail at the bottom
- * (messaging). Inside: a 3x2 grid of rounded squares representing a
- * calendar, with a checkmark replacing the bottom-right cell (confirmed
- * reservation). The inner elements are knocked out (transparent), so
- * the mark works on any background color.
+ * Logomark: a rounded square in emerald (#059669) with a bold white "R"
+ * lettermark — simple, geometric, works at any size from 16x16 to hero.
  *
- * Uses `currentColor` to adapt to light/dark themes.
+ * Inspired by Stripe's "S", Linear's cube, Notion's "N".
  *
  * Variants:
  *  - Logo         = mark + wordmark (horizontal lockup)
@@ -38,50 +34,35 @@ interface LogoProps {
 /* ------------------------------------------------------------------ */
 
 export function LogoMark({ className, size = "md" }: LogoProps) {
-  const uid = useId()
-  const maskId = `rm-${uid}`
   const s = sizes[size].mark
 
   return (
     <svg
       width={s}
       height={s}
-      viewBox="0 0 64 72"
+      viewBox="0 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn("shrink-0", className)}
       aria-hidden="true"
     >
-      <defs>
-        <mask id={maskId}>
-          {/* Full area visible */}
-          <rect width="64" height="72" fill="white" />
+      {/* Rounded square background */}
+      <rect width="48" height="48" rx="12" fill="#059669" />
 
-          {/* Row 1: three calendar cells knocked out */}
-          <rect x="12" y="14" width="9" height="9" rx="2" fill="black" />
-          <rect x="27.5" y="14" width="9" height="9" rx="2" fill="black" />
-          <rect x="43" y="14" width="9" height="9" rx="2" fill="black" />
-
-          {/* Row 2: two calendar cells + checkmark */}
-          <rect x="12" y="32" width="9" height="9" rx="2" fill="black" />
-          <rect x="27.5" y="32" width="9" height="9" rx="2" fill="black" />
-
-          {/* Checkmark in the bottom-right position */}
-          <path
-            d="M43.5 37.5l3.5 3.5 6-6.5"
-            stroke="black"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </mask>
-      </defs>
-
-      {/* Rounded rect body + speech bubble tail */}
+      {/* Bold geometric "R" */}
       <path
-        d="M4 14C4 6.268 10.268 0 18 0h28c7.732 0 14 6.268 14 14v34c0 7.732-6.268 14-14 14H38l-3.8 8.2a2.5 2.5 0 0 1-4.4 0L26 62H18C10.268 62 4 55.732 4 48V14Z"
-        fill="currentColor"
-        mask={`url(#${maskId})`}
+        d="M15 38V10h11.5c2.8 0 5 .7 6.5 2.2 1.6 1.4 2.4 3.4 2.4 5.8 0 1.8-.5 3.3-1.4 4.5-.9 1.2-2.2 2-3.8 2.5L35 38h-6.2l-4.3-12h-3.2v12H15zm6.3-17.5h4.8c1.4 0 2.4-.4 3.2-1.1.7-.7 1.1-1.7 1.1-2.9 0-1.2-.4-2.1-1.1-2.8-.8-.7-1.8-1-3.2-1h-4.8v7.8z"
+        fill="white"
+      />
+
+      {/* Small checkmark accent — bottom right */}
+      <path
+        d="M33 35l2.5 2.5L39 34"
+        stroke="white"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.7"
       />
     </svg>
   )
@@ -100,7 +81,7 @@ export function LogoWordmark({ className, size = "md" }: LogoProps) {
         className,
       )}
     >
-      Reservas<span>AI</span>
+      Reservas<span className="text-emerald-600 font-extrabold">AI</span>
     </span>
   )
 }

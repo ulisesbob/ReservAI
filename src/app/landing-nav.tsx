@@ -101,7 +101,7 @@ export function LandingNav() {
           <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
             Iniciar sesion
           </Link>
-          <Button asChild size="sm" className="text-sm rounded-lg px-5 bg-foreground text-background hover:bg-foreground/90">
+          <Button asChild size="sm" className="text-sm rounded-lg px-5 bg-emerald-600 text-white hover:bg-emerald-700">
             <Link href="/register">Proba gratis</Link>
           </Button>
         </div>

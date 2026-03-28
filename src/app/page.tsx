@@ -161,7 +161,7 @@ export default async function Home() {
           {/* Left column — copy */}
           <div>
             {/* Pain point subtitle */}
-            <p className="text-sm sm:text-base text-muted-foreground/70 tracking-wide uppercase mb-4 animate-fade-up">
+            <p className="text-sm sm:text-base text-emerald-600 font-medium tracking-wide uppercase mb-4 animate-fade-up">
               Tu equipo pierde horas atendiendo el telefono para tomar reservas
             </p>
 
@@ -169,7 +169,7 @@ export default async function Home() {
             <h1 className="text-5xl md:text-7xl lg:text-7xl font-bold tracking-tight leading-[0.95] max-w-4xl animate-fade-up animate-delay-100">
               Reservas por WhatsApp.
               <br />
-              <span className="text-muted-foreground/40">Automáticas.</span>
+              <span className="text-emerald-600">Automáticas.</span>
             </h1>
 
             {/* Solution copy */}
@@ -183,7 +183,7 @@ export default async function Home() {
               <Button
                 asChild
                 size="lg"
-                className="h-14 text-base px-10 rounded-lg font-semibold bg-foreground text-background hover:bg-foreground/90 shadow-sm border-0"
+                className="h-14 text-base px-10 rounded-lg font-semibold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-0"
               >
                 <Link href="/register">
                   Empeza gratis — 14 dias
@@ -276,13 +276,13 @@ export default async function Home() {
       {/* ============================================ */}
       <section className="border-b">
         <div className="max-w-5xl mx-auto px-6 py-4 flex flex-wrap items-center gap-x-8 gap-y-2 text-xs text-muted-foreground/60 tracking-wide">
-          <span>14 dias gratis</span>
+          <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-emerald-600" />14 dias gratis</span>
           <span className="hidden sm:inline text-border">|</span>
-          <span>Sin tarjeta de credito</span>
+          <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-emerald-600" />Sin tarjeta de credito</span>
           <span className="hidden sm:inline text-border">|</span>
-          <span>IA disponible 24/7</span>
+          <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-emerald-600" />IA disponible 24/7</span>
           <span className="hidden sm:inline text-border">|</span>
-          <span>Activo en 10 minutos</span>
+          <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-emerald-600" />Activo en 10 minutos</span>
         </div>
       </section>
 
@@ -298,12 +298,12 @@ export default async function Home() {
           <div className="grid md:grid-cols-3 gap-16 md:gap-12">
             {/* Stat 1 */}
             <article className="text-left">
-              <p className="text-7xl md:text-8xl font-black tracking-tighter leading-none" aria-label="Menos 35 por ciento">
+              <p className="text-7xl md:text-8xl font-black tracking-tighter leading-none text-emerald-600" aria-label="Menos 35 por ciento">
                 -35%
               </p>
               <p className="mt-4 text-base font-semibold">Menos no-shows</p>
               <p className="text-sm text-muted-foreground">con recordatorios automaticos</p>
-              <blockquote className="mt-6 border-l-2 border-foreground/10 pl-4">
+              <blockquote className="mt-6 border-l-2 border-emerald-600/30 pl-4">
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   &ldquo;Antes perdiamos 6 o 7 mesas por noche por gente que no venia. Con los recordatorios bajo muchisimo.&rdquo;
                 </p>
@@ -313,12 +313,12 @@ export default async function Home() {
 
             {/* Stat 2 */}
             <article className="text-left">
-              <p className="text-7xl md:text-8xl font-black tracking-tighter leading-none" aria-label="Mas 25 por ciento">
+              <p className="text-7xl md:text-8xl font-black tracking-tighter leading-none text-emerald-600" aria-label="Mas 25 por ciento">
                 +25%
               </p>
               <p className="mt-4 text-base font-semibold">Mas reservas</p>
               <p className="text-sm text-muted-foreground">captadas fuera de horario</p>
-              <blockquote className="mt-6 border-l-2 border-foreground/10 pl-4">
+              <blockquote className="mt-6 border-l-2 border-emerald-600/30 pl-4">
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   &ldquo;La mayoria reserva a la noche, cuando el restaurante esta cerrado. Ahora la IA les responde al toque.&rdquo;
                 </p>
@@ -328,12 +328,12 @@ export default async function Home() {
 
             {/* Stat 3 */}
             <article className="text-left">
-              <p className="text-7xl md:text-8xl font-black tracking-tighter leading-none" aria-label="3 horas menos">
+              <p className="text-7xl md:text-8xl font-black tracking-tighter leading-none text-emerald-600" aria-label="3 horas menos">
                 3hs
               </p>
               <p className="mt-4 text-base font-semibold">Menos gestion</p>
               <p className="text-sm text-muted-foreground">por semana para tu equipo</p>
-              <blockquote className="mt-6 border-l-2 border-foreground/10 pl-4">
+              <blockquote className="mt-6 border-l-2 border-emerald-600/30 pl-4">
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   &ldquo;Mi encargada dejo de atender el telefono todo el dia. Ahora se dedica a lo que importa: los clientes en sala.&rdquo;
                 </p>
@@ -375,11 +375,11 @@ export default async function Home() {
               },
             ].map((item) => (
               <div key={item.step} className="relative">
-                <span className="text-8xl font-black text-foreground/[0.04] absolute -top-10 -left-2 select-none leading-none" aria-hidden="true">
+                <span className="text-8xl font-black text-emerald-600/[0.08] absolute -top-10 -left-2 select-none leading-none" aria-hidden="true">
                   {item.step}
                 </span>
                 <div className="relative pt-8">
-                  <div className="w-1.5 h-1.5 rounded-full bg-foreground mb-4" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 mb-4" />
                   <h3 className="text-lg font-semibold">{item.title}</h3>
                   <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                     {item.desc}
@@ -406,7 +406,7 @@ export default async function Home() {
           {/* Asymmetric grid: 1 large + 3 small */}
           <div className="mt-16 grid md:grid-cols-2 gap-4">
             {/* Large card — WhatsApp reservations (main feature) */}
-            <div className="md:row-span-3 border rounded-lg p-10 flex flex-col justify-between bg-foreground text-background">
+            <div className="md:row-span-3 border rounded-lg p-10 flex flex-col justify-between bg-foreground text-background border-t-4 border-t-emerald-500">
               <div>
                 <MessageCircle className="h-8 w-8 mb-6 opacity-60 stroke-[1.5]" />
                 <h3 className="text-2xl font-bold leading-tight">
@@ -428,7 +428,7 @@ export default async function Home() {
                 key={f.title}
                 className="border rounded-lg p-8"
               >
-                <f.icon className="h-6 w-6 text-muted-foreground mb-4 stroke-[1.5]" />
+                <f.icon className="h-6 w-6 text-emerald-600 mb-4 stroke-[1.5]" />
                 <h3 className="text-base font-semibold">{f.title}</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
                   {f.description}
@@ -444,7 +444,7 @@ export default async function Home() {
       {/* ============================================ */}
       <section id="precios" className="py-28 px-6 bg-background border-t" aria-labelledby="pricing-heading">
         <div className="max-w-5xl mx-auto">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground/50 mb-3">
+          <p className="text-xs uppercase tracking-widest text-emerald-600 font-semibold mb-3">
             Precio de lanzamiento — Primeros 50 restaurantes
           </p>
           <h2 id="pricing-heading" className="text-3xl sm:text-4xl font-bold tracking-tight">
@@ -506,7 +506,7 @@ export default async function Home() {
             <Button
               asChild
               size="lg"
-              className="h-14 text-base px-12 rounded-lg font-semibold bg-white text-black hover:bg-white/90 shadow-sm border-0"
+              className="h-14 text-base px-12 rounded-lg font-semibold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-0"
             >
               <Link href="/register">
                 Empeza tu prueba gratis

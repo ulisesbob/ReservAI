@@ -35,7 +35,7 @@ export function PricingSection() {
           aria-label="Facturación mensual: seleccionar plan de pago mensual"
           className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all motion-reduce:transition-none ${
             !annual
-              ? "bg-foreground text-background shadow-sm"
+              ? "bg-emerald-600 text-white shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           }`}
           onClick={() => setAnnual(false)}
@@ -47,7 +47,7 @@ export function PricingSection() {
           aria-label="Facturación anual: seleccionar plan de pago anual con descuento del 20%"
           className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all motion-reduce:transition-none ${
             annual
-              ? "bg-foreground text-background shadow-sm"
+              ? "bg-emerald-600 text-white shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           }`}
           onClick={() => setAnnual(true)}
@@ -85,7 +85,7 @@ export function PricingSection() {
           <ul className="space-y-3.5">
             {allFeatures.map((feature) => (
               <li key={feature} className="flex items-center gap-3 text-sm">
-                <Check className="h-4 w-4 text-muted-foreground/40 flex-shrink-0" />
+                <Check className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                 {feature}
               </li>
             ))}
@@ -94,7 +94,7 @@ export function PricingSection() {
           <Button
             asChild
             size="lg"
-            className="w-full mt-10 h-14 text-base font-semibold rounded-lg bg-foreground text-background hover:bg-foreground/90 shadow-sm border-0"
+            className="w-full mt-10 h-14 text-base font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm border-0"
           >
             <Link href="/register">
               Empeza gratis — 14 dias de prueba
