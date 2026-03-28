@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
 import { markAllAsRead, markAsRead } from "@/lib/notifications"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 /**
  * GET /api/notifications
@@ -15,6 +16,8 @@ import { markAllAsRead, markAsRead } from "@/lib/notifications"
  */
 export async function GET(request: Request) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.reservationRead, request)
+    if (blocked) return blocked
     const session = await requireSession()
     const { searchParams } = new URL(request.url)
 
@@ -84,6 +87,8 @@ export async function GET(request: Request) {
  */
 export async function PATCH(request: Request) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.reservationWrite, request)
+    if (blocked) return blocked
     const session = await requireSession()
     const body = await request.json()
 

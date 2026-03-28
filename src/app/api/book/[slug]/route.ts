@@ -5,10 +5,10 @@ import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 import { z } from "zod"
 
 const bookingSchema = z.object({
-  customerName: z.string().min(1, "Nombre es requerido").max(200),
-  customerPhone: z.string().min(1, "Teléfono es requerido").max(30),
+  customerName: z.string().min(1, "Nombre es requerido").max(200).transform((s) => s.trim()),
+  customerPhone: z.string().min(1, "Teléfono es requerido").max(30).transform((s) => s.trim()),
   customerEmail: z.string().email("Email inválido").max(255).optional().or(z.literal("")),
-  dateTime: z.string().min(1, "Fecha/hora es requerida"),
+  dateTime: z.string().min(1, "Fecha/hora es requerida").max(50),
   partySize: z.coerce.number().int().min(1, "Mínimo 1 persona"),
 })
 

@@ -79,6 +79,11 @@ export const rateLimiters = {
   guestRead: { name: "guestRead", maxRequests: 60, windowMs: 60 * 1000 },
   reviewWrite: { name: "reviewWrite", maxRequests: 20, windowMs: 60 * 1000 },
   reviewRead: { name: "reviewRead", maxRequests: 60, windowMs: 60 * 1000 },
+  conversationRead: { name: "conversationRead", maxRequests: 60, windowMs: 60 * 1000 },
+  conversationWrite: { name: "conversationWrite", maxRequests: 30, windowMs: 60 * 1000 },
+  analytics: { name: "analytics", maxRequests: 30, windowMs: 60 * 1000 },
+  locale: { name: "locale", maxRequests: 10, windowMs: 60 * 1000 },
+  health: { name: "health", maxRequests: 30, windowMs: 60 * 1000 },
 } as const
 
 export async function applyRateLimit(config: RateLimitConfig, request: Request): Promise<Response | null> {

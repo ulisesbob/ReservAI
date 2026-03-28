@@ -15,12 +15,16 @@ export function validateEnv() {
     "WHATSAPP_VERIFY_TOKEN",
     "WHATSAPP_APP_SECRET",
     "RESEND_API_KEY",
+    "RESEND_FROM_EMAIL",
     "MERCADOPAGO_ACCESS_TOKEN",
     "MERCADOPAGO_WEBHOOK_SECRET",
     "CRON_SECRET",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
     "GOOGLE_REDIRECT_URI",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "NEXT_PUBLIC_APP_URL",
   ]
 
   const missing = required.filter((key) => !process.env[key])

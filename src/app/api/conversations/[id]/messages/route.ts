@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.conversationRead, request)
+    if (blocked) return blocked
     const session = await requireSession()
     const { id } = await params
     const conversation = await prisma.conversation.findFirst({

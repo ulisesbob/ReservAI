@@ -70,6 +70,14 @@ export async function PATCH(request: Request) {
             ? Prisma.JsonNull
             : undefined,
       },
+      select: {
+        name: true,
+        slug: true,
+        timezone: true,
+        maxCapacity: true,
+        maxPartySize: true,
+        operatingHours: true,
+      },
     })
 
     return NextResponse.json(restaurant)

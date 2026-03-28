@@ -3,18 +3,24 @@ import { prisma } from "@/lib/prisma"
 import { requireSession } from "@/lib/auth"
 import { sendWhatsAppMessage } from "@/lib/whatsapp"
 import { safeDecrypt } from "@/lib/encryption"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.conversationWrite, request)
+    if (blocked) return blocked
     const session = await requireSession()
     const { id } = await params
     const { message } = await request.json()
 
     if (!message || typeof message !== "string" || message.trim().length === 0) {
       return NextResponse.json({ error: "Mensaje vacío" }, { status: 400 })
+    }
+    if (message.length > 5000) {
+      return NextResponse.json({ error: "Mensaje demasiado largo (máximo 5000 caracteres)" }, { status: 400 })
     }
 
     const conversation = await prisma.conversation.findFirst({

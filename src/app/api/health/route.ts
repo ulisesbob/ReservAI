@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
-export async function GET() {
+export async function GET(request: Request) {
+  const blocked = await applyRateLimit(rateLimiters.health, request)
+  if (blocked) return blocked
+
   const checks: Record<string, "ok" | "error"> = {}
 
   // Database connectivity

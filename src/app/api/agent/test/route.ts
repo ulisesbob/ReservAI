@@ -24,9 +24,15 @@ export async function POST(request: Request) {
 
     const { message, conversationId } = body
 
-    if (!message || typeof message !== "string") {
+    if (!message || typeof message !== "string" || message.trim().length === 0) {
       return NextResponse.json(
         { error: "Se requiere el campo 'message'" },
+        { status: 400 }
+      )
+    }
+    if (message.length > 2000) {
+      return NextResponse.json(
+        { error: "Mensaje demasiado largo (máximo 2000 caracteres)" },
         { status: 400 }
       )
     }

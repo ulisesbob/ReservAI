@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth"
-
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function GET(request: Request) {
   try {
+    const blocked = await applyRateLimit(rateLimiters.reservationRead, request)
+    if (blocked) return blocked
     const session = await requireAdmin()
     const { searchParams } = new URL(request.url)
     const search = searchParams.get("search")

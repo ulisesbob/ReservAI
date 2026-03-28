@@ -3,18 +3,18 @@ import { z } from "zod"
 // ─── Reservation schemas ────────────────────────────────────────────────────
 
 export const reservationCreateSchema = z.object({
-  customerName: z.string().min(1, "Nombre es requerido").max(200, "Nombre demasiado largo"),
-  customerPhone: z.string().min(1, "Teléfono es requerido").max(30, "Teléfono demasiado largo"),
+  customerName: z.string().min(1, "Nombre es requerido").max(200, "Nombre demasiado largo").transform((s) => s.trim()),
+  customerPhone: z.string().min(1, "Teléfono es requerido").max(30, "Teléfono demasiado largo").transform((s) => s.trim()),
   customerEmail: z.string().email("Email inválido").max(255).nullish().or(z.literal("")),
-  dateTime: z.string().min(1, "Fecha/hora es requerida"),
+  dateTime: z.string().min(1, "Fecha/hora es requerida").max(50),
   partySize: z.coerce.number().int("Debe ser entero").min(1, "Mínimo 1 persona"),
 })
 
 export const reservationUpdateSchema = z.object({
-  customerName: z.string().min(1).max(200, "Nombre demasiado largo").optional(),
-  customerPhone: z.string().min(1).max(30, "Teléfono demasiado largo").optional(),
+  customerName: z.string().min(1).max(200, "Nombre demasiado largo").transform((s) => s.trim()).optional(),
+  customerPhone: z.string().min(1).max(30, "Teléfono demasiado largo").transform((s) => s.trim()).optional(),
   customerEmail: z.string().email("Email inválido").max(255).nullish(),
-  dateTime: z.string().optional(),
+  dateTime: z.string().max(50).optional(),
   partySize: z.coerce.number().int("Debe ser entero").min(1, "Mínimo 1 persona").optional(),
   status: z.enum(["PENDING", "PENDING_DEPOSIT", "CONFIRMED", "CANCELLED", "COMPLETED", "NO_SHOW"]).optional(),
 })
@@ -22,11 +22,11 @@ export const reservationUpdateSchema = z.object({
 // ─── Register schema ────────────────────────────────────────────────────────
 
 export const registerSchema = z.object({
-  restaurantName: z.string().min(1, "Nombre del restaurante es requerido").max(100),
-  name: z.string().min(1, "Nombre es requerido").max(100),
+  restaurantName: z.string().min(1, "Nombre del restaurante es requerido").max(100).transform((s) => s.trim()),
+  name: z.string().min(1, "Nombre es requerido").max(100).transform((s) => s.trim()),
   email: z.string().email("Email inválido").max(255).transform((e) => e.toLowerCase().trim()),
   password: z.string().min(8, "Mínimo 8 caracteres").max(128, "Contraseña demasiado larga"),
-  timezone: z.string().optional(),
+  timezone: z.string().max(100).optional(),
 })
 
 // ─── Settings schemas ───────────────────────────────────────────────────────
@@ -40,13 +40,13 @@ export const restaurantSettingsSchema = z.object({
 })
 
 export const knowledgeBaseSchema = z.object({
-  knowledgeBase: z.string().max(50000, "Máximo 50.000 caracteres"),
+  knowledgeBase: z.string().max(50000, "Máximo 50.000 caracteres").transform((s) => s.trim()),
 })
 
 export const whatsappSettingsSchema = z.object({
-  whatsappPhoneId: z.string(),
-  whatsappToken: z.string(),
-  openaiApiKey: z.string().nullish(),
+  whatsappPhoneId: z.string().max(100).transform((s) => s.trim()),
+  whatsappToken: z.string().max(500),
+  openaiApiKey: z.string().max(500).nullish(),
 })
 
 export const escalationSettingsSchema = z.object({
@@ -59,8 +59,8 @@ export const escalationSettingsSchema = z.object({
 })
 
 export const accountUpdateSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  currentPassword: z.string().optional(),
+  name: z.string().min(1).max(100).transform((s) => s.trim()).optional(),
+  currentPassword: z.string().max(128).optional(),
   newPassword: z.string().min(8).max(128).optional(),
 })
 
@@ -75,7 +75,7 @@ export const depositSettingsSchema = z.object({
 })
 
 export const depositRequestSchema = z.object({
-  reservationId: z.string().min(1, "Reservation ID es requerido"),
+  reservationId: z.string().min(1, "Reservation ID es requerido").max(100),
 })
 
 
@@ -90,11 +90,11 @@ export const teamMemberCreateSchema = z.object({
 // ─── Waitlist schemas ────────────────────────────────────────────────────────
 
 export const waitlistCreateSchema = z.object({
-  restaurantId: z.string().min(1, "Restaurant ID es requerido"),
-  customerName: z.string().min(1, "Nombre es requerido").max(200),
-  customerPhone: z.string().min(1, "Teléfono es requerido").max(30),
+  restaurantId: z.string().min(1, "Restaurant ID es requerido").max(100),
+  customerName: z.string().min(1, "Nombre es requerido").max(200).transform((s) => s.trim()),
+  customerPhone: z.string().min(1, "Teléfono es requerido").max(30).transform((s) => s.trim()),
   customerEmail: z.string().email("Email inválido").max(255).nullish().or(z.literal("")),
-  dateTime: z.string().min(1, "Fecha/hora es requerida"),
+  dateTime: z.string().min(1, "Fecha/hora es requerida").max(50),
   partySize: z.coerce.number().int().min(1, "Mínimo 1 persona"),
 })
 
@@ -116,9 +116,13 @@ export const guestUpdateSchema = guestCreateSchema.partial().omit({ phone: true 
 // ─── Review schemas ─────────────────────────────────────────────────────────
 
 export const reviewCreateSchema = z.object({
-  reservationId: z.string().min(1, "Reservation ID es requerido"),
+  reservationId: z.string().min(1, "Reservation ID es requerido").max(100),
+  customerName: z.string().min(1).max(200).optional(),
+  customerPhone: z.string().min(1).max(30).optional(),
   rating: z.coerce.number().int().min(1).max(5),
   comment: z.string().max(5000).nullish(),
+  source: z.string().max(50).optional(),
+  guestId: z.string().max(100).nullish(),
 })
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

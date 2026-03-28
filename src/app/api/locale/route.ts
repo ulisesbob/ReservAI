@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { locales } from "@/i18n/config"
+import { applyRateLimit, rateLimiters } from "@/lib/rate-limit"
 
 export async function POST(request: NextRequest) {
+  const blocked = await applyRateLimit(rateLimiters.locale, request)
+  if (blocked) return blocked
+
   const { locale } = await request.json()
   if (!locales.includes(locale)) {
     return NextResponse.json({ error: "Invalid locale" }, { status: 400 })
