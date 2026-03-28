@@ -27,12 +27,12 @@ export function PricingSection() {
   const billingLabel = annual ? "/mes (facturado anual)" : "/mes"
 
   return (
-    <div className="flex flex-col items-center gap-10">
+    <div className="flex flex-col items-center gap-6">
       {/* Toggle */}
       <div className="flex items-center gap-1 bg-muted rounded-full p-1">
         <button
           aria-pressed={!annual}
-          aria-label="Facturacion mensual: seleccionar plan de pago mensual"
+          aria-label="Facturación mensual: seleccionar plan de pago mensual"
           className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all motion-reduce:transition-none ${
             !annual
               ? "bg-foreground text-background shadow-sm"
@@ -44,7 +44,7 @@ export function PricingSection() {
         </button>
         <button
           aria-pressed={annual}
-          aria-label="Facturacion anual: seleccionar plan de pago anual con descuento del 20%"
+          aria-label="Facturación anual: seleccionar plan de pago anual con descuento del 20%"
           className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all motion-reduce:transition-none ${
             annual
               ? "bg-foreground text-background shadow-sm"
@@ -59,7 +59,7 @@ export function PricingSection() {
 
       {/* Single Plan Card */}
       <div className="w-full max-w-lg">
-        <div className="border rounded-lg p-10">
+        <div className="border rounded-lg p-8">
           <div className="text-left">
             <p className="text-xs uppercase tracking-widest text-muted-foreground/50 mb-4">
               ReservasAI
