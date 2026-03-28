@@ -39,7 +39,7 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
       {[1, 2, 3, 4, 5].map((s) => (
         <Star
           key={s}
-          className={`${starClass} ${s <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
+          className={`${starClass} ${s <= rating ? "fill-yellow-400 text-yellow-400" : "text-foreground/70/30"}`}
         />
       ))}
     </div>
@@ -49,13 +49,18 @@ function StarRating({ rating, size = "sm" }: { rating: number; size?: "sm" | "md
 function DistributionBar({ label, count, total }: { label: string; count: number; total: number }) {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm w-4 text-right shrink-0">{label}</span>
+    <div className="flex items-center gap-2.5">
+      <span className="text-sm w-3 text-right shrink-0 font-medium">{label}</span>
       <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 shrink-0" />
-      <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
-        <div className="bg-yellow-400 h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
+      <div className="flex-1 bg-muted rounded-full h-2.5 overflow-hidden">
+        <div
+          className="bg-yellow-400 h-2.5 rounded-full transition-all duration-500"
+          style={{ width: `${Math.max(pct, pct > 0 ? 4 : 0)}%` }}
+        />
       </div>
-      <span className="text-xs text-muted-foreground w-8 shrink-0">{count}</span>
+      <span className="text-xs text-foreground/70 w-12 shrink-0 text-right tabular-nums">
+        {count} ({pct}%)
+      </span>
     </div>
   )
 }
@@ -103,7 +108,7 @@ export default function ReviewsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Reseñas</h1>
-          <p className="text-muted-foreground">Valoraciones de clientes post-visita.</p>
+          <p className="text-foreground/70">Valoraciones de clientes post-visita.</p>
         </div>
         <Select value={ratingFilter} onValueChange={setRatingFilter}>
           <SelectTrigger className="w-[160px]" aria-label="Filtrar por calificación">
@@ -123,36 +128,31 @@ export default function ReviewsPage() {
       {/* Stats cards */}
       {stats && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Promedio</CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* HERO: Average rating -- large and centered */}
+          <Card className="flex flex-col items-center justify-center py-6">
+            <CardContent className="flex flex-col items-center gap-1.5 p-0">
               {stats.avgRating !== null ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-3xl font-bold">{stats.avgRating}</span>
+                <>
+                  <span className="text-6xl font-extrabold tracking-tight leading-none">
+                    {stats.avgRating}
+                  </span>
                   <StarRating rating={Math.round(stats.avgRating)} size="md" />
-                </div>
+                  <p className="text-xs text-foreground/60 mt-1">
+                    de {stats.total} resena{stats.total !== 1 ? "s" : ""}
+                  </p>
+                </>
               ) : (
-                <p className="text-muted-foreground text-sm">Sin reseñas</p>
+                <p className="text-foreground/70 text-sm">Sin resenas</p>
               )}
             </CardContent>
           </Card>
 
-          <Card>
+          {/* Distribution -- spans 2 cols for better proportions */}
+          <Card className="sm:col-span-2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total resenas</CardTitle>
+              <CardTitle className="text-sm font-medium text-foreground/70">Distribucion</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{stats.total}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Distribucion</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1.5">
+            <CardContent className="space-y-2.5">
               {[5, 4, 3, 2, 1].map((r) => (
                 <DistributionBar
                   key={r}
@@ -169,13 +169,13 @@ export default function ReviewsPage() {
       {/* Review list */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="h-6 w-6 animate-spin text-foreground/70" />
         </div>
       ) : reviews.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12">
-            <MessageSquare className="h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground">
+            <MessageSquare className="h-10 w-10 text-foreground/70" />
+            <p className="text-foreground/75">
               {ratingFilter !== "ALL" ? "No hay reseñas con esa calificación." : "Aún no hay reseñas."}
             </p>
           </CardContent>
@@ -190,17 +190,17 @@ export default function ReviewsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium text-sm">{r.customerName}</span>
-                        <span className="text-xs text-muted-foreground">{r.customerPhone}</span>
+                        <span className="text-xs text-foreground/70">{r.customerPhone}</span>
                         <Badge variant="outline" className="text-xs">
                           {sourceLabel[r.source] ?? r.source}
                         </Badge>
                       </div>
                       <StarRating rating={r.rating} />
                       {r.comment && (
-                        <p className="text-sm text-muted-foreground mt-2">{r.comment}</p>
+                        <p className="text-sm text-foreground/70 mt-2">{r.comment}</p>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground shrink-0">{formatDate(r.createdAt)}</p>
+                    <p className="text-xs text-foreground/70 shrink-0">{formatDate(r.createdAt)}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -209,7 +209,7 @@ export default function ReviewsPage() {
 
           {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-foreground/75">
                 Pagina {pagination.page} de {pagination.totalPages}
               </p>
               <div className="flex items-center gap-2">

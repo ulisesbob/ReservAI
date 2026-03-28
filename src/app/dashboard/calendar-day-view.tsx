@@ -6,7 +6,7 @@ import { es } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Clock, Users, Phone, MessageSquare } from "lucide-react"
+import { CalendarDays, Clock, Users, Phone, MessageSquare } from "lucide-react"
 
 type Reservation = {
   id: string
@@ -114,6 +114,13 @@ export function CalendarDayView({
       </div>
 
       {/* Timeline */}
+      {dayReservations.length === 0 ? (
+        <div className="border rounded-lg bg-background py-16 text-center">
+          <CalendarDays className="h-12 w-12 text-muted-foreground/25 mx-auto mb-4" />
+          <p className="text-base font-medium text-muted-foreground">Dia libre</p>
+          <p className="text-sm text-muted-foreground/60 mt-1">No hay reservas para este dia</p>
+        </div>
+      ) : (
       <div className="border rounded-lg overflow-hidden bg-background">
         <ScrollArea className="h-[600px]">
           <div className="divide-y">
@@ -232,6 +239,7 @@ export function CalendarDayView({
           </div>
         </ScrollArea>
       </div>
+      )}
     </div>
   )
 }

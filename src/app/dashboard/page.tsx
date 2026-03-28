@@ -1,8 +1,16 @@
 import { requireSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { DashboardViewToggle } from "./dashboard-view-toggle"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { GettingStartedCard } from "@/components/getting-started-card"
+import { CalendarDays, Users } from "lucide-react"
+
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return "Buenos dias"
+  if (hour < 19) return "Buenas tardes"
+  return "Buenas noches"
+}
 
 export default async function DashboardPage() {
   const session = await requireSession()
@@ -43,16 +51,23 @@ export default async function DashboardPage() {
 
   const dateLabel = today.toLocaleDateString("es-AR", {
     weekday: "long",
-    year: "numeric",
-    month: "long",
     day: "numeric",
+    month: "long",
   })
 
   const todayStr = today.toISOString().split("T")[0]
+  const greeting = getGreeting()
+  const firstName = session.name?.split(" ")[0] ?? ""
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight capitalize">{dateLabel}</h1>
+      {/* Header: Greeting + date */}
+      <div className="pb-6 border-b">
+        <h1 className="text-3xl font-bold tracking-tight">
+          {greeting}, {firstName}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1 capitalize">{dateLabel}</p>
+      </div>
 
       {showOnboarding && (
         <div className="mt-6">
@@ -64,37 +79,34 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {/* Stats: Hero stat + secondary stats */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total reservas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{totalReservations}</p>
+        {/* HERO stat */}
+        <Card className="sm:col-span-1">
+          <CardContent className="pt-6 pb-6">
+            <p className="text-sm font-medium text-muted-foreground">Total reservas hoy</p>
+            <p className="text-5xl font-black tracking-tight mt-1">{totalReservations}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        {/* Secondary stats — visually subdued */}
+        <Card className="sm:col-span-1">
+          <CardContent className="pt-6 pb-6">
+            <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <CalendarDays className="h-3 w-3" />
               Confirmadas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-green-600">{confirmedCount}</p>
+            </p>
+            <p className="text-2xl font-semibold text-muted-foreground mt-1">{confirmedCount}</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+        <Card className="sm:col-span-1">
+          <CardContent className="pt-6 pb-6">
+            <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <Users className="h-3 w-3" />
               Comensales
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-primary">{totalGuests._sum.partySize ?? 0}</p>
+            </p>
+            <p className="text-2xl font-semibold text-muted-foreground mt-1">{totalGuests._sum.partySize ?? 0}</p>
           </CardContent>
         </Card>
       </div>

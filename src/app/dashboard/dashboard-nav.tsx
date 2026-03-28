@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -29,6 +30,7 @@ import {
 } from "lucide-react"
 
 export function DashboardNav({ name, role }: { name: string; role: string }) {
+  const pathname = usePathname()
   const [escalatedCount, setEscalatedCount] = useState(0)
   const [waitlistCount, setWaitlistCount] = useState(0)
 
@@ -104,29 +106,29 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
             <Separator orientation="vertical" className="h-6" />
             <div className="flex items-center gap-1">
               {/* Primary nav — always visible */}
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className={pathname === "/dashboard" ? "bg-accent text-accent-foreground" : ""}>
                 <Link href="/dashboard" className="flex items-center gap-1.5">
                   <CalendarDays className="h-3.5 w-3.5" />
                   Reservas
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+              <Button variant="ghost" size="sm" asChild className={`hidden sm:inline-flex ${pathname === "/dashboard/analytics" ? "bg-accent text-accent-foreground" : ""}`}>
                 <Link href="/dashboard/analytics" className="flex items-center gap-1.5">
                   <BarChart3 className="h-3.5 w-3.5" />
                   Analytics
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+              <Button variant="ghost" size="sm" asChild className={`hidden sm:inline-flex ${pathname === "/dashboard/guests" ? "bg-accent text-accent-foreground" : ""}`}>
                 <Link href="/dashboard/guests" className="flex items-center gap-1.5">
                   <ContactRound className="h-3.5 w-3.5" />
                   CRM
                 </Link>
               </Button>
               {role === "ADMIN" && (
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" asChild className={pathname?.startsWith("/settings") ? "bg-accent text-accent-foreground" : ""}>
                   <Link href="/settings/restaurant" className="flex items-center gap-1.5">
                     <Settings className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Configuración</span>
+                    <span className="hidden sm:inline">Configuracion</span>
                     <span className="sm:hidden">Config</span>
                   </Link>
                 </Button>
@@ -139,7 +141,7 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
                     <MoreHorizontal className="h-4 w-4 mr-1" />
                     Más
                     {totalBadgeCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center" aria-label={`${totalBadgeCount} notificaciones`}>
                         {totalBadgeCount}
                       </span>
                     )}
@@ -160,19 +162,26 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="sm:hidden" />
-                  {secondaryItems.map((item) => (
-                    <DropdownMenuItem key={item.href} asChild className="cursor-pointer">
-                      <Link href={item.href} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
-                        {item.label}
-                        {item.badge && item.badge > 0 ? (
-                          <span className={`ml-auto ${item.badgeColor} text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center`}>
-                            {item.badge}
-                          </span>
-                        ) : null}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
+                  {secondaryItems.map((item) => {
+                    const isActive = pathname === item.href
+                    return (
+                      <DropdownMenuItem
+                        key={item.href}
+                        asChild
+                        className={`cursor-pointer ${isActive ? "bg-accent font-medium" : ""}`}
+                      >
+                        <Link href={item.href} className="flex items-center gap-2">
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                          {item.badge && item.badge > 0 ? (
+                            <span className={`ml-auto ${item.badgeColor} text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center`}>
+                              {item.badge}
+                            </span>
+                          ) : null}
+                        </Link>
+                      </DropdownMenuItem>
+                    )
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

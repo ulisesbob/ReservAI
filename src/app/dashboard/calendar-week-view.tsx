@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Users } from "lucide-react"
+import { getStatusColors } from "@/lib/status-colors"
 
 type Reservation = {
   id: string
@@ -26,15 +27,6 @@ type Reservation = {
   partySize: number
   status: string
   source: string
-}
-
-const STATUS_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-  PENDING: { bg: "bg-yellow-100", border: "border-l-yellow-400", text: "text-yellow-800" },
-  PENDING_DEPOSIT: { bg: "bg-amber-100", border: "border-l-amber-400", text: "text-amber-800" },
-  CONFIRMED: { bg: "bg-emerald-100", border: "border-l-emerald-500", text: "text-emerald-800" },
-  CANCELLED: { bg: "bg-red-100", border: "border-l-red-400", text: "text-red-700" },
-  COMPLETED: { bg: "bg-gray-100", border: "border-l-gray-400", text: "text-gray-600" },
-  NO_SHOW: { bg: "bg-orange-100", border: "border-l-orange-400", text: "text-orange-800" },
 }
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 8) // 08:00 - 23:00
@@ -122,13 +114,13 @@ export function CalendarWeekView({
                     }`}
                   >
                     {cellReservations.map((r) => {
-                      const colors = STATUS_COLORS[r.status] || STATUS_COLORS.COMPLETED
+                      const sc = getStatusColors(r.status)
                       return (
                         <Tooltip key={r.id}>
                           <TooltipTrigger asChild>
                             <button
                               onClick={() => onSelectReservation?.(r)}
-                              className={`w-full text-left px-1.5 py-0.5 rounded-sm border-l-2 mb-0.5 text-[10px] leading-tight truncate cursor-pointer hover:opacity-80 transition-opacity ${colors.bg} ${colors.border} ${colors.text}`}
+                              className={`w-full text-left px-1.5 py-0.5 rounded-sm border-l-2 mb-0.5 text-[10px] leading-tight truncate cursor-pointer hover:opacity-80 transition-opacity ${sc.bg} ${sc.border} ${sc.text}`}
                             >
                               <div className="font-medium truncate">
                                 {format(new Date(r.dateTime), "HH:mm")} {r.customerName}

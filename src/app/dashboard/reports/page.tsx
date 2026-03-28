@@ -145,7 +145,7 @@ export default function ReportsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Reportes</h1>
-          <p className="text-muted-foreground">Exportá y visualizá datos de tu restaurante.</p>
+          <p className="text-foreground/70">Exportá y visualizá datos de tu restaurante.</p>
         </div>
       </div>
 
@@ -220,13 +220,13 @@ export default function ReportsPage() {
               </Card>
             ) : loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="h-6 w-6 animate-spin text-foreground/70" />
               </div>
             ) : data.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center gap-3 py-12">
-                  <BarChart2 className="h-10 w-10 text-muted-foreground" />
-                  <p className="text-muted-foreground text-sm">
+                  <BarChart2 className="h-10 w-10 text-foreground/70" />
+                  <p className="text-foreground/70 text-sm">
                     No hay datos para el período seleccionado.
                   </p>
                 </CardContent>
@@ -234,7 +234,7 @@ export default function ReportsPage() {
             ) : (
               <Card>
                 <CardHeader className="pb-0">
-                  <CardTitle className="text-sm text-muted-foreground">
+                  <CardTitle className="text-sm text-foreground/75">
                     {data.length} registro{data.length !== 1 ? "s" : ""}
                   </CardTitle>
                 </CardHeader>

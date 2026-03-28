@@ -16,6 +16,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog"
 import { ChevronLeft, ChevronRight, Search, Loader2, Download } from "lucide-react"
+import { getStatusColors, getStatusLabel } from "@/lib/status-colors"
 
 type Reservation = {
   id: string
@@ -35,24 +36,6 @@ type PaginationInfo = {
   limit: number
   total: number
   totalPages: number
-}
-
-const STATUS_CLASSES: Record<string, string> = {
-  PENDING: "border-yellow-500 text-yellow-700 bg-yellow-50",
-  PENDING_DEPOSIT: "border-amber-500 text-amber-700 bg-amber-50",
-  CONFIRMED: "border-transparent bg-green-100 text-green-800",
-  CANCELLED: "border-transparent bg-red-100 text-red-800",
-  COMPLETED: "border-transparent bg-gray-100 text-gray-700",
-  NO_SHOW: "border-transparent bg-orange-100 text-orange-800",
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "Pendiente",
-  PENDING_DEPOSIT: "Esperando sena",
-  CONFIRMED: "Confirmada",
-  CANCELLED: "Cancelada",
-  COMPLETED: "Completada",
-  NO_SHOW: "No asistio",
 }
 
 const DEPOSIT_STATUS_LABELS: Record<string, string> = {
@@ -160,7 +143,7 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
       {/* Filters bar */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/70" />
           <Input
             placeholder="Buscar por nombre o teléfono..."
             value={search}
@@ -227,20 +210,20 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
       {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="h-6 w-6 animate-spin text-foreground/70" />
           <span className="sr-only">Cargando reservas</span>
         </div>
       ) : reservations.length === 0 ? (
         <div className="rounded-lg border bg-card p-8 text-center">
-          <p className="text-muted-foreground">
+          <p className="text-foreground/70">
             {search ? "No se encontraron resultados." : "No hay reservas para mostrar."}
           </p>
         </div>
       ) : (
         <>
-          <div className="rounded-lg border bg-card shadow-sm overflow-x-auto">
+          <div className="rounded-lg border bg-card shadow-sm overflow-x-auto max-h-[70vh] overflow-y-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 z-10 bg-background shadow-[0_1px_0_0_hsl(var(--border))]">
                 <TableRow>
                   <TableHead scope="col">Hora</TableHead>
                   <TableHead scope="col">Fecha</TableHead>
@@ -253,18 +236,21 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reservations.map((r) => (
-                  <TableRow key={r.id}>
+                {reservations.map((r) => {
+                  const colors = getStatusColors(r.status)
+                  return (
+                  <TableRow key={r.id} className="hover:bg-muted/50 transition-colors">
                     <TableCell className="font-medium">{formatTime(r.dateTime)}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{formatDate(r.dateTime)}</TableCell>
+                    <TableCell className="text-foreground/70 text-sm">{formatDate(r.dateTime)}</TableCell>
                     <TableCell>
                       <div className="font-medium">{r.customerName}</div>
-                      <div className="text-xs text-muted-foreground">{r.customerPhone}</div>
+                      <div className="text-xs text-foreground/70">{r.customerPhone}</div>
                     </TableCell>
                     <TableCell>{r.partySize}</TableCell>
                     <TableCell>
-                      <Badge className={STATUS_CLASSES[r.status] || ""}>
-                        {STATUS_LABELS[r.status] || r.status}
+                      <Badge variant="outline" className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${colors.badge}`}>
+                        <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${colors.dot}`} />
+                        {getStatusLabel(r.status)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -274,13 +260,13 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
                             {DEPOSIT_STATUS_LABELS[r.depositStatus] || r.depositStatus}
                           </Badge>
                           {r.depositAmount && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-foreground/70">
                               ${r.depositAmount.toLocaleString("es-AR")}
                             </span>
                           )}
                         </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
+                        <span className="text-xs text-foreground/70">-</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -323,7 +309,8 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  )
+                })}
               </TableBody>
             </Table>
           </div>
@@ -331,7 +318,7 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
           {/* Pagination */}
           {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-foreground/70">
                 {pagination.total} reserva{pagination.total !== 1 ? "s" : ""} — Página {pagination.page} de {pagination.totalPages}
               </p>
               <div className="flex items-center gap-2">
@@ -339,6 +326,7 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
                   variant="outline" size="sm"
                   disabled={pagination.page <= 1}
                   onClick={() => fetchReservations(pagination.page - 1)}
+                  aria-label="Página anterior"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -346,6 +334,7 @@ export function ReservationList({ defaultDate }: { defaultDate: string }) {
                   variant="outline" size="sm"
                   disabled={pagination.page >= pagination.totalPages}
                   onClick={() => fetchReservations(pagination.page + 1)}
+                  aria-label="Página siguiente"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>

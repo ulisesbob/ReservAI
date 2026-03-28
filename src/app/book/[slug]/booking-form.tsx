@@ -247,7 +247,7 @@ export function BookingForm({
     return (
       <Card>
         <CardContent className="pt-8 pb-8 text-center space-y-4">
-          <div className="mx-auto h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center">
+          <div className="mx-auto h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center animate-check-in">
             <Check className="h-8 w-8 text-emerald-600" />
           </div>
           <h2 className="text-xl font-semibold">Reserva confirmada</h2>
@@ -392,7 +392,7 @@ export function BookingForm({
                     className={`
                       flex flex-col items-center py-2 px-1 rounded-lg text-xs transition-colors motion-reduce:transition-none
                       ${disabled ? "opacity-30 cursor-not-allowed" : "hover:bg-accent cursor-pointer"}
-                      ${isSelected ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
+                      ${isSelected ? "bg-foreground text-background hover:bg-foreground/90" : ""}
                     `}
                   >
                     <span className="uppercase font-medium">
@@ -450,7 +450,7 @@ export function BookingForm({
                     className={`
                       py-2 px-2 rounded-md text-sm font-medium transition-colors motion-reduce:transition-none
                       ${selectedTime === time
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-foreground text-background"
                         : "bg-muted hover:bg-accent"
                       }
                     `}

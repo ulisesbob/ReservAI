@@ -147,7 +147,7 @@ export function NoShowsClient({
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">No-shows</h1>
-        <p className="text-muted-foreground">
+        <p className="text-foreground/75">
           Clientes que no se presentaron a sus reservas.
         </p>
       </div>
@@ -173,7 +173,7 @@ export function NoShowsClient({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-foreground/75">
               Total no-shows
             </CardTitle>
           </CardHeader>
@@ -183,18 +183,18 @@ export function NoShowsClient({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-foreground/75">
               Tasa de no-show
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.noShowRate}%</div>
-            <p className="text-xs text-muted-foreground mt-1">del total completado</p>
+            <p className="text-xs text-foreground/70 mt-1">del total completado</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-foreground/75">
               Clientes reincidentes
             </CardTitle>
           </CardHeader>
@@ -205,7 +205,7 @@ export function NoShowsClient({
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">3+ no-shows</p>
+            <p className="text-xs text-foreground/70 mt-1">3+ no-shows</p>
           </CardContent>
         </Card>
       </div>
@@ -214,18 +214,18 @@ export function NoShowsClient({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Reservas pasadas sin confirmar asistencia</CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-foreground/75">
             Marcalas como completadas o no-show.
           </p>
         </CardHeader>
         <CardContent className="p-0">
           {loadingRecent ? (
             <div className="flex items-center justify-center py-8" role="status" aria-live="polite">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 animate-spin text-foreground/70" />
               <span className="sr-only">Cargando reservas recientes</span>
             </div>
           ) : recentReservations.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center px-4">
+            <p className="text-sm text-foreground/70 py-8 text-center px-4">
               No hay reservas pasadas pendientes de revision.
             </p>
           ) : (
@@ -244,7 +244,7 @@ export function NoShowsClient({
                     <TableRow key={r.id}>
                       <TableCell>
                         <div className="font-medium">{r.customerName}</div>
-                        <div className="text-xs text-muted-foreground">{r.customerPhone}</div>
+                        <div className="text-xs text-foreground/70">{r.customerPhone}</div>
                       </TableCell>
                       <TableCell className="text-sm">{formatDateTime(r.dateTime)}</TableCell>
                       <TableCell>{r.partySize}</TableCell>
@@ -297,13 +297,13 @@ export function NoShowsClient({
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center py-8" role="status" aria-live="polite">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 animate-spin text-foreground/70" />
               <span className="sr-only">Cargando historial de no-shows</span>
             </div>
           ) : noShows.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-12">
-              <UserX className="h-10 w-10 text-muted-foreground" />
-              <p className="text-muted-foreground">No hay no-shows registrados.</p>
+              <UserX className="h-10 w-10 text-foreground/70" />
+              <p className="text-foreground/70">No hay no-shows registrados.</p>
             </div>
           ) : (
             <>
@@ -324,11 +324,11 @@ export function NoShowsClient({
                           <div className="flex items-center gap-2">
                             <div>
                               <div className="font-medium">{r.customerName}</div>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-foreground/75">
                                 {r.customerPhone}
                               </div>
                               {r.customerEmail && (
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-foreground/75">
                                   {r.customerEmail}
                                 </div>
                               )}
@@ -362,7 +362,7 @@ export function NoShowsClient({
 
               {pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-foreground/75">
                     Pagina {pagination.page} de {pagination.totalPages}
                   </p>
                   <div className="flex items-center gap-2">
@@ -371,6 +371,7 @@ export function NoShowsClient({
                       size="sm"
                       disabled={pagination.page <= 1}
                       onClick={() => fetchNoShows(pagination.page - 1)}
+                      aria-label="Página anterior"
                       aria-label="Pagina anterior"
                     >
                       <ChevronLeft className="h-4 w-4" />
@@ -380,6 +381,7 @@ export function NoShowsClient({
                       size="sm"
                       disabled={pagination.page >= pagination.totalPages}
                       onClick={() => fetchNoShows(pagination.page + 1)}
+                      aria-label="Página siguiente"
                       aria-label="Pagina siguiente"
                     >
                       <ChevronRight className="h-4 w-4" />

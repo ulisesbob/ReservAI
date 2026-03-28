@@ -35,6 +35,7 @@ import { ChevronLeft, ChevronRight, CalendarDays, Users, Clock, Calendar, Layout
 import { ReservationForm } from "./reservation-form"
 import { CalendarWeekView } from "./calendar-week-view"
 import { CalendarDayView } from "./calendar-day-view"
+import { getStatusColors } from "@/lib/status-colors"
 
 type Reservation = {
   id: string
@@ -56,24 +57,6 @@ type DaySummary = {
 }
 
 type ViewMode = "month" | "week" | "day"
-
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-yellow-400",
-  PENDING_DEPOSIT: "bg-amber-400",
-  CONFIRMED: "bg-emerald-500",
-  CANCELLED: "bg-red-400",
-  COMPLETED: "bg-gray-400",
-  NO_SHOW: "bg-orange-400",
-}
-
-const STATUS_BADGE: Record<string, string> = {
-  PENDING: "border-yellow-500 text-yellow-700 bg-yellow-50",
-  PENDING_DEPOSIT: "border-amber-500 text-amber-700 bg-amber-50",
-  CONFIRMED: "border-transparent bg-emerald-100 text-emerald-800",
-  CANCELLED: "border-transparent bg-red-100 text-red-800",
-  COMPLETED: "border-transparent bg-gray-100 text-gray-700",
-  NO_SHOW: "border-transparent bg-orange-100 text-orange-800",
-}
 
 const WEEKDAYS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"]
 
@@ -124,6 +107,20 @@ export function ReservationCalendar() {
   useEffect(() => {
     fetchReservations()
   }, [fetchReservations])
+
+  // Keyboard shortcut: "N" to open new reservation form
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "n" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const target = e.target as HTMLElement
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return
+        e.preventDefault()
+        setShowForm(true)
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   // Navigation handlers
   const goBack = () => {
@@ -218,13 +215,13 @@ export function ReservationCalendar() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={goBack}>
+            <Button variant="outline" size="icon" onClick={goBack} aria-label={viewMode === "month" ? "Mes anterior" : viewMode === "week" ? "Semana anterior" : "Día anterior"}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <h2 className="text-lg font-semibold min-w-[220px] text-center capitalize">
               {headerLabel}
             </h2>
-            <Button variant="outline" size="icon" onClick={goForward}>
+            <Button variant="outline" size="icon" onClick={goForward} aria-label={viewMode === "month" ? "Mes siguiente" : viewMode === "week" ? "Semana siguiente" : "Día siguiente"}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -256,8 +253,15 @@ export function ReservationCalendar() {
             </Button>
 
             <Dialog open={showForm} onOpenChange={setShowForm}>
-              <Button size="sm" onClick={() => setShowForm(true)}>
+              <Button
+                size="sm"
+                onClick={() => setShowForm(true)}
+                className="bg-foreground text-background hover:bg-foreground/90"
+              >
                 + Nueva reserva
+                <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center rounded border border-background/20 bg-background/10 px-1.5 font-mono text-[10px] font-medium text-background/70">
+                  N
+                </kbd>
               </Button>
               <DialogContent className="max-w-lg">
                 <DialogHeader>
@@ -284,7 +288,7 @@ export function ReservationCalendar() {
                 {WEEKDAYS.map((day) => (
                   <div
                     key={day}
-                    className="px-2 py-2 text-center text-xs font-medium text-muted-foreground uppercase"
+                    className="px-2 py-2 text-center text-xs font-medium text-foreground/70 uppercase"
                   >
                     {day}
                   </div>
@@ -309,7 +313,7 @@ export function ReservationCalendar() {
                       className={`
                         relative min-h-[80px] p-1.5 border-b border-r text-left transition-colors
                         hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset
-                        ${!isCurrentMonth ? "bg-muted/30 text-muted-foreground" : ""}
+                        ${!isCurrentMonth ? "bg-muted/30 text-foreground/70" : ""}
                         ${isSelected ? "ring-2 ring-primary ring-inset bg-primary/5" : ""}
                       `}
                     >
@@ -344,8 +348,8 @@ export function ReservationCalendar() {
                           )}
                           {summary.totalGuests > 0 && (
                             <div className="flex items-center gap-1">
-                              <Users className="h-2.5 w-2.5 text-muted-foreground" />
-                              <span className="text-[10px] text-muted-foreground">
+                              <Users className="h-2.5 w-2.5 text-foreground/70" />
+                              <span className="text-[10px] text-foreground/70">
                                 {summary.totalGuests}
                               </span>
                             </div>
@@ -359,20 +363,19 @@ export function ReservationCalendar() {
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-4 text-[11px] text-muted-foreground/70">
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 Confirmadas
               </div>
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-yellow-400" />
+                <div className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
                 Pendientes
               </div>
               <div className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
+                <Users className="h-2.5 w-2.5" />
                 Personas
               </div>
-              <span className="text-[10px] ml-auto">Doble clic en un día para ver detalle</span>
             </div>
 
             {/* Day detail panel */}
@@ -382,7 +385,7 @@ export function ReservationCalendar() {
                   <h3 className="font-semibold capitalize">
                     {format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}
                   </h3>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-3 text-sm text-foreground/70">
                     <span className="flex items-center gap-1">
                       <CalendarDays className="h-4 w-4" />
                       {selectedSummary.reservations.filter((r) => r.status !== "CANCELLED").length} reservas
@@ -395,9 +398,11 @@ export function ReservationCalendar() {
                 </div>
 
                 {selectedSummary.reservations.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    No hay reservas para este dia
-                  </p>
+                  <div className="py-10 text-center">
+                    <CalendarDays className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-muted-foreground">Sin reservas</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">Este dia no tiene reservas registradas</p>
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     {selectedSummary.reservations
@@ -408,13 +413,13 @@ export function ReservationCalendar() {
                           className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/50 hover:bg-muted transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`h-2 w-2 rounded-full ${STATUS_COLORS[r.status] || "bg-gray-400"}`} />
+                            <div className={`h-2 w-2 rounded-full ${getStatusColors(r.status).dot}`} />
                             <div>
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium">{r.customerName}</span>
                                 <Badge
                                   variant="outline"
-                                  className={`text-[10px] px-1.5 py-0 ${STATUS_BADGE[r.status] || ""}`}
+                                  className={`text-[10px] px-1.5 py-0 rounded-full ${getStatusColors(r.status).badge}`}
                                 >
                                   {r.status}
                                 </Badge>
@@ -424,7 +429,7 @@ export function ReservationCalendar() {
                                   </Badge>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <div className="flex items-center gap-2 text-xs text-foreground/70 mt-0.5">
                                 <Clock className="h-3 w-3" />
                                 {format(new Date(r.dateTime), "HH:mm")}
                                 <span>|</span>
@@ -497,21 +502,21 @@ export function ReservationCalendar() {
 
         {/* Status legend (week & day views) */}
         {viewMode !== "month" && (
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-4 text-[11px] text-muted-foreground/70">
             <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-emerald-500" />
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               Confirmadas
             </div>
             <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-yellow-400" />
+              <div className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
               Pendientes
             </div>
             <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-red-400" />
+              <div className="h-1.5 w-1.5 rounded-full bg-red-400" />
               Canceladas
             </div>
             <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-gray-400" />
+              <div className="h-1.5 w-1.5 rounded-full bg-gray-400" />
               Completadas
             </div>
           </div>

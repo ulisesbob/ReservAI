@@ -124,13 +124,12 @@ export default function GuestsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Clientes CRM</h1>
-          <p className="text-muted-foreground">Gestion de clientes, historial y notas.</p>
+          <p className="text-foreground/70">Gestion de clientes, historial y notas.</p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Agregar cliente
+              + Nuevo cliente
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
@@ -203,25 +202,25 @@ export default function GuestsPage() {
 
       {/* Search */}
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
         <Input
-          placeholder="Buscar por nombre o telefono..."
+          placeholder="Buscar cliente por nombre, telefono o email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
+          className="pl-9 h-9 bg-muted/40 border-transparent focus:bg-background focus:border-input transition-colors"
           aria-label="Buscar clientes"
         />
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Loader2 className="h-6 w-6 animate-spin text-foreground/70" />
         </div>
       ) : guests.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12">
-            <Users className="h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground text-sm text-center max-w-xs">
+            <Users className="h-10 w-10 text-foreground/70" />
+            <p className="text-foreground/70 text-sm text-center max-w-xs">
               {search
                 ? "No se encontraron clientes con esa búsqueda."
                 : "No hay clientes registrados. Los clientes se agregan automáticamente cuando hacen una reserva."}
@@ -232,7 +231,7 @@ export default function GuestsPage() {
         <>
           <Card>
             <CardHeader className="pb-0">
-              <CardTitle className="text-sm text-muted-foreground">
+              <CardTitle className="text-sm text-foreground/75">
                 {pagination.total} cliente{pagination.total !== 1 ? "s" : ""} en total
               </CardTitle>
             </CardHeader>
@@ -257,9 +256,9 @@ export default function GuestsPage() {
                       >
                         <TableCell>
                           <div className="font-medium">{g.name}</div>
-                          <div className="text-xs text-muted-foreground">{g.phone}</div>
+                          <div className="text-xs text-foreground/70">{g.phone}</div>
                           {g.email && (
-                            <div className="text-xs text-muted-foreground">{g.email}</div>
+                            <div className="text-xs text-foreground/70">{g.email}</div>
                           )}
                         </TableCell>
                         <TableCell>
@@ -269,20 +268,23 @@ export default function GuestsPage() {
                           {g.totalNoShows > 0 ? (
                             <Badge variant="destructive">{g.totalNoShows}</Badge>
                           ) : (
-                            <span className="text-muted-foreground text-sm">0</span>
+                            <span className="text-foreground/70 text-sm">0</span>
                           )}
                         </TableCell>
                         <TableCell>
                           {g.vipStatus ? (
-                            <span className="flex items-center gap-1 text-yellow-600 font-medium text-sm">
-                              <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                            <Badge
+                              variant="outline"
+                              className="rounded-full bg-amber-50 text-amber-700 border-amber-300 px-2.5 py-0.5 text-xs font-semibold gap-1"
+                            >
+                              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                               VIP
-                            </span>
+                            </Badge>
                           ) : (
-                            <span className="text-muted-foreground text-sm">—</span>
+                            <span className="text-foreground/70 text-sm">--</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
+                        <TableCell className="text-sm text-foreground/75">
                           {formatDate(g.lastVisit)}
                         </TableCell>
                       </TableRow>
@@ -295,7 +297,7 @@ export default function GuestsPage() {
 
           {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-foreground/75">
                 Pagina {pagination.page} de {pagination.totalPages}
               </p>
               <div className="flex items-center gap-2">
