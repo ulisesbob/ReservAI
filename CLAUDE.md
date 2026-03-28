@@ -21,6 +21,7 @@ SaaS multi-tenant de reservas para restaurantes. Clientes reservan por WhatsApp 
 - Bug reports: arreglar directo sin preguntar. Encontrar root cause, no fix temporal.
 - Nunca marcar tarea completa sin probar que funciona.
 - Después de cada corrección → actualizar LESSONS.md.
+- **PROMPTS SON OBLIGATORIOS**: cuando el usuario pega un prompt con herramientas (skills, agents, MCPs), usar TODAS sin excepción. No saltear ninguna. Checklist al final.
 
 ## Proceso
 1. Leer estado actual (archivos afectados, no asumir)

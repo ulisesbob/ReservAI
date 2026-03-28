@@ -19,7 +19,7 @@ const geistMono = localFont({
 const siteUrl = "https://www.reservasai.com";
 const title = "ReservasAI | Reservas por WhatsApp con IA para Restaurantes";
 const description =
-  "Automatiza las reservas de tu restaurante con un bot de IA en WhatsApp. Tus clientes reservan 24/7 en segundos, sin apps ni formularios. Probalo gratis 14 dias.";
+  "Automatizá reservas 24/7 por WhatsApp con IA. Tus clientes reservan en 30 segundos, vos reducís no-shows 35%. Probá gratis 14 días.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -39,6 +39,12 @@ export const metadata: Metadata = {
     "bot IA WhatsApp",
     "software restaurante Argentina",
     "reservas automáticas",
+    "reservas por WhatsApp Argentina",
+    "software reservas restaurantes",
+    "automatizar reservas",
+    "bot whatsapp para restaurantes",
+    "software restaurante Buenos Aires",
+    "mesero virtual whatsapp",
   ],
   authors: [{ name: "ReservasAI", url: siteUrl }],
   creator: "ReservasAI",

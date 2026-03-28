@@ -15,7 +15,7 @@
     --secondary: 240 5% 96%;
     --secondary-foreground: 224 71% 4%;
     --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted-foreground: 220 8% 35%;
     --accent: 38 92% 50%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
@@ -24,6 +24,35 @@
     --input: 220 13% 91%;
     --ring: 160 84% 39%;
     --radius: 0.625rem;
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+
+    /* Semantic status colors */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 30 80% 15%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+
+    /* Section spacing scale */
+    --section-sm: 3rem;
+    --section-md: 5rem;
+    --section-lg: 7rem;
+    --section-xl: 9rem;
+
+    /* Sidebar tokens */
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 224 71% 4%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 224 71% 4%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 160 84% 39%;
+
     --chart-1: 160 84% 39%;
     --chart-2: 38 92% 50%;
     --chart-3: 239 84% 67%;
@@ -51,6 +80,25 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 160 84% 45%;
+
+    /* Semantic status colors (dark) */
+    --success: 160 84% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 38 10% 10%;
+    --info: 217 91% 65%;
+    --info-foreground: 0 0% 100%;
+
+    /* Sidebar tokens (dark) */
+    --sidebar: 224 71% 6%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 160 84% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 160 84% 45%;
+
     --chart-1: 160 84% 45%;
     --chart-2: 38 92% 50%;
     --chart-3: 239 84% 67%;
@@ -70,24 +118,49 @@
 
 @layer utilities {
   .gradient-hero {
-    background: linear-gradient(135deg, #ecfdf5 0%, #f0f9ff 50%, #fdf4ff 100%);
-  }
-  .gradient-cta {
-    background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+    background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
   }
   .gradient-dark {
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    background: #0a0a0a;
   }
-  .text-gradient {
-    background: linear-gradient(135deg, #059669, #10b981, #6366f1);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+
+  /* Entrance animations */
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  .glow-green {
-    box-shadow: 0 0 60px rgba(16, 185, 129, 0.15), 0 0 120px rgba(16, 185, 129, 0.05);
+
+  .animate-fade-up {
+    animation: fade-up 0.7s ease-out both;
   }
-  .glow-amber {
-    box-shadow: 0 0 40px rgba(245, 158, 11, 0.15);
+
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-up {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 }

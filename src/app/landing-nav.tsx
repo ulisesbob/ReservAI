@@ -58,7 +58,7 @@ export function LandingNav() {
       aria-label="Principal"
       className={`fixed top-0 left-0 right-0 z-50 transition-all motion-reduce:transition-none duration-300 ${
         scrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-emerald-100 shadow-sm"
+          ? "bg-background/80 backdrop-blur-xl border-b shadow-sm"
           : "bg-transparent"
       }`}
     >
@@ -68,12 +68,12 @@ export function LandingNav() {
       >
         Saltar al contenido principal
       </a>
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
+      <div className="max-w-5xl mx-auto flex items-center justify-between px-6 h-16">
         <Link href="/" className="text-xl font-bold tracking-tight">
-          Reservas<span className="text-emerald-500">AI</span>
+          Reservas<span className="text-foreground">AI</span>
         </Link>
 
-        {/* Section anchors — hidden on small screens */}
+        {/* Section anchors */}
         <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
           {NAV_LINKS.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-foreground transition-colors">
@@ -89,17 +89,17 @@ export function LandingNav() {
             type="button"
             className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Abrir menú"
+            aria-label="Abrir menu"
             aria-expanded={menuOpen}
             aria-controls="mobile-nav-menu"
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
 
-          <Button asChild variant="ghost" size="sm" className="text-sm">
-            <Link href="/login">Iniciar sesion</Link>
-          </Button>
-          <Button asChild size="sm" className="text-sm rounded-full px-5">
+          <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
+            Iniciar sesion
+          </Link>
+          <Button asChild size="sm" className="text-sm rounded-lg px-5 bg-foreground text-background hover:bg-foreground/90">
             <Link href="/register">Proba gratis</Link>
           </Button>
         </div>
@@ -110,7 +110,7 @@ export function LandingNav() {
         <div
           ref={menuRef}
           id="mobile-nav-menu"
-          className="md:hidden border-b border-emerald-100 bg-background/95 backdrop-blur-xl"
+          className="md:hidden border-b bg-background/95 backdrop-blur-xl"
         >
           <div className="flex flex-col px-6 py-4 gap-3 text-sm">
             {NAV_LINKS.map((link) => (
@@ -123,6 +123,13 @@ export function LandingNav() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/login"
+              className="text-muted-foreground hover:text-foreground transition-colors py-1 sm:hidden"
+              onClick={closeMenu}
+            >
+              Iniciar sesion
+            </Link>
           </div>
         </div>
       )}
