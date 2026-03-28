@@ -47,6 +47,7 @@ export function BookingForm({
   depositAmount: number
   depositMinPartySize: number
 }) {
+  const [mounted, setMounted] = useState(false)
   const [step, setStep] = useState<Step>("date")
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
@@ -61,9 +62,14 @@ export function BookingForm({
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
 
-  // Calendar state
+  // Calendar state — initialised lazily to avoid SSR/client mismatch
+  const [calendarStart, setCalendarStart] = useState<Date>(() => startOfDay(new Date()))
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const today = startOfDay(new Date())
-  const [calendarStart, setCalendarStart] = useState(today)
 
   // Open day numbers (0=sun, 1=mon, etc.)
   const openDayNumbers = openDays.map((d) => SPANISH_DAYS[d]).filter((n) => n !== undefined)
@@ -297,8 +303,11 @@ export function BookingForm({
           </div>
         </div>
 
-        {/* Step 1: Date selection */}
-        {(step === "date" || step === "time" || step === "details") && (
+        {/* Step 1: Date selection — rendered only after mount to avoid hydration mismatch */}
+        {!mounted && (step === "date" || step === "time" || step === "details") && (
+          <div className="h-[160px] rounded-lg bg-muted/40 animate-pulse" aria-hidden="true" />
+        )}
+        {mounted && (step === "date" || step === "time" || step === "details") && (
           <div>
             <Label className="flex items-center gap-2 mb-2">
               <CalendarDays className="h-4 w-4" />

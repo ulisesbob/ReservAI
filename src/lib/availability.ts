@@ -60,27 +60,39 @@ export async function checkAvailability(
 
   // Check operating hours
   if (operatingHours) {
-    const dayNames = [
+    // Keys must match exactly what onboarding/settings saves to the DB (no accents)
+    const dayKeys = [
       "domingo",
+      "lunes",
+      "martes",
+      "miercoles",
+      "jueves",
+      "viernes",
+      "sabado",
+    ]
+    // Display names for error messages (accented, plural-friendly)
+    const dayDisplayNames = [
+      "domingos",
       "lunes",
       "martes",
       "miércoles",
       "jueves",
       "viernes",
-      "sábado",
+      "sábados",
     ]
 
     // Get the day of week in the restaurant's timezone
     const dateInTz = new Date(
       dateTime.toLocaleString("en-US", { timeZone: timezone })
     )
-    const dayName = dayNames[dateInTz.getDay()]
-    const hours = operatingHours[dayName]
+    const dayIndex = dateInTz.getDay()
+    const dayKey = dayKeys[dayIndex]
+    const hours = operatingHours[dayKey]
 
     if (!hours || !hours.open || !hours.close) {
       return {
         available: false,
-        reason: `El restaurante no abre los ${dayName}`,
+        reason: `El restaurante no abre los ${dayDisplayNames[dayIndex]}`,
       }
     }
 

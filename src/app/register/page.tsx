@@ -180,6 +180,7 @@ export default function RegisterPage() {
                     type="email"
                     placeholder="tu@email.com"
                     required
+                    autoComplete="email"
                     className="h-11"
                   />
                 </div>
@@ -192,6 +193,7 @@ export default function RegisterPage() {
                     type="password"
                     required
                     minLength={8}
+                    autoComplete="new-password"
                     className="h-11"
                   />
                 </div>

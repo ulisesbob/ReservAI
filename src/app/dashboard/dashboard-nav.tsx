@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { ContactRound, Star, BarChart3 } from "lucide-react"
 
 export function DashboardNav({ name, role }: { name: string; role: string }) {
   const [escalatedCount, setEscalatedCount] = useState(0)
@@ -81,6 +82,24 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
               </Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/dashboard/no-shows">No-shows</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard/guests" className="flex items-center gap-1.5">
+                  <ContactRound className="h-3.5 w-3.5" />
+                  CRM
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard/reviews" className="flex items-center gap-1.5">
+                  <Star className="h-3.5 w-3.5" />
+                  Reseñas
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/dashboard/reports" className="flex items-center gap-1.5">
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  Reportes
+                </Link>
               </Button>
               {role === "ADMIN" && (
                 <Button variant="ghost" size="sm" asChild>

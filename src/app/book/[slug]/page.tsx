@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!restaurant) return { title: "Restaurante no encontrado" }
 
   return {
-    title: `Reservar en ${restaurant.name} | ReservasAI`,
+    title: `Reservar en ${restaurant.name}`,
     description: `Hacé tu reserva online en ${restaurant.name}. Elegí fecha, hora y cantidad de personas.`,
   }
 }

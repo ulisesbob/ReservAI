@@ -131,6 +131,7 @@ export default function LoginPage() {
                     type="email"
                     placeholder="tu@email.com"
                     required
+                    autoComplete="email"
                     className="h-11"
                   />
                 </div>
@@ -148,6 +149,7 @@ export default function LoginPage() {
                     type="password"
                     required
                     minLength={8}
+                    autoComplete="current-password"
                     className="h-11"
                   />
                 </div>
