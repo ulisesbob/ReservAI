@@ -2,6 +2,7 @@ import { requireSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { DashboardViewToggle } from "./dashboard-view-toggle"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { GettingStartedCard } from "@/components/getting-started-card"
 
 export default async function DashboardPage() {
   const session = await requireSession()
@@ -10,18 +11,35 @@ export default async function DashboardPage() {
   const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0)
   const dayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999)
 
-  const [totalReservations, confirmedCount, totalGuests] = await Promise.all([
-    prisma.reservation.count({
-      where: { restaurantId: session.restaurantId, dateTime: { gte: dayStart, lte: dayEnd } },
-    }),
-    prisma.reservation.count({
-      where: { restaurantId: session.restaurantId, dateTime: { gte: dayStart, lte: dayEnd }, status: "CONFIRMED" },
-    }),
-    prisma.reservation.aggregate({
-      where: { restaurantId: session.restaurantId, dateTime: { gte: dayStart, lte: dayEnd } },
-      _sum: { partySize: true },
-    }),
-  ])
+  const [totalReservations, confirmedCount, totalGuests, restaurant, anyReservation] =
+    await Promise.all([
+      prisma.reservation.count({
+        where: { restaurantId: session.restaurantId, dateTime: { gte: dayStart, lte: dayEnd } },
+      }),
+      prisma.reservation.count({
+        where: {
+          restaurantId: session.restaurantId,
+          dateTime: { gte: dayStart, lte: dayEnd },
+          status: "CONFIRMED",
+        },
+      }),
+      prisma.reservation.aggregate({
+        where: { restaurantId: session.restaurantId, dateTime: { gte: dayStart, lte: dayEnd } },
+        _sum: { partySize: true },
+      }),
+      prisma.restaurant.findUniqueOrThrow({
+        where: { id: session.restaurantId },
+        select: { whatsappToken: true, slug: true },
+      }),
+      prisma.reservation.findFirst({
+        where: { restaurantId: session.restaurantId },
+        select: { id: true },
+      }),
+    ])
+
+  const hasWhatsApp = !!restaurant.whatsappToken
+  const hasReservation = !!anyReservation
+  const showOnboarding = !hasWhatsApp || !hasReservation
 
   const dateLabel = today.toLocaleDateString("es-AR", {
     weekday: "long",
@@ -35,6 +53,16 @@ export default async function DashboardPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight capitalize">{dateLabel}</h1>
+
+      {showOnboarding && (
+        <div className="mt-6">
+          <GettingStartedCard
+            hasWhatsApp={hasWhatsApp}
+            hasReservation={hasReservation}
+            slug={restaurant.slug}
+          />
+        </div>
+      )}
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>

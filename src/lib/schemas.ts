@@ -37,6 +37,8 @@ export const restaurantSettingsSchema = z.object({
   maxCapacity: z.number().int().min(1, "Capacidad debe ser mayor a 0"),
   maxPartySize: z.number().int().min(1, "Máximo por reserva debe ser mayor a 0"),
   operatingHours: z.record(z.string(), z.unknown()).nullish(),
+  defaultDurationMinutes: z.number().int().min(15, "Mínimo 15 minutos").max(480, "Máximo 480 minutos (8 horas)").optional(),
+  address: z.string().max(300).nullish(),
 })
 
 export const knowledgeBaseSchema = z.object({

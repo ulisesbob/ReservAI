@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { Loader2 } from "lucide-react"
+import { Loader2, Copy, Check, Download, QrCode } from "lucide-react"
+import QRCode from "qrcode"
 
 const TIMEZONES = [
   "America/Argentina/Buenos_Aires",
@@ -52,19 +53,51 @@ interface RestaurantFormProps {
     maxCapacity: number
     maxPartySize: number
     operatingHours: OperatingHours
+    defaultDurationMinutes: number
+    address?: string | null
   }
 }
 
 export function RestaurantForm({ initialData }: RestaurantFormProps) {
   const [name, setName] = useState(initialData.name)
+  const [address, setAddress] = useState(initialData.address ?? "")
   const [timezone, setTimezone] = useState(initialData.timezone)
   const [maxCapacity, setMaxCapacity] = useState(initialData.maxCapacity)
   const [maxPartySize, setMaxPartySize] = useState(initialData.maxPartySize)
+  const [defaultDurationMinutes, setDefaultDurationMinutes] = useState(initialData.defaultDurationMinutes)
   const [operatingHours, setOperatingHours] = useState<OperatingHours>(
     initialData.operatingHours
   )
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const qrCanvasRef = useRef<HTMLCanvasElement>(null)
+
+  const bookingUrl = `https://reservasai.com/book/${initialData.slug}`
+
+  useEffect(() => {
+    if (qrCanvasRef.current) {
+      QRCode.toCanvas(qrCanvasRef.current, bookingUrl, {
+        width: 200,
+        margin: 2,
+        color: { dark: "#000000", light: "#ffffff" },
+      })
+    }
+  }, [bookingUrl])
+
+  function handleCopyLink() {
+    navigator.clipboard.writeText(bookingUrl)
+    setLinkCopied(true)
+    setTimeout(() => setLinkCopied(false), 2000)
+  }
+
+  function handleDownloadQR() {
+    if (!qrCanvasRef.current) return
+    const link = document.createElement("a")
+    link.download = `qr-reservas-${initialData.slug}.png`
+    link.href = qrCanvasRef.current.toDataURL("image/png")
+    link.click()
+  }
 
   function toggleDay(day: string, enabled: boolean) {
     setOperatingHours((prev) => {
@@ -95,9 +128,11 @@ export function RestaurantForm({ initialData }: RestaurantFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
+          address: address.trim() || null,
           timezone,
           maxCapacity,
           maxPartySize,
+          defaultDurationMinutes,
           operatingHours,
         }),
       })
@@ -148,6 +183,60 @@ export function RestaurantForm({ initialData }: RestaurantFormProps) {
             </div>
           </div>
 
+          {/* Booking link + QR code */}
+          <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <QrCode className="h-4 w-4 text-muted-foreground" />
+              <Label className="text-sm font-medium">Link de reservas</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                value={bookingUrl}
+                readOnly
+                className="text-sm bg-background"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCopyLink}
+                className="shrink-0"
+              >
+                {linkCopied ? (
+                  <Check className="h-4 w-4 text-green-600" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+                <span className="ml-1.5">{linkCopied ? "Copiado" : "Copiar"}</span>
+              </Button>
+            </div>
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <canvas ref={qrCanvasRef} className="rounded-lg" />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadQR}
+              >
+                <Download className="h-4 w-4 mr-1.5" />
+                Descargar QR
+              </Button>
+              <p className="text-xs text-muted-foreground text-center max-w-xs">
+                Imprimí este QR y ponelo en tu restaurante para que los clientes reserven fácil.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Dirección</Label>
+            <Input
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Ej: Av. Corrientes 1234, CABA"
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="timezone">Zona horaria</Label>
             <Select value={timezone} onValueChange={setTimezone}>
@@ -164,7 +253,7 @@ export function RestaurantForm({ initialData }: RestaurantFormProps) {
             </Select>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="maxCapacity">Capacidad maxima (personas)</Label>
               <Input
@@ -188,6 +277,24 @@ export function RestaurantForm({ initialData }: RestaurantFormProps) {
                 onChange={(e) => setMaxPartySize(Number(e.target.value))}
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="defaultDurationMinutes">
+                Duración estimada (minutos)
+              </Label>
+              <Input
+                id="defaultDurationMinutes"
+                type="number"
+                min={15}
+                max={480}
+                step={15}
+                value={defaultDurationMinutes}
+                onChange={(e) => setDefaultDurationMinutes(Number(e.target.value))}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Se muestra al cliente en la confirmación.
+              </p>
             </div>
           </div>
         </CardContent>

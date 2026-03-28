@@ -218,8 +218,66 @@ export function BillingForm({ subscription }: { subscription: Subscription | nul
         </div>
       )}
 
-      {/* Change Plan — show when active or trialing */}
-      {(isActive || isTrialing) && (
+      {/* Activate Plan — show when trialing (no active paid plan yet) */}
+      {isTrialing && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold">Activar tu plan</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Elegí el plan que mejor se adapta a tu restaurante. Podés cambiar o cancelar cuando quieras.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Plan Mensual</CardTitle>
+                <CardDescription>Facturación mensual, cancelá cuando quieras</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold mb-4">
+                  $25.000{" "}
+                  <span className="text-sm font-normal text-muted-foreground">/mes</span>
+                </p>
+                <Button
+                  className="w-full"
+                  onClick={() => handleSubscribe("MONTHLY")}
+                  disabled={loading !== null}
+                >
+                  {loading === "MONTHLY" ? "Procesando..." : "Activar Plan Mensual — $25.000/mes"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Plan Anual
+                  <Badge>Ahorra 20%</Badge>
+                </CardTitle>
+                <CardDescription>Facturación anual</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold mb-1">
+                  $240.000{" "}
+                  <span className="text-sm font-normal text-muted-foreground">/año</span>
+                </p>
+                <p className="text-xs text-emerald-600 font-medium mb-4">Ahorrás $60.000 vs plan mensual</p>
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => handleSubscribe("YEARLY")}
+                  disabled={loading !== null}
+                >
+                  {loading === "YEARLY" ? "Procesando..." : "Activar Plan Anual — $240.000/año"}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Change Plan — show only when active (already on a paid plan) */}
+      {isActive && (
         <Card>
           <CardHeader>
             <CardTitle>Cambiar de Plan</CardTitle>
@@ -234,7 +292,7 @@ export function BillingForm({ subscription }: { subscription: Subscription | nul
             <div className="flex-1">
               <p className="text-sm text-muted-foreground mb-2">
                 {alternatePlan === "YEARLY"
-                  ? "Plan Anual: $240.000/ano (ahorra $60.000)"
+                  ? "Plan Anual: $240.000/año (ahorrás $60.000)"
                   : "Plan Mensual: $25.000/mes"}
               </p>
               <Button

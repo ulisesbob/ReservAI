@@ -33,6 +33,8 @@ export default async function BookingPage({ params }: Props) {
       depositEnabled: true,
       depositAmount: true,
       depositMinPartySize: true,
+      defaultDurationMinutes: true,
+      address: true,
     },
   })
 
@@ -59,6 +61,8 @@ export default async function BookingPage({ params }: Props) {
           depositEnabled={restaurant.depositEnabled}
           depositAmount={restaurant.depositAmount}
           depositMinPartySize={restaurant.depositMinPartySize}
+          defaultDurationMinutes={restaurant.defaultDurationMinutes}
+          address={restaurant.address ?? null}
         />
 
         {/* Footer */}

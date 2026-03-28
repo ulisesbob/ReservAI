@@ -20,6 +20,7 @@ export async function GET(request: Request) {
         maxCapacity: true,
         maxPartySize: true,
         operatingHours: true,
+        address: true,
       },
     })
 
@@ -48,7 +49,7 @@ export async function PATCH(request: Request) {
     const body = await request.json()
     const parsed = parseBody(restaurantSettingsSchema, body)
     if (!parsed.success) return NextResponse.json({ error: parsed.error }, { status: 400 })
-    const { name, timezone, maxCapacity, maxPartySize, operatingHours } = parsed.data
+    const { name, timezone, maxCapacity, maxPartySize, operatingHours, defaultDurationMinutes, address } = parsed.data
 
     if (maxPartySize > maxCapacity) {
       return NextResponse.json(
@@ -69,6 +70,8 @@ export async function PATCH(request: Request) {
           : operatingHours === null
             ? Prisma.JsonNull
             : undefined,
+        defaultDurationMinutes: defaultDurationMinutes ?? undefined,
+        address: address ?? null,
       },
       select: {
         name: true,
@@ -77,6 +80,8 @@ export async function PATCH(request: Request) {
         maxCapacity: true,
         maxPartySize: true,
         operatingHours: true,
+        defaultDurationMinutes: true,
+        address: true,
       },
     })
 

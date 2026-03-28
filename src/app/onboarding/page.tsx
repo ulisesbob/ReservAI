@@ -51,6 +51,7 @@ export default function OnboardingPage() {
 
   // Step 1
   const [restaurantName, setRestaurantName] = useState("")
+  const [address, setAddress] = useState("")
   const [timezone, setTimezone] = useState("America/Argentina/Buenos_Aires")
   const [maxCapacity, setMaxCapacity] = useState("50")
   const [maxPartySize, setMaxPartySize] = useState("20")
@@ -68,6 +69,7 @@ export default function OnboardingPage() {
       .then((r) => r.json())
       .then((data) => {
         setRestaurantName(data.name ?? "")
+        if (data.address) setAddress(data.address)
         if (data.timezone) setTimezone(data.timezone)
         if (data.maxCapacity) setMaxCapacity(String(data.maxCapacity))
         if (data.maxPartySize) setMaxPartySize(String(data.maxPartySize))
@@ -121,6 +123,7 @@ export default function OnboardingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: restaurantName,
+          address: address.trim() || null,
           timezone,
           maxCapacity: Number(maxCapacity),
           maxPartySize: Number(maxPartySize),
@@ -252,6 +255,15 @@ export default function OnboardingPage() {
                     value={restaurantName}
                     onChange={(e) => setRestaurantName(e.target.value)}
                     placeholder="Ej: La Trattoria"
+                    className="h-11"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Dirección</Label>
+                  <Input
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Ej: Av. Corrientes 1234, CABA"
                     className="h-11"
                   />
                 </div>

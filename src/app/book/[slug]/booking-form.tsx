@@ -4,10 +4,12 @@ import { useState, useEffect } from "react"
 import {
   format,
   addDays,
+  addMinutes,
   startOfDay,
   isBefore,
   eachDayOfInterval,
   addMonths,
+  parse,
 } from "date-fns"
 import { es } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
@@ -39,6 +41,8 @@ export function BookingForm({
   depositEnabled,
   depositAmount,
   depositMinPartySize,
+  defaultDurationMinutes,
+  address,
 }: {
   slug: string
   maxPartySize: number
@@ -46,6 +50,8 @@ export function BookingForm({
   depositEnabled: boolean
   depositAmount: number
   depositMinPartySize: number
+  defaultDurationMinutes: number
+  address: string | null
 }) {
   const [mounted, setMounted] = useState(false)
   const [step, setStep] = useState<Step>("date")
@@ -105,6 +111,12 @@ export function BookingForm({
   }, [selectedDate, slug])
 
   const requiresDeposit = depositEnabled && partySize >= depositMinPartySize && depositAmount > 0
+
+  function getEstimatedEndTime(time: string): string {
+    const parsed = parse(time, "HH:mm", new Date())
+    const end = addMinutes(parsed, defaultDurationMinutes)
+    return format(end, "HH:mm")
+  }
 
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime || !name || !phone) return
@@ -243,8 +255,15 @@ export function BookingForm({
             <p className="capitalize">
               {selectedDate && format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
             </p>
-            <p>{selectedTime} hs — {partySize} {partySize === 1 ? "persona" : "personas"}</p>
+            <p>
+              <Clock className="inline h-3.5 w-3.5 mr-1" />
+              {selectedTime} — ~{selectedTime && getEstimatedEndTime(selectedTime)} hs ({defaultDurationMinutes} min estimados)
+            </p>
+            <p>{partySize} {partySize === 1 ? "persona" : "personas"}</p>
             <p className="font-medium text-foreground">{name}</p>
+            {address && (
+              <p className="text-sm">Dirección: {address}</p>
+            )}
           </div>
           <p className="text-sm text-muted-foreground">
             Tu reserva esta pendiente de confirmacion. Te avisaremos por WhatsApp.
@@ -447,14 +466,21 @@ export function BookingForm({
         {/* Step 3: Contact details */}
         {step === "details" && selectedTime && (
           <div className="space-y-4">
-            <div className="p-3 rounded-lg bg-muted/50 text-sm">
-              <span className="capitalize">
-                {format(selectedDate!, "EEEE d 'de' MMMM", { locale: es })}
-              </span>
-              {" a las "}
-              <span className="font-semibold">{selectedTime} hs</span>
-              {" — "}
-              {partySize} {partySize === 1 ? "persona" : "personas"}
+            <div className="p-3 rounded-lg bg-muted/50 text-sm space-y-1">
+              <p>
+                <span className="capitalize">
+                  {format(selectedDate!, "EEEE d 'de' MMMM", { locale: es })}
+                </span>
+                {" — "}
+                {partySize} {partySize === 1 ? "persona" : "personas"}
+              </p>
+              <p className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="font-semibold">{selectedTime}</span>
+                {" — ~"}
+                <span className="font-semibold">{getEstimatedEndTime(selectedTime)} hs</span>
+                <span className="text-muted-foreground ml-1">({defaultDurationMinutes} min estimados)</span>
+              </p>
             </div>
 
             <div>

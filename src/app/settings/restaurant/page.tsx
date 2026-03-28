@@ -14,6 +14,8 @@ export default async function RestaurantSettingsPage() {
       maxCapacity: true,
       maxPartySize: true,
       operatingHours: true,
+      defaultDurationMinutes: true,
+      address: true,
     },
   })
 
@@ -26,6 +28,8 @@ export default async function RestaurantSettingsPage() {
         maxCapacity: restaurant.maxCapacity,
         maxPartySize: restaurant.maxPartySize,
         operatingHours: (restaurant.operatingHours as Record<string, { open: string; close: string }>) ?? {},
+        defaultDurationMinutes: restaurant.defaultDurationMinutes,
+        address: restaurant.address,
       }}
     />
   )

@@ -524,7 +524,10 @@ export default async function Home() {
             </Link>
           </Button>
           <p className="mt-8 text-white/60 text-sm">
-            Tenes dudas? <Link href="https://wa.me/5491130303030" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Pedi una demo por WhatsApp</Link>
+            Tenes dudas?{" "}
+            <Link href="mailto:hola@reservasai.com" className="underline hover:text-white">
+              Contactanos
+            </Link>
           </p>
         </div>
       </section>
