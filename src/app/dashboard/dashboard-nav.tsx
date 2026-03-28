@@ -103,7 +103,7 @@ export function DashboardNav({ name, role }: { name: string; role: string }) {
               </Button>
               {role === "ADMIN" && (
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/settings/restaurant">Configuracion</Link>
+                  <Link href="/settings/restaurant">Configuración</Link>
                 </Button>
               )}
             </div>

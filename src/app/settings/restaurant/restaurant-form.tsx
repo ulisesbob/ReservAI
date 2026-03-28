@@ -108,7 +108,7 @@ export function RestaurantForm({ initialData }: RestaurantFormProps) {
         throw new Error(data.error ?? "Error al guardar")
       }
 
-      setMessage({ type: "success", text: "Configuracion guardada correctamente." })
+      setMessage({ type: "success", text: "Configuración guardada correctamente." })
     } catch (err) {
       setMessage({
         type: "error",

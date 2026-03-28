@@ -33,7 +33,7 @@ export function PricingSection() {
       <div className="flex items-center gap-1 bg-muted rounded-full p-1">
         <button
           aria-pressed={!annual}
-          aria-label="Facturacion mensual"
+          aria-label="Facturación mensual"
           className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all motion-reduce:transition-none ${
             !annual
               ? "gradient-cta text-white shadow-lg"
@@ -45,7 +45,7 @@ export function PricingSection() {
         </button>
         <button
           aria-pressed={annual}
-          aria-label="Facturacion anual"
+          aria-label="Facturación anual"
           className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all motion-reduce:transition-none ${
             annual
               ? "gradient-cta text-white shadow-lg"

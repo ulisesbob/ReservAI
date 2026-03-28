@@ -16,7 +16,7 @@ export default async function SettingsLayout({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Configuracion</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Configuración</h1>
         <p className="text-muted-foreground">
           Administra tu restaurante, base de conocimiento y conexiones.
         </p>

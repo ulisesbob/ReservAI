@@ -221,8 +221,10 @@ export default function GuestsPage() {
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12">
             <Users className="h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              {search ? "No se encontraron clientes." : "Aun no hay clientes registrados."}
+            <p className="text-muted-foreground text-sm text-center max-w-xs">
+              {search
+                ? "No se encontraron clientes con esa búsqueda."
+                : "No hay clientes registrados. Los clientes se agregan automáticamente cuando hacen una reserva."}
             </p>
           </CardContent>
         </Card>

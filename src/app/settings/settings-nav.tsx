@@ -12,8 +12,8 @@ const navItems = [
   { href: "/settings/knowledge-base", label: "Knowledge Base", icon: Brain },
   { href: "/settings/whatsapp", label: "WhatsApp", icon: MessageCircle },
   { href: "/settings/team", label: "Equipo", icon: Users },
-  { href: "/settings/deposits", label: "Senas", icon: Banknote },
-  { href: "/settings/billing", label: "Facturacion", icon: CreditCard },
+  { href: "/settings/deposits", label: "Señas", icon: Banknote },
+  { href: "/settings/billing", label: "Facturación", icon: CreditCard },
   { href: "/settings/google-calendar", label: "Google Calendar", icon: CalendarDays },
 ]
 

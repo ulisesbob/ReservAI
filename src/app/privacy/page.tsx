@@ -2,7 +2,7 @@ import Link from "next/link"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Política de Privacidad | ReservasAI",
+  title: "Política de Privacidad",
   description: "Política de privacidad y manejo de datos de ReservasAI.",
 }
 

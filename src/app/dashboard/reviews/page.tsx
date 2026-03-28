@@ -102,11 +102,11 @@ export default function ReviewsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Resenas</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Reseñas</h1>
           <p className="text-muted-foreground">Valoraciones de clientes post-visita.</p>
         </div>
         <Select value={ratingFilter} onValueChange={setRatingFilter}>
-          <SelectTrigger className="w-[160px]" aria-label="Filtrar por calificacion">
+          <SelectTrigger className="w-[160px]" aria-label="Filtrar por calificación">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -134,7 +134,7 @@ export default function ReviewsPage() {
                   <StarRating rating={Math.round(stats.avgRating)} size="md" />
                 </div>
               ) : (
-                <p className="text-muted-foreground text-sm">Sin resenas</p>
+                <p className="text-muted-foreground text-sm">Sin reseñas</p>
               )}
             </CardContent>
           </Card>
@@ -176,7 +176,7 @@ export default function ReviewsPage() {
           <CardContent className="flex flex-col items-center gap-3 py-12">
             <MessageSquare className="h-10 w-10 text-muted-foreground" />
             <p className="text-muted-foreground">
-              {ratingFilter !== "ALL" ? "No hay resenas con esa calificacion." : "Aun no hay resenas."}
+              {ratingFilter !== "ALL" ? "No hay reseñas con esa calificación." : "Aún no hay reseñas."}
             </p>
           </CardContent>
         </Card>

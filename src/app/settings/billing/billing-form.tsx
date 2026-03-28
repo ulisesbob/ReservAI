@@ -145,14 +145,20 @@ export function BillingForm({ subscription }: { subscription: Subscription | nul
         {(isActive || isTrialing) && subscription?.currentPeriodEnd && (
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Proximo cobro: {new Date(subscription.currentPeriodEnd).toLocaleDateString("es-AR")}
+              Proximo cobro:{" "}
+              <span suppressHydrationWarning>
+                {new Date(subscription.currentPeriodEnd).toLocaleDateString("es-AR")}
+              </span>
             </p>
           </CardContent>
         )}
         {isTrialing && subscription?.trialEndsAt && (
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Fin del trial: {new Date(subscription.trialEndsAt).toLocaleDateString("es-AR")}
+              Fin del trial:{" "}
+              <span suppressHydrationWarning>
+                {new Date(subscription.trialEndsAt).toLocaleDateString("es-AR")}
+              </span>
             </p>
           </CardContent>
         )}
@@ -176,7 +182,7 @@ export function BillingForm({ subscription }: { subscription: Subscription | nul
           <Card>
             <CardHeader>
               <CardTitle>Plan Mensual</CardTitle>
-              <CardDescription>Facturacion mensual, cancela cuando quieras</CardDescription>
+              <CardDescription>Facturación mensual, cancelá cuando quieras</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold mb-4">$25.000 <span className="text-sm font-normal text-muted-foreground">/mes</span></p>
@@ -196,7 +202,7 @@ export function BillingForm({ subscription }: { subscription: Subscription | nul
                 Plan Anual
                 <Badge>Ahorra 20%</Badge>
               </CardTitle>
-              <CardDescription>Facturacion anual</CardDescription>
+              <CardDescription>Facturación anual</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold mb-4">$240.000 <span className="text-sm font-normal text-muted-foreground">/ano</span></p>
@@ -278,7 +284,7 @@ export function BillingForm({ subscription }: { subscription: Subscription | nul
                 <div key={payment.id} className="flex justify-between items-center py-2 border-b last:border-0">
                   <div>
                     <p className="font-medium">${Number(payment.amount).toLocaleString("es-AR")}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground" suppressHydrationWarning>
                       {new Date(payment.createdAt).toLocaleDateString("es-AR")}
                     </p>
                   </div>

@@ -45,7 +45,7 @@ export function DepositForm({ initialData }: DepositFormProps) {
         throw new Error(data.error ?? "Error al guardar")
       }
 
-      setMessage({ type: "success", text: "Configuracion de senas guardada correctamente." })
+      setMessage({ type: "success", text: "Configuración de señas guardada correctamente." })
     } catch (err) {
       setMessage({
         type: "error",
@@ -60,7 +60,7 @@ export function DepositForm({ initialData }: DepositFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Senas / Depositos</CardTitle>
+          <CardTitle>Señas / Depósitos</CardTitle>
           <CardDescription>
             Configura si queres pedir una sena para reservas de grupos grandes.
             La sena se cobra via MercadoPago al momento de reservar.
@@ -74,14 +74,14 @@ export function DepositForm({ initialData }: DepositFormProps) {
               onCheckedChange={setEnabled}
             />
             <Label htmlFor="deposit-enabled" className="font-medium">
-              Habilitar senas
+              Habilitar señas
             </Label>
           </div>
 
           {enabled && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="deposit-amount">Monto de la sena (ARS)</Label>
+                <Label htmlFor="deposit-amount">Monto de la seña (ARS)</Label>
                 <Input
                   id="deposit-amount"
                   type="number"
@@ -91,13 +91,13 @@ export function DepositForm({ initialData }: DepositFormProps) {
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  Monto fijo en pesos argentinos que se cobra como sena.
+                  Monto fijo en pesos argentinos que se cobra como seña.
                 </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="min-party-size">
-                  Minimo de personas para pedir sena
+                  Mínimo de personas para pedir seña
                 </Label>
                 <Input
                   id="min-party-size"

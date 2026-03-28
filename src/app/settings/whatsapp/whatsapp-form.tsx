@@ -56,7 +56,7 @@ export function WhatsAppForm({ initialData, maskedToken, hasExistingToken }: Wha
 
       setMessage({
         type: "success",
-        text: "Configuracion de WhatsApp guardada correctamente.",
+        text: "Configuración de WhatsApp guardada correctamente.",
       })
     } catch (err) {
       setMessage({

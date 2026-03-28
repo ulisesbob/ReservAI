@@ -87,7 +87,7 @@ export function GoogleCalendarForm({
         throw new Error(data.error ?? "Error al guardar")
       }
 
-      setMessage({ type: "success", text: "Configuracion guardada correctamente." })
+      setMessage({ type: "success", text: "Configuración guardada correctamente." })
       router.refresh()
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Error al guardar" })
@@ -154,7 +154,7 @@ export function GoogleCalendarForm({
       {connected && (
         <Card>
           <CardHeader>
-            <CardTitle>Configuracion de sincronizacion</CardTitle>
+            <CardTitle>Configuración de sincronización</CardTitle>
             <CardDescription>
               Elige en que calendario se crean los eventos y si la sincronizacion esta activa.
             </CardDescription>
