@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { LogoMark, LogoWordmark } from "@/components/logo"
 import { Menu, X } from "lucide-react"
 
 const NAV_LINKS = [
@@ -69,8 +70,9 @@ export function LandingNav() {
         Saltar al contenido principal
       </a>
       <div className="max-w-5xl mx-auto flex items-center justify-between px-6 h-16">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          Reservas<span className="text-foreground">AI</span>
+        <Link href="/" className="inline-flex items-center gap-2">
+          <LogoMark size="sm" />
+          <LogoWordmark size="sm" />
         </Link>
 
         {/* Section anchors */}

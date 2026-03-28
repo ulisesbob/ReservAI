@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from "lucide-react"
 import { PricingSection } from "@/components/pricing-section"
+import { Logo } from "@/components/logo"
 import { LandingNav } from "./landing-nav"
 import { faqs } from "@/data/faqs"
 
@@ -536,7 +537,10 @@ export default async function Home() {
       {/* ============================================ */}
       <footer className="py-8 px-6 border-t" role="contentinfo">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} ReservasAI. Todos los derechos reservados.</p>
+          <p className="inline-flex items-center gap-2">
+            <Logo size="sm" />
+            <span>&copy; {new Date().getFullYear()} Todos los derechos reservados.</span>
+          </p>
           <nav aria-label="Footer">
             <ul className="flex items-center gap-4">
               <li>
