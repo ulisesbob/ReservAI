@@ -465,7 +465,7 @@ export function BookingForm({
 
         {/* Step 3: Contact details */}
         {step === "details" && selectedTime && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="p-3 rounded-lg bg-muted/50 text-sm space-y-1">
               <p>
                 <span className="capitalize">

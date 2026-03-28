@@ -163,7 +163,7 @@ export function RestaurantForm({ initialData }: RestaurantFormProps) {
             Configura el nombre, zona horaria y capacidad de tu restaurante.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Nombre</Label>

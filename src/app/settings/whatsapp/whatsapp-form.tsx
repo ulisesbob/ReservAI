@@ -78,7 +78,7 @@ export function WhatsAppForm({ initialData, maskedToken, hasExistingToken }: Wha
             recibir y enviar mensajes a tus clientes.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="whatsappPhoneId">Phone Number ID</Label>
             <Input
@@ -136,7 +136,7 @@ export function WhatsAppForm({ initialData, maskedToken, hasExistingToken }: Wha
 
       <Button type="submit" disabled={saving}>
         {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Guardar configuracion
+        Guardar cambios
       </Button>
     </form>
   )

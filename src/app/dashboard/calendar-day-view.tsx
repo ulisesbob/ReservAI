@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { CalendarDays, Clock, Users, Phone, MessageSquare } from "lucide-react"
+import { getStatusColors, getStatusLabel } from "@/lib/status-colors"
 
 type Reservation = {
   id: string
@@ -17,39 +18,6 @@ type Reservation = {
   partySize: number
   status: string
   source: string
-}
-
-const STATUS_STYLES: Record<string, { dot: string; badge: string; label: string }> = {
-  PENDING: {
-    dot: "bg-yellow-400",
-    badge: "border-yellow-500 text-yellow-700 bg-yellow-50",
-    label: "Pendiente",
-  },
-  PENDING_DEPOSIT: {
-    dot: "bg-amber-400",
-    badge: "border-amber-500 text-amber-700 bg-amber-50",
-    label: "Esperando sena",
-  },
-  CONFIRMED: {
-    dot: "bg-emerald-500",
-    badge: "border-transparent bg-emerald-100 text-emerald-800",
-    label: "Confirmada",
-  },
-  CANCELLED: {
-    dot: "bg-red-400",
-    badge: "border-transparent bg-red-100 text-red-800",
-    label: "Cancelada",
-  },
-  COMPLETED: {
-    dot: "bg-gray-400",
-    badge: "border-transparent bg-gray-100 text-gray-700",
-    label: "Completada",
-  },
-  NO_SHOW: {
-    dot: "bg-orange-400",
-    badge: "border-transparent bg-orange-100 text-orange-800",
-    label: "No asistio",
-  },
 }
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 8) // 08:00 - 23:00
@@ -143,7 +111,7 @@ export function CalendarDayView({
                   {/* Reservations */}
                   <div className="p-2 space-y-2">
                     {hourReservations.map((r) => {
-                      const style = STATUS_STYLES[r.status] || STATUS_STYLES.COMPLETED
+                      const style = getStatusColors(r.status)
 
                       return (
                         <div
@@ -165,9 +133,9 @@ export function CalendarDayView({
                                 <span className="text-sm font-semibold">{r.customerName}</span>
                                 <Badge
                                   variant="outline"
-                                  className={`text-[10px] px-1.5 py-0 ${style.badge}`}
+                                  className={`text-[10px] px-1.5 py-0 rounded-full ${style.badge}`}
                                 >
-                                  {style.label}
+                                  {getStatusLabel(r.status)}
                                 </Badge>
                                 {r.source === "WHATSAPP" && (
                                   <Badge

@@ -109,7 +109,7 @@ export function GoogleCalendarForm({
             Conecta tu cuenta de Google para sincronizar reservas automaticamente.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="flex items-center gap-3">
             {connected ? (
               <>
@@ -215,7 +215,7 @@ export function GoogleCalendarForm({
 
             <Button onClick={handleSave} disabled={saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Guardar configuracion
+              Guardar cambios
             </Button>
           </CardContent>
         </Card>
