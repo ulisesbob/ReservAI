@@ -87,30 +87,30 @@ export const metadata: Metadata = {
 const features = [
   {
     icon: MessageCircle,
-    title: "WhatsApp nativo",
+    title: "Tus clientes reservan en 30 segundos",
     description:
-      "Tus clientes reservan desde la app que ya usan. Sin descargas, sin friccion.",
+      "Desde WhatsApp, la app que ya usan todos los dias. Sin descargas, sin friccion, sin que tu equipo levante el telefono.",
     color: "emerald",
   },
   {
     icon: Bot,
-    title: "IA conversacional",
+    title: "Nunca mas perdes una reserva fuera de horario",
     description:
-      "El agente entiende lenguaje natural, consulta disponibilidad y confirma en segundos.",
+      "La IA atiende 24/7, entiende lenguaje natural, consulta disponibilidad y confirma al instante. Incluso a las 2 AM.",
     color: "indigo",
   },
   {
     icon: CalendarDays,
-    title: "Panel en tiempo real",
+    title: "Sabe exactamente cuantos cubiertos tenes hoy",
     description:
-      "Todas las reservas del dia, confirmaciones y cancelaciones en un solo lugar.",
+      "Panel en tiempo real con todas las reservas, confirmaciones y cancelaciones. Cero sorpresas en el turno.",
     color: "amber",
   },
   {
     icon: Users,
-    title: "Equipo completo",
+    title: "Tu equipo accede desde cualquier dispositivo",
     description:
-      "Invita empleados con su propia cuenta. Control total desde admin.",
+      "Invita empleados con su propia cuenta. Cada uno ve lo que necesita, desde el celular o la compu.",
     color: "rose",
   },
 ]
@@ -189,12 +189,22 @@ export default async function Home() {
               <span className="text-xs font-medium text-emerald-700">Usado por restaurantes en Argentina</span>
             </div>
 
+            {/* PAS: Problem */}
+            <p className="text-base sm:text-lg text-muted-foreground font-medium mb-3">
+              Tu equipo pierde horas atendiendo el telefono para tomar reservas?
+            </p>
+
             <h1 className="text-5xl sm:text-7xl font-bold tracking-tight leading-[1.05]">
               Tu restaurante recibe reservas
               <span className="text-gradient"> por WhatsApp con IA</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-lg leading-relaxed">
-              Un bot de inteligencia artificial atiende tu WhatsApp 24/7, toma reservas en segundos y organiza tu turno. Sin apps, sin formularios, sin llamadas perdidas.
+
+            {/* PAS: Agitate + Solve */}
+            <p className="mt-4 text-base sm:text-lg text-rose-600/80 font-medium max-w-lg">
+              Mientras tanto, los clientes se cansan de esperar y reservan en otro lado.
+            </p>
+            <p className="mt-3 text-lg sm:text-xl text-muted-foreground max-w-lg leading-relaxed">
+              Un bot de IA atiende tu WhatsApp 24/7, toma reservas en segundos y organiza tu turno. Sin apps, sin formularios, sin llamadas perdidas.
             </p>
             <ul className="mt-5 space-y-2.5 text-muted-foreground max-w-lg text-base sm:text-lg">
               <li className="flex items-center gap-2">
@@ -227,7 +237,7 @@ export default async function Home() {
                 size="lg"
                 className="h-13 text-base px-8 text-muted-foreground"
               >
-                <Link href="#como-funciona">Ver como funciona</Link>
+                <Link href="#como-funciona">Mira como funciona en 30 seg</Link>
               </Button>
             </div>
             <p className="mt-5 text-sm text-muted-foreground/70">
@@ -333,6 +343,12 @@ export default async function Home() {
       {/* ============================================ */}
       <section className="py-20 px-6 bg-background" aria-labelledby="testimonials-heading">
         <div className="max-w-6xl mx-auto text-center">
+          {/* Counter strip */}
+          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-full px-5 py-2 mb-8">
+            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-sm font-medium text-emerald-700">Restaurantes en Argentina ya gestionan reservas con IA</span>
+          </div>
+
           <h2 id="testimonials-heading" className="text-3xl sm:text-4xl font-bold tracking-tight">
             Resultados reales de restaurantes reales
           </h2>
@@ -342,24 +358,27 @@ export default async function Home() {
 
           <div className="mt-16 grid md:grid-cols-3 gap-10">
             <article className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-emerald-600" aria-label="Menos 35 por ciento">-35%</p>
-              <p className="mt-2 text-muted-foreground font-medium">Menos no-shows con recordatorios</p>
+              <p className="text-6xl sm:text-7xl font-extrabold text-emerald-600 tracking-tight" aria-label="Menos 35 por ciento">-35%</p>
+              <p className="mt-3 text-muted-foreground font-semibold text-lg">Menos no-shows</p>
+              <p className="text-sm text-muted-foreground">con recordatorios automaticos</p>
               <blockquote className="mt-6">
                 <p className="font-semibold text-lg">&ldquo;Antes perdiamos 6 o 7 mesas por noche por gente que no venia. Con los recordatorios automaticos bajo muchisimo.&rdquo;</p>
                 <footer className="mt-2 text-sm text-muted-foreground">-- Carlos M., Restaurante El Fogon</footer>
               </blockquote>
             </article>
             <article className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-indigo-600" aria-label="Mas 25 por ciento">+25%</p>
-              <p className="mt-2 text-muted-foreground font-medium">Mas reservas fuera de horario</p>
+              <p className="text-6xl sm:text-7xl font-extrabold text-indigo-600 tracking-tight" aria-label="Mas 25 por ciento">+25%</p>
+              <p className="mt-3 text-muted-foreground font-semibold text-lg">Mas reservas</p>
+              <p className="text-sm text-muted-foreground">captadas fuera de horario</p>
               <blockquote className="mt-6">
                 <p className="font-semibold text-lg">&ldquo;La mayoria de nuestra gente reserva a la noche, cuando el restaurante esta cerrado. Ahora la IA les responde al toque.&rdquo;</p>
                 <footer className="mt-2 text-sm text-muted-foreground">-- Maria L., Parrilla Don Carlos</footer>
               </blockquote>
             </article>
             <article className="bg-muted/30 border rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
-              <p className="text-5xl font-bold text-amber-600" aria-label="3 horas menos">3hs</p>
-              <p className="mt-2 text-muted-foreground font-medium">Menos de gestion por semana</p>
+              <p className="text-6xl sm:text-7xl font-extrabold text-amber-600 tracking-tight" aria-label="3 horas menos">3hs</p>
+              <p className="mt-3 text-muted-foreground font-semibold text-lg">Menos gestion</p>
+              <p className="text-sm text-muted-foreground">por semana para tu equipo</p>
               <blockquote className="mt-6">
                 <p className="font-semibold text-lg">&ldquo;Mi encargada dejo de atender el telefono todo el dia para tomar reservas. Ahora se dedica a lo que importa: los clientes en sala.&rdquo;</p>
                 <footer className="mt-2 text-sm text-muted-foreground">-- Roberto S., Trattoria Bella</footer>
@@ -428,10 +447,10 @@ export default async function Home() {
       <section id="funciones" className="py-16 px-6 bg-muted/30" aria-labelledby="features-heading">
         <div className="max-w-5xl mx-auto">
           <h2 id="features-heading" className="text-3xl sm:text-4xl font-bold text-center tracking-tight">
-            Todo lo que necesitas para gestionar reservas
+            Resultados que vas a notar desde el dia uno
           </h2>
           <p className="mt-3 text-center text-muted-foreground">
-            Sin modulos, sin extras. Un plan con todo incluido.
+            Sin modulos, sin extras. Un plan con todo lo que tu restaurante necesita.
           </p>
 
           <div className="mt-14 grid sm:grid-cols-2 gap-6">
@@ -459,6 +478,12 @@ export default async function Home() {
       {/* ============================================ */}
       <section id="precios" className="py-28 px-6 bg-background" aria-labelledby="pricing-heading">
         <div className="max-w-6xl mx-auto">
+          <div className="flex justify-center mb-4">
+            <span className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-full px-4 py-1.5 text-sm font-semibold">
+              <Zap className="h-3.5 w-3.5" />
+              Precio de lanzamiento — Solo para los primeros 50 restaurantes
+            </span>
+          </div>
           <h2 id="pricing-heading" className="text-3xl sm:text-4xl font-bold text-center tracking-tight">
             Precio simple, sin sorpresas
           </h2>
@@ -511,18 +536,37 @@ export default async function Home() {
             Empeza a recibir reservas hoy
           </h2>
           <p className="mt-4 text-white/60 text-lg max-w-xl mx-auto">
-            Configura tu restaurante en 10 minutos. Sin tarjeta de credito, sin compromiso. Cancela cuando quieras.
+            Configura tu restaurante en 10 minutos. Sin tarjeta de credito, sin compromiso.
           </p>
-          <Button
-            asChild
-            size="lg"
-            className="mt-10 h-13 text-base px-10 rounded-xl font-semibold bg-white text-emerald-700 hover:bg-white/90 shadow-lg border-0"
-          >
-            <Link href="/register">
-              Empeza tu prueba gratis de 14 dias
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+
+          {/* Guarantee */}
+          <div className="mt-6 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-5 py-2">
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span className="text-sm text-white/80">Si no te sirve en 14 dias, cancelas sin pagar un peso</span>
+          </div>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-8">
+            <div className="flex flex-col items-center sm:items-start">
+              <Button
+                asChild
+                size="lg"
+                className="h-14 text-lg px-12 rounded-xl font-semibold bg-white text-emerald-700 hover:bg-white/90 shadow-lg border-0"
+              >
+                <Link href="/register">
+                  Empeza tu prueba gratis
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <span className="mt-2 text-white/50 text-xs">Empeza en 5 minutos, sin tarjeta</span>
+            </div>
+
+            {/* Testimonial quote next to CTA */}
+            <blockquote className="max-w-xs text-left border-l-2 border-emerald-400/50 pl-4">
+              <p className="text-sm text-white/70 italic">&ldquo;En una semana ya teniamos todo funcionando. No puedo creer que antes lo haciamos a mano.&rdquo;</p>
+              <footer className="mt-1 text-xs text-white/50">-- Carlos M., Restaurante El Fogon</footer>
+            </blockquote>
+          </div>
+
           <p className="mt-8 text-white/60 text-sm">
             Tenes dudas?{" "}
             <Link href="mailto:hola@reservasai.com" className="underline hover:text-white">

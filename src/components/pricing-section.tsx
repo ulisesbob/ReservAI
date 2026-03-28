@@ -60,9 +60,12 @@ export function PricingSection() {
       {/* Single Plan Card */}
       <div className="w-full max-w-lg">
         <div className="relative bg-background border-2 border-emerald-500 rounded-2xl p-10 shadow-lg">
-          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 flex gap-2">
             <Badge className="rounded-full px-4 py-1 text-xs font-semibold shadow-md bg-amber-500 text-white hover:bg-amber-500 border-0">
               Todo incluido
+            </Badge>
+            <Badge className="rounded-full px-4 py-1 text-xs font-semibold shadow-md bg-rose-500 text-white hover:bg-rose-500 border-0">
+              Precio de lanzamiento
             </Badge>
           </div>
 
@@ -102,16 +105,19 @@ export function PricingSection() {
           <Button
             asChild
             size="lg"
-            className="w-full mt-8 h-12 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow motion-reduce:transition-none gradient-cta text-white border-0"
+            className="w-full mt-8 h-14 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-shadow motion-reduce:transition-none gradient-cta text-white border-0"
           >
             <Link href="/register">
               Empeza gratis — 14 dias de prueba
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
+          <p className="mt-2 text-center text-xs text-emerald-600 font-medium">
+            Empeza en 5 minutos. Sin tarjeta de credito.
+          </p>
 
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            Sin tarjeta de credito. Cancelas cuando quieras.
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Cancelas cuando quieras, sin letra chica.
           </p>
         </div>
       </div>
