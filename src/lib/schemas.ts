@@ -98,6 +98,29 @@ export const waitlistCreateSchema = z.object({
   partySize: z.coerce.number().int().min(1, "Mínimo 1 persona"),
 })
 
+// ─── Guest schemas ──────────────────────────────────────────────────────────
+
+export const guestCreateSchema = z.object({
+  name: z.string().min(1, "Nombre es requerido").max(200, "Nombre demasiado largo").transform((s) => s.trim()),
+  phone: z.string().min(1, "Teléfono es requerido").max(30, "Teléfono demasiado largo"),
+  email: z.string().email("Email inválido").max(255).nullish().or(z.literal("")),
+  notes: z.string().max(5000).nullish(),
+  allergies: z.string().max(2000).nullish(),
+  preferences: z.string().max(2000).nullish(),
+  birthday: z.string().nullish(),
+  vipStatus: z.boolean().optional(),
+})
+
+export const guestUpdateSchema = guestCreateSchema.partial().omit({ phone: true })
+
+// ─── Review schemas ─────────────────────────────────────────────────────────
+
+export const reviewCreateSchema = z.object({
+  reservationId: z.string().min(1, "Reservation ID es requerido"),
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z.string().max(5000).nullish(),
+})
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 /** Parse a Zod schema and return a formatted error response or the parsed data */

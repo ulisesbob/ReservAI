@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       )
     }
 
-    if (!reservation.depositAmount || reservation.depositAmount <= 0) {
+    if (!reservation.depositAmount || Number(reservation.depositAmount) <= 0) {
       return NextResponse.json({ error: "Monto de sena invalido" }, { status: 400 })
     }
 
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     const preference = await createDepositPreference({
       reservationId: reservation.id,
       restaurantName: reservation.restaurant.name,
-      amount: reservation.depositAmount,
+      amount: Number(reservation.depositAmount),
       payerEmail,
       backUrl,
       notificationUrl,

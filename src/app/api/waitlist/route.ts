@@ -26,6 +26,17 @@ export async function GET(request: NextRequest) {
     const entries = await prisma.waitlistEntry.findMany({
       where,
       orderBy: [{ dateTime: "asc" }, { createdAt: "asc" }],
+      take: 200,
+      select: {
+        id: true,
+        customerName: true,
+        customerPhone: true,
+        customerEmail: true,
+        dateTime: true,
+        partySize: true,
+        status: true,
+        createdAt: true,
+      },
     })
     return NextResponse.json(entries)
   } catch (error) {

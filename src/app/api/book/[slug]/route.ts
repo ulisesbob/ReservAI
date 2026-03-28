@@ -93,6 +93,8 @@ export async function GET(
         maxPartySize: restaurant.maxPartySize,
       },
       timeSlots,
+    }, {
+      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
     })
   } catch (error) {
     console.error("Book GET error:", error)
@@ -158,7 +160,7 @@ export async function POST(
     // Determine if a deposit is required for this reservation
     const requiresDeposit =
       restaurant.depositEnabled &&
-      restaurant.depositAmount > 0 &&
+      Number(restaurant.depositAmount) > 0 &&
       partySize >= restaurant.depositMinPartySize
 
     const reservation = await prisma.reservation.create({

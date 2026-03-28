@@ -6,7 +6,7 @@ import { reservationUpdateSchema, parseBody } from "@/lib/schemas"
 import { notifyNextInWaitlist } from "@/lib/waitlist"
 import { validateTransition } from "@/lib/status-transitions"
 import type { ReservationStatus } from "@prisma/client"
-import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "@/lib/google-calendar"
+import { updateCalendarEvent, deleteCalendarEvent } from "@/lib/google-calendar"
 
 export async function PATCH(
   request: Request,

@@ -116,8 +116,8 @@ export function ReservationCalendar() {
       })
 
       setReservations(filtered)
-    } catch (err) {
-      console.error("Calendar fetch error:", err)
+    } catch {
+      // Silently handle — UI shows stale data gracefully
     }
   }, [currentDate, viewMode])
 
@@ -169,8 +169,8 @@ export function ReservationCalendar() {
       if (res.ok) {
         fetchReservations()
       }
-    } catch (err) {
-      console.error("Status update error:", err)
+    } catch {
+      // Silently handle status update errors
     }
   }
 

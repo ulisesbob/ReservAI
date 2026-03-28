@@ -1,10 +1,31 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
 import { CalendarDays, List } from "lucide-react"
-import { ReservationList } from "./reservation-list"
-import { ReservationCalendar } from "./reservation-calendar"
+
+const ReservationCalendar = dynamic(
+  () => import("./reservation-calendar").then((m) => m.ReservationCalendar),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center py-20">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      </div>
+    ),
+  }
+)
+
+const ReservationList = dynamic(
+  () => import("./reservation-list").then((m) => m.ReservationList),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center py-20">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      </div>
+    ),
+  }
+)
 
 export function DashboardViewToggle({ defaultDate }: { defaultDate: string }) {
   const [view, setView] = useState<"calendar" | "list">("calendar")

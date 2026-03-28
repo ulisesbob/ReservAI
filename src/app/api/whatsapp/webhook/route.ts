@@ -7,7 +7,7 @@ import { checkAvailability } from "@/lib/availability"
 import { sendWhatsAppMessage } from "@/lib/whatsapp"
 import { safeDecrypt, verifyWebhookSignature } from "@/lib/encryption"
 import { notifyNextInWaitlist, confirmWaitlistEntry, expireAndNotifyNext } from "@/lib/waitlist"
-import { notifyNewReservation, notifyCancel, notifyWaitlistFreed } from "@/lib/notifications"
+import { notifyNewReservation, notifyCancel } from "@/lib/notifications"
 import { upsertGuest } from "@/lib/guest-ops"
 import { createCalendarEvent } from "@/lib/google-calendar"
 

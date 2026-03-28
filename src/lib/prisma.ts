@@ -18,4 +18,8 @@ function createPrismaClient(): PrismaClient {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+// Cache the singleton in ALL environments (including production on Vercel serverless).
+// Without this, each cold start creates a new PrismaClient + connection pool.
+// The previous condition `!== "production"` meant production cold starts always
+// created fresh clients, wasting ~50-100ms per invocation on connection setup.
+globalForPrisma.prisma = prisma

@@ -7,11 +7,16 @@ export async function GET() {
     const session = await requireSession()
     const conversations = await prisma.conversation.findMany({
       where: { restaurantId: session.restaurantId, status: "ESCALATED" },
-      include: {
-        messages: { orderBy: { createdAt: "desc" }, take: 1 },
+      select: {
+        id: true,
+        customerPhone: true,
+        escalatedAt: true,
+        escalatedReason: true,
+        messages: { orderBy: { createdAt: "desc" }, take: 1, select: { content: true, role: true } },
         reservation: { select: { customerName: true, dateTime: true, partySize: true } },
       },
       orderBy: { escalatedAt: "desc" },
+      take: 100,
     })
 
     const result = conversations.map((c) => ({

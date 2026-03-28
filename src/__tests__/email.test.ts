@@ -12,7 +12,7 @@
  * Run: node --experimental-strip-types src/__tests__/email.test.ts
  */
 
-import { test, describe, beforeEach, afterEach, mock } from "node:test"
+import { test, describe, beforeEach, afterEach } from "node:test"
 import assert from "node:assert/strict"
 
 // ─── isEmailConfigured ────────────────────────────────────────────────────

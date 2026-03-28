@@ -23,7 +23,9 @@ export async function GET(request: Request) {
       },
     })
 
-    return NextResponse.json(restaurant)
+    return NextResponse.json(restaurant, {
+      headers: { "Cache-Control": "private, s-maxage=3600, stale-while-revalidate=600" },
+    })
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {

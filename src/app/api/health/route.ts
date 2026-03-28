@@ -24,6 +24,9 @@ export async function GET() {
       status: allOk ? "healthy" : "degraded",
       timestamp: new Date().toISOString(),
     },
-    { status: allOk ? 200 : 503 }
+    {
+      status: allOk ? 200 : 503,
+      headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
+    }
   )
 }

@@ -21,8 +21,8 @@ export async function GET(request: Request) {
       dateTime: { gte: since },
     }
 
-    // Core counts
-    const [total, byStatus, bySource, avgPartySize, dailyCounts] = await Promise.all([
+    // All queries in a single Promise.all to eliminate sequential waterfall
+    const [total, byStatus, bySource, avgPartySize, dailyCounts, peakHours] = await Promise.all([
       prisma.reservation.count({ where }),
 
       prisma.reservation.groupBy({
@@ -51,18 +51,18 @@ export async function GET(request: Request) {
         GROUP BY DATE("dateTime")
         ORDER BY day ASC
       `,
-    ])
 
-    // Peak hours
-    const peakHours = await prisma.$queryRaw<Array<{ hour: number; count: bigint }>>`
-      SELECT EXTRACT(HOUR FROM "dateTime")::int as hour, COUNT(*)::bigint as count
-      FROM "Reservation"
-      WHERE "restaurantId" = ${session.restaurantId}
-        AND "dateTime" >= ${since}
-      GROUP BY hour
-      ORDER BY count DESC
-      LIMIT 5
-    `
+      // Peak hours (was sequential -- now parallel)
+      prisma.$queryRaw<Array<{ hour: number; count: bigint }>>`
+        SELECT EXTRACT(HOUR FROM "dateTime")::int as hour, COUNT(*)::bigint as count
+        FROM "Reservation"
+        WHERE "restaurantId" = ${session.restaurantId}
+          AND "dateTime" >= ${since}
+        GROUP BY hour
+        ORDER BY count DESC
+        LIMIT 5
+      `,
+    ])
 
     const statusMap = Object.fromEntries(byStatus.map((s) => [s.status, s._count]))
     const sourceMap = Object.fromEntries(bySource.map((s) => [s.source, s._count]))
@@ -79,6 +79,8 @@ export async function GET(request: Request) {
       cancellationRate,
       peakHours: peakHours.map((h) => ({ hour: h.hour, count: Number(h.count) })),
       dailyCounts: dailyCounts.map((d) => ({ day: String(d.day).split("T")[0], count: Number(d.count) })),
+    }, {
+      headers: { "Cache-Control": "private, s-maxage=60, stale-while-revalidate=120" },
     })
   } catch (error) {
     if (error instanceof Error) {

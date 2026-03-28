@@ -12,5 +12,22 @@
       "path": "/api/cron/reviews",
       "schedule": "0 * * * *"
     }
-  ]
+  ],
+  "functions": {
+    "src/app/api/cron/reminders/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/daily-digest/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/reviews/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/webhooks/mercadopago/route.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/webhooks/deposits/route.ts": {
+      "maxDuration": 30
+    }
+  }
 }

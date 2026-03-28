@@ -73,6 +73,17 @@ export async function GET(request: Request) {
         orderBy: { [orderField]: sortOrder },
         skip: (page - 1) * limit,
         take: limit,
+        select: {
+          id: true,
+          customerName: true,
+          customerPhone: true,
+          customerEmail: true,
+          dateTime: true,
+          partySize: true,
+          status: true,
+          source: true,
+          createdAt: true,
+        },
       }),
       prisma.reservation.count({ where }),
     ])

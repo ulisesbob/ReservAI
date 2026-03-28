@@ -60,6 +60,8 @@ export async function GET(request: Request) {
         total,
         totalPages: Math.ceil(total / limit),
       },
+    }, {
+      headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
     })
   } catch (error) {
     if (error instanceof Error) {
